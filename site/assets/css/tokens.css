@@ -1,0 +1,57 @@
+/* 현장로그 공통 토큰 · 리셋 (가입 문의 랜딩 · 파트너 · 어드민 공통 색) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+:root {
+  --accent: oklch(0.55 0.18 258);
+  --accent2: oklch(0.72 0.13 250);
+  --ink: #15181D;
+  --text2: #363B44;
+  --sub: #646B76;
+  --sub2: #8A909A;
+  --line: #E3E6EA;
+  --line2: #ECEEF1;
+  --bg: #F4F5F7;
+  --card: #FFFFFF;
+  --surf: #EEF0F3;
+  --night: #0E131D;
+  --night2: #18202E;
+  --ph1: #DADEE4;
+  --ph2: #E4E7EB;
+  --ok: #1E7A43;
+  --okb: #E2F3E7;
+  --warn: #7A4E00;
+  --warnb: #FBF0DC;
+  --red: #A33A2E;
+  --redb: #F9E5E3;
+
+  --glow: 0 14px 34px -10px oklch(0.6 0.2 258 / .75);
+  --font: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+a { color: inherit; text-decoration: none; }
+a:hover { color: inherit; }
+button, input, textarea, select { font-family: inherit; }
+button { cursor: pointer; }
+h1, h2, h3, p { margin: 0; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+:focus-visible { outline: 3px solid var(--accent2); outline-offset: 2px; }

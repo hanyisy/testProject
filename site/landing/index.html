@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>현장로그 · 사장님이 한 현장이 검색에 남습니다</title>
+<meta name="description" content="현장 사진을 올리면 현장마다 검색 페이지가 생기고, 그 페이지로 문의가 들어와요. 철거·입주청소·인테리어·바닥 시공 업체를 위한 현장로그 가입 문의.">
+<meta property="og:title" content="현장로그 · 사장님이 한 현장이 검색에 남습니다">
+<meta property="og:description" content="현장 사진을 올리면 현장마다 검색 페이지가 생기고, 그 페이지로 문의가 들어와요.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="css/landing.css">
+<script src="js/landing.js" defer></script>
+</head>
+<body>
+
+<!-- 헤더 -->
+<header class="gnb">
+  <div class="gnb__in wrap">
+    <a href="./" class="gnb__logo">현장로그</a>
+    <nav class="gnb__nav only-d" aria-label="주요 메뉴">
+      <a href="#how">어떻게 되나요</a>
+      <a href="#pricing">요금제</a>
+      <a href="#faq">자주 묻는 질문</a>
+    </nav>
+    <a href="#form-full" class="gnb__cta" data-apply>가입 문의</a>
+  </div>
+</header>
+
+<main>
+  <!-- 1. 첫 화면 -->
+  <section class="hero">
+    <div class="hero__grid-bg" aria-hidden="true"></div>
+    <div class="hero__in wrap">
+      <div class="hero__copy">
+        <span class="hero__badge"><span class="pulse-dot" aria-hidden="true"></span>현장 시공·서비스 업체를 위한 검색 페이지</span>
+        <h1 class="hero__title">사장님이 한 현장이<br><span class="grad-text">검색에 남습니다</span></h1>
+        <p class="hero__lead">현장 사진을 올리면 현장마다 검색 페이지가 생기고, 그 페이지로 문의가 들어와요.</p>
+        <div class="hero__btns">
+          <a href="#form-full" class="btn btn--primary btn--xl hero__cta" data-apply>가입 문의 →</a>
+          <a href="#how" class="btn btn--ghost-dark only-d">어떻게 되나요 ↓</a>
+        </div>
+        <div class="hero__inds">
+          <span class="hero__inds-label"><span class="only-m">업종을 고르면 예시가 바뀌어요</span><span class="only-d">업종을 고르면 아래 예시가 바뀌어요</span></span>
+          <div class="chips" data-ind-chips data-variant="dark" role="group" aria-label="업종 선택"></div>
+        </div>
+      </div>
+
+      <!-- 모바일: 겹친 카드 -->
+      <div class="hero__cards only-m" aria-hidden="true">
+        <div class="mini-serp">
+          <div class="mini-serp__q" data-ex="q">춘천 상가철거</div>
+          <span class="mini-serp__url" data-ex="url">hangyeol.kr › 춘천 › 석사동</span>
+          <span class="mini-serp__title" data-ex="title">춘천 석사동 상가 철거 · 한결철거</span>
+          <div class="mini-serp__ph"><span class="ph"></span><span class="ph"></span><span class="ph"></span></div>
+        </div>
+        <div class="notice-card notice-card--m">
+          <span class="notice-card__icon">!</span>
+          <div class="notice-card__txt">
+            <span class="notice-card__eyebrow">새 문의 · 방금</span>
+            <span class="notice-card__title" data-ex="inq">석사동 상가 40평 철거</span>
+            <span class="notice-card__sub"><span data-ex="site">춘천 석사동 상가 철거</span> 페이지에서</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 데스크톱: 짧은 문의 폼 -->
+      <div class="hero__form-wrap only-d">
+        <div class="notice-card notice-card--d" aria-hidden="true">
+          <span class="notice-card__icon">!</span>
+          <div class="notice-card__txt">
+            <span class="notice-card__eyebrow">새 문의 · 방금</span>
+            <span class="notice-card__title" data-ex="inq">석사동 상가 40평 철거</span>
+            <span class="notice-card__sub"><span data-ex="site">춘천 석사동 상가 철거</span> 페이지에서</span>
+          </div>
+        </div>
+
+        <form id="form" class="quick-form" data-lead-form novalidate>
+          <h2 class="quick-form__title">가입 문의</h2>
+          <p class="quick-form__desc">네 가지만 남겨 주세요. 영업일 기준 1일 안에 연락드려요.</p>
+          <label class="field">
+            <span class="field__label">상호</span>
+            <input name="company" placeholder="예) 한결철거" required autocomplete="organization">
+          </label>
+          <label class="field">
+            <span class="field__label">연락처</span>
+            <input name="phone" placeholder="010-0000-0000" inputmode="tel" required autocomplete="tel">
+          </label>
+          <label class="field">
+            <span class="field__label">업종</span>
+            <span class="select"><select name="industry" data-ind-select></select></span>
+          </label>
+          <label class="field">
+            <span class="field__label">지역</span>
+            <input name="region" placeholder="예) 인천 부평">
+          </label>
+          <label class="agree agree--sm">
+            <input type="checkbox" name="agree" class="sr-only" data-agree>
+            <span class="agree__box" aria-hidden="true"></span>
+            <span>개인정보 수집·이용에 동의해요</span>
+            <a href="#privacy" class="agree__view">보기</a>
+          </label>
+          <button type="submit" class="btn btn--primary btn--block quick-form__submit" disabled>가입 문의 남기기</button>
+        </form>
+
+        <div class="check-chip" aria-hidden="true">
+          <span class="check-chip__icon">✓</span>
+          <div class="check-chip__txt">
+            <span class="check-chip__eyebrow">검색 노출 확인</span>
+            <span class="check-chip__q">“<span data-ex="q">춘천 상가철거</span>”</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track" data-marquee>
+        <span class="marquee__item">춘천 상가철거<em>검색 노출</em></span>
+        <span class="marquee__item">서초 입주청소<em>검색 노출</em></span>
+        <span class="marquee__item">수원 강마루 시공<em>검색 노출</em></span>
+        <span class="marquee__item">성남 아파트 인테리어<em>검색 노출</em></span>
+        <span class="marquee__item">원주 사무실 철거<em>검색 노출</em></span>
+        <span class="marquee__item">강남 이사청소<em>검색 노출</em></span>
+        <span class="marquee__item">마포 카페 창업 컨설팅<em>검색 노출</em></span>
+        <span class="marquee__item">홍천 식당 원상복구<em>검색 노출</em></span>
+        <span class="marquee__item">용인 장판 교체<em>검색 노출</em></span>
+        <span class="marquee__item">송파 입주청소<em>검색 노출</em></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 숫자 띠 -->
+  <section class="stats" aria-label="현장로그 숫자">
+    <div class="stats__grid wrap">
+      <div class="stat">
+        <span class="stat__num"><span class="blank blank--light" style="--w:70px;--wd:90px"></span><span class="stat__unit">개</span></span>
+        <span class="stat__label">운영 업종 <span class="todo-chip">실제 값 입력</span></span>
+      </div>
+      <div class="stat">
+        <span class="stat__num"><span class="blank blank--light" style="--w:110px;--wd:130px"></span><span class="stat__unit">건</span></span>
+        <span class="stat__label">제작한 페이지 <span class="todo-chip">실제 값 입력</span></span>
+      </div>
+      <div class="stat">
+        <span class="stat__num">1<span class="stat__unit stat__unit--dim">건</span><span class="stat__arrow">→</span>4<span class="stat__unit stat__unit--dim">장</span></span>
+        <span class="stat__label">현장 1건 → 페이지 4장</span>
+        <span class="stat__note">현장 기록 · 지역 · 역 주변 · 지역 허브</span>
+      </div>
+      <div class="stat">
+        <span class="stat__num">0<span class="stat__unit">분</span></span>
+        <span class="stat__label">사진 정리에 쓰는 시간</span>
+        <span class="stat__note">올리기만 하면 묶고 고르는 건 저희가 해요</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 검색 화면 예시 -->
+  <section class="sec">
+    <div class="sec__in wrap">
+      <div class="sec__head">
+        <span class="eyebrow">검색 화면</span>
+        <h2 class="sec__title">“<span data-ex="q">춘천 상가철거</span>”를 검색하면<br>사장님 현장이 보여요</h2>
+        <p class="sec__lead">현장마다 만든 페이지가 검색 결과에 올라가요. 사진과 평수, 기간이 그대로 적힌 페이지예요.</p>
+      </div>
+      <div class="chips" data-ind-chips role="group" aria-label="업종 선택"></div>
+      <div class="serp">
+        <span class="tag serp__tag">예시 화면</span>
+        <div class="serp__bar">
+          <span class="serp__brand">검색</span>
+          <div class="serp__q" data-ex="q">춘천 상가철거</div>
+        </div>
+        <div class="serp__list">
+          <div class="serp__item serp__item--ours">
+            <span class="serp__url" data-ex="url">hangyeol.kr › 춘천 › 석사동</span>
+            <span class="serp__title" data-ex="title">춘천 석사동 상가 철거 · 한결철거</span>
+            <span class="serp__snip" data-ex="snip">석사동에서 직접 철거한 40평 상가 현장 사진 19장. 천장·칸막이·바닥 2일 작업 기록.</span>
+            <div class="serp__ph"><span class="ph"></span><span class="ph"></span><span class="ph"></span></div>
+          </div>
+          <div class="serp__item">
+            <span class="serp__url" data-ex="url">hangyeol.kr › 춘천 › 석사동</span>
+            <span class="serp__title" data-ex="r2">춘천 상가 철거 비용 · 평수별 예시</span>
+            <span class="serp__snip" data-ex="r2s">20평 이하, 20~40평, 40평 이상으로 나눠 실제 현장과 함께 정리했어요.</span>
+          </div>
+          <div class="serp__item serp__item--skel" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="serp__item serp__item--skel" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 전과 후 -->
+  <section class="sec">
+    <div class="sec__in wrap">
+      <div class="sec__head">
+        <span class="eyebrow">전과 후</span>
+        <h2 class="sec__title">지금과 무엇이 달라지나요</h2>
+      </div>
+      <div class="compare">
+        <div class="compare__card">
+          <span class="compare__name">지금</span>
+          <p class="compare__row"><span class="compare__mark">–</span>홈페이지 한 장이 전부예요</p>
+          <p class="compare__row"><span class="compare__mark">–</span>블로그 글은 며칠이면 밀려 내려가요</p>
+          <p class="compare__row"><span class="compare__mark">–</span>현장 사진은 폰 앨범에만 쌓여요</p>
+        </div>
+        <div class="compare__card glow-card">
+          <span class="compare__name">현장로그</span>
+          <p class="compare__row"><span class="compare__mark">✓</span>현장마다 검색 페이지가 하나씩 생겨요</p>
+          <p class="compare__row"><span class="compare__mark">✓</span>계약 기간 동안 페이지가 그대로 남아요</p>
+          <p class="compare__row"><span class="compare__mark">✓</span>찍어 둔 사진이 곧 검색 자리가 돼요</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 3단계 + 실제 관리 화면 -->
+  <section class="sec" id="how">
+    <div class="sec__in wrap">
+      <div class="sec__head">
+        <span class="eyebrow">어떻게 되나요</span>
+        <h2 class="sec__title">세 단계면 끝나요</h2>
+        <p class="sec__lead">사장님은 사진을 올리고 문의를 받기만 하면 돼요. 페이지 구성과 배포는 본사가 해요.</p>
+      </div>
+
+      <div class="step">
+        <div class="step__txt">
+          <span class="step__no">01</span>
+          <h3 class="step__title">사진 올리기</h3>
+          <p class="step__desc">현장에서 찍은 사진을 그대로 올려요. 촬영일과 위치로 현장별로 자동으로 묶여요.</p>
+        </div>
+        <div class="mock">
+          <span class="tag mock__tag">실제 관리 화면</span>
+          <span class="mock__title">사진 추가</span>
+          <div class="mock__drop">
+            <strong>사진을 끌어다 놓거나 찍어서 올리기</strong>
+            <span>드라이브 폴더 연결도 돼요</span>
+          </div>
+          <div class="mock__box mock__upload">
+            <strong>14장 중 8장 올리는 중</strong>
+            <span class="progress"><span style="width:57%"></span></span>
+            <div class="mock__thumbs">
+              <span class="ph"></span><span class="ph"></span><span class="ph"></span><span class="ph"></span>
+              <span class="ph is-dim"></span><span class="ph is-dim"></span><span class="ph is-dim"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step step--rev">
+        <div class="step__txt">
+          <span class="step__no">02</span>
+          <h3 class="step__title">페이지 생성</h3>
+          <p class="step__desc">현장 1건으로 현장 기록, 지역, 역 주변, 지역 허브 페이지가 만들어져요.</p>
+        </div>
+        <div class="mock">
+          <span class="tag mock__tag">실제 관리 화면</span>
+          <span class="mock__title">이 현장으로 생긴 페이지</span>
+          <span class="mock__sub" data-ex="site">춘천 석사동 상가 철거</span>
+          <div class="mock__box mock__pages">
+            <div class="page-row"><strong>현장 기록</strong><span class="page-row__kind">신규</span><span class="st st--warn">색인 요청</span></div>
+            <div class="page-row"><strong>지역 페이지</strong><span class="page-row__kind">보강</span><span class="st st--ok">색인 확인</span></div>
+            <div class="page-row"><strong>역 주변</strong><span class="page-row__kind">신규</span><span class="st st--mute">발행됨</span></div>
+            <div class="page-row"><strong>지역 허브</strong><span class="page-row__kind">갱신</span><span class="st st--ok">색인 확인</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step__txt">
+          <span class="step__no">03</span>
+          <h3 class="step__title">문의 받기</h3>
+          <p class="step__desc">검색으로 들어온 문의가 어느 페이지에서 왔는지 함께 보여요.</p>
+        </div>
+        <div class="mock">
+          <span class="tag mock__tag">실제 관리 화면</span>
+          <span class="mock__title">문의</span>
+          <div class="mock__box inq">
+            <div class="inq__top"><span class="inq__time">오늘 09:12</span><span class="state state--new">신규</span></div>
+            <strong class="inq__title" data-ex="inq">석사동 상가 40평 철거</strong>
+            <div class="inq__bottom"><span class="st st--surf">현장</span><span class="inq__page" data-ex="site">춘천 석사동 상가 철거</span><span class="inq__call inq__call--fill">전화</span></div>
+          </div>
+          <div class="mock__box inq">
+            <div class="inq__top"><span class="inq__time">어제 17:25</span><span class="state state--talk">상담</span></div>
+            <strong class="inq__title" data-ex="inq2">퇴계동 학원 철거 기간 문의</strong>
+            <div class="inq__bottom"><span class="st st--surf">현장</span><span class="inq__page" data-ex="site">춘천 석사동 상가 철거</span><span class="inq__call">전화</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 실측 결과 -->
+  <section class="sec">
+    <div class="sec__in wrap">
+      <div class="sec__head">
+        <span class="eyebrow">실측 결과</span>
+        <h2 class="sec__title">실제로 측정해서 보여드려요</h2>
+        <p class="sec__lead">색인까지 걸린 기간, 페이지당 유입, 문의 수를 파트너 화면에서 매달 확인할 수 있어요.</p>
+      </div>
+      <div class="metrics">
+        <div class="metric">
+          <span class="metric__label">색인까지 걸린 기간</span>
+          <span class="metric__val"><span class="blank" style="--w:90px;--wd:110px"></span></span>
+          <span class="metric__note">운영 데이터가 쌓이면 실제 수치로 바뀝니다</span>
+        </div>
+        <div class="metric">
+          <span class="metric__label">페이지당 유입</span>
+          <span class="metric__val"><span class="blank" style="--w:90px;--wd:110px"></span></span>
+          <span class="metric__note">운영 데이터가 쌓이면 실제 수치로 바뀝니다</span>
+        </div>
+        <div class="metric">
+          <span class="metric__label">문의 수</span>
+          <span class="metric__val"><span class="blank" style="--w:90px;--wd:110px"></span></span>
+          <span class="metric__note">운영 데이터가 쌓이면 실제 수치로 바뀝니다</span>
+        </div>
+      </div>
+      <figure class="chart">
+        <span class="tag chart__tag">예시 · 파트너 관리 화면</span>
+        <figcaption class="chart__title">검색 유입 문의 · 최근 6개월</figcaption>
+        <!-- 막대 순서: 현장 / 지역 / 가이드 / 질문 (아래부터 쌓임) -->
+        <div class="chart__bars">
+          <div class="bar"><span class="bar__total">3</span><div class="bar__stack"><span class="c1" style="--v:2"></span><span class="c2" style="--v:1"></span></div><span class="bar__m">5월</span></div>
+          <div class="bar"><span class="bar__total">5</span><div class="bar__stack"><span class="c1" style="--v:3"></span><span class="c2" style="--v:1"></span><span class="c3" style="--v:1"></span></div><span class="bar__m">6월</span></div>
+          <div class="bar"><span class="bar__total">7</span><div class="bar__stack"><span class="c1" style="--v:4"></span><span class="c2" style="--v:2"></span><span class="c3" style="--v:1"></span></div><span class="bar__m">7월</span></div>
+          <div class="bar"><span class="bar__total">9</span><div class="bar__stack"><span class="c1" style="--v:4"></span><span class="c2" style="--v:3"></span><span class="c3" style="--v:1"></span><span class="c4" style="--v:1"></span></div><span class="bar__m">8월</span></div>
+          <div class="bar"><span class="bar__total">11</span><div class="bar__stack"><span class="c1" style="--v:5"></span><span class="c2" style="--v:3"></span><span class="c3" style="--v:2"></span><span class="c4" style="--v:1"></span></div><span class="bar__m">9월</span></div>
+          <div class="bar"><span class="bar__total">13</span><div class="bar__stack"><span class="c1" style="--v:7"></span><span class="c2" style="--v:3"></span><span class="c3" style="--v:2"></span><span class="c4" style="--v:1"></span></div><span class="bar__m">10월</span></div>
+        </div>
+        <div class="chart__legend">
+          <span><i class="c1"></i>현장</span><span><i class="c2"></i>지역</span><span><i class="c3"></i>가이드</span><span><i class="c4"></i>질문</span>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 7. 약속하는 것 -->
+  <section class="sec">
+    <div class="sec__in wrap">
+      <div class="sec__head">
+        <span class="eyebrow">약속하는 것</span>
+        <h2 class="sec__title">계약하면 이렇게 약속해요</h2>
+      </div>
+      <div class="promises">
+        <div class="promise">
+          <span class="promise__label">월 발행 수 <span class="todo-chip">실제 값 입력</span></span>
+          <span class="promise__val">매달 페이지 <span class="blank" style="--w:48px"></span> 장 이상 발행</span>
+          <span class="promise__note">요금제별로 계약서에 적어요</span>
+        </div>
+        <div class="promise">
+          <span class="promise__label">색인 · 유입 리포트</span>
+          <span class="promise__val">매달 1일 리포트</span>
+          <span class="promise__note">어느 페이지가 색인됐고, 몇 번 들어왔는지</span>
+        </div>
+        <div class="promise">
+          <span class="promise__label">수정 반영 기한 <span class="todo-chip">실제 값 입력</span></span>
+          <span class="promise__val">요청 후 <span class="blank" style="--w:40px"></span> 영업일 안에 반영</span>
+          <span class="promise__note">틀린 정보나 사진 교체 요청</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. 업종 · 지역 확인 -->
+  <section class="sec" id="check">
+    <div class="sec__in wrap">
+      <div class="sec__head">
+        <span class="eyebrow">업종 · 지역 확인</span>
+        <h2 class="sec__title">우리 동네, 신청할 수 있을까요</h2>
+        <p class="sec__lead">한 지역의 한 업종은 한 업체만 운영해요. 먼저 확인해 보세요.</p>
+      </div>
+      <div class="check">
+        <div class="check__group">
+          <span class="check__label">업종</span>
+          <div class="chips" data-ind-chips role="group" aria-label="업종 선택"></div>
+        </div>
+        <div class="check__group">
+          <span class="check__label">지역</span>
+          <div class="chips" data-reg-chips role="group" aria-label="지역 선택"></div>
+        </div>
+        <div aria-live="polite">
+          <div class="result result--ok" data-result="ok">
+            <span class="result__icon">✓</span>
+            <span class="result__txt"><span data-chk-text>강원 춘천 · 철거</span> · 신청할 수 있어요</span>
+            <a href="#form-full" class="btn btn--primary btn--md" data-apply>가입 문의</a>
+          </div>
+          <div class="result result--etc" data-result="etc" hidden>
+            <span class="result__icon">i</span>
+            <span class="result__txt">기타 업종은 상담에서 확인해 드려요</span>
+            <a href="#form-full" class="btn btn--primary btn--md" data-apply>가입 문의</a>
+          </div>
+          <div class="result result--taken" data-result="taken" hidden>
+            <span class="result__icon">!</span>
+            <span class="result__txt"><span data-chk-text>강원 춘천 · 철거</span> · 이미 다른 업체가 운영 중이에요</span>
+            <a href="#form-full" class="btn btn--outline-warn btn--md" data-apply>대기 신청</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. 요금제 -->
+  <section class="sec" id="pricing">
+    <div class="sec__in wrap">
+      <div class="sec__head">
+        <span class="eyebrow">요금제</span>
+        <h2 class="sec__title">요금제</h2>
+        <p class="sec__lead">업체 규모와 현장 수에 맞춰 골라요. 금액은 상담할 때 안내해 드려요.</p>
+      </div>
+      <div class="plans">
+        <div class="plan">
+          <h3 class="plan__name">기본</h3>
+          <p class="plan__desc">현장 페이지를 꾸준히 쌓고 싶은 업체</p>
+          <span class="plan__price">상담 시 안내</span>
+          <ul class="plan__list">
+            <li>현장·지역 페이지 발행</li>
+            <li>알림톡 문의 확인</li>
+            <li>월간 색인·유입 리포트</li>
+          </ul>
+          <a href="#form-full" class="btn btn--outline btn--plan" data-apply>상담 신청</a>
+        </div>
+        <div class="plan plan--featured glow-card">
+          <div class="plan__name-row"><h3 class="plan__name">성장</h3><span class="plan__badge">추천</span></div>
+          <p class="plan__desc">지역을 넓히고 글도 함께 쓰고 싶은 업체</p>
+          <span class="plan__price">상담 시 안내</span>
+          <ul class="plan__list">
+            <li>기본 전체</li>
+            <li>블로그 초안 · 직접 올리기</li>
+            <li>플레이스 소식 초안</li>
+            <li>구글시트 동기화</li>
+          </ul>
+          <a href="#form-full" class="btn btn--primary-flat btn--plan" data-apply>상담 신청</a>
+        </div>
+        <div class="plan">
+          <h3 class="plan__name">지원형</h3>
+          <p class="plan__desc">초기 비용 없이 시작하고 싶은 업체</p>
+          <span class="plan__price">상담 시 안내</span>
+          <ul class="plan__list">
+            <li>기본 전체</li>
+            <li>블로그 본사 대행</li>
+            <li>사이트 경유 계약 정산</li>
+          </ul>
+          <a href="#form-full" class="btn btn--outline btn--plan" data-apply>상담 신청</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. 자주 묻는 질문 -->
+  <section class="sec" id="faq">
+    <div class="sec__in wrap">
+      <div class="sec__head">
+        <span class="eyebrow">FAQ</span>
+        <h2 class="sec__title">자주 묻는 질문</h2>
+      </div>
+      <div class="faq">
+        <details class="faq__item" open>
+          <summary>홈페이지가 이미 있어도 되나요?</summary>
+          <p>네. 지금 홈페이지는 그대로 두고, 현장 페이지를 따로 쌓아요. 원하시면 기존 홈페이지에서 현장 페이지로 연결해 드려요.</p>
+        </details>
+        <details class="faq__item">
+          <summary>사진은 어떻게 보내나요?</summary>
+          <p>폰에서 바로 찍거나 앨범에서 골라 올리면 돼요. 구글 드라이브 폴더를 연결해 두면 폴더에 넣기만 해도 올라와요.</p>
+        </details>
+        <details class="faq__item">
+          <summary>글은 누가 쓰나요?</summary>
+          <p>사진과 현장 정보로 본사가 페이지를 구성해요. 사장님은 미리보기를 보고 좋아요나 의견만 남기면 돼요.</p>
+        </details>
+        <details class="faq__item">
+          <summary>같은 지역에 같은 업종 업체가 여러 곳 들어가나요?</summary>
+          <p>아니요. 한 지역의 한 업종은 한 업체만 운영해요. 이미 운영 중이면 대기 신청을 받아요.</p>
+        </details>
+        <details class="faq__item">
+          <summary>해지하면 만든 페이지는 어떻게 되나요?</summary>
+          <p>해지하면 페이지는 비공개로 전환돼요. 그동안의 현장 기록과 문의 내역은 PDF나 구글시트로 받아 가실 수 있어요.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. 전체 문의 폼 -->
+  <section class="apply" id="form-full">
+    <div class="apply__in wrap">
+      <div class="apply__copy">
+        <span class="apply__eyebrow">가입 문의</span>
+        <h2 class="apply__title">사장님 현장,<br>검색에 남겨 보세요</h2>
+        <p class="apply__lead">남겨 주시면 영업일 기준 1일 안에 연락드려요. 상담은 무료예요.</p>
+      </div>
+      <form class="apply__form" data-lead-form novalidate>
+        <div class="apply__grid">
+          <label class="field"><span class="field__label">상호</span><input name="company" placeholder="예) 한결철거" required autocomplete="organization"></label>
+          <label class="field"><span class="field__label">담당자 이름</span><input name="name" placeholder="이름" required autocomplete="name"></label>
+          <label class="field"><span class="field__label">연락처</span><input name="phone" placeholder="010-0000-0000" inputmode="tel" required autocomplete="tel"></label>
+          <label class="field"><span class="field__label">이메일 (선택)</span><input name="email" type="email" placeholder="답장 받을 이메일" autocomplete="email"></label>
+          <label class="field"><span class="field__label">업종</span><span class="select"><select name="industry" data-ind-select></select></span></label>
+          <label class="field"><span class="field__label">지역</span><input name="region" placeholder="예) 강원 춘천"></label>
+          <label class="field field--full"><span class="field__label">현재 홈페이지 (선택)</span><input name="homepage" placeholder="주소가 있으면 적어 주세요" inputmode="url"></label>
+        </div>
+        <label class="field"><span class="field__label">문의 내용 (선택)</span><textarea name="message" placeholder="궁금한 점을 적어 주세요"></textarea></label>
+        <label class="agree">
+          <input type="checkbox" name="agree" class="sr-only" data-agree>
+          <span class="agree__box" aria-hidden="true"></span>
+          <span>개인정보 수집·이용에 동의해요</span>
+          <a href="#privacy" class="agree__view">보기</a>
+        </label>
+        <button type="submit" class="btn btn--primary btn--block btn--submit" disabled>가입 문의 남기기</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- 12. 푸터 -->
+<footer class="footer">
+  <div class="footer__in wrap">
+    <span class="footer__logo">현장로그</span>
+    <div class="footer__info">
+      <span>상호 (주)현장로그</span>
+      <span class="footer__item">대표자 <span class="blank blank--footer" style="--w:70px"></span><span class="todo-chip">실제 값 입력</span></span>
+      <span class="footer__item">사업자등록번호 <span class="blank blank--footer" style="--w:110px"></span><span class="todo-chip">실제 값 입력</span></span>
+      <span class="footer__item">주소 <span class="blank blank--footer" style="--w:160px"></span><span class="todo-chip">실제 값 입력</span></span>
+      <span class="footer__item">이메일 <span class="blank blank--footer" style="--w:140px"></span><span class="todo-chip">실제 값 입력</span></span>
+    </div>
+    <div class="footer__links">
+      <a href="#privacy" class="footer__privacy" id="privacy">개인정보처리방침</a>
+      <a href="#terms">이용약관</a>
+    </div>
+  </div>
+</footer>
+
+<!-- 모바일 하단 고정 바 -->
+<div class="mbar only-m">
+  <a href="#" class="btn btn--outline mbar__call" data-tel>전화 상담</a>
+  <a href="#form-full" class="btn btn--primary mbar__apply">가입 문의</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>문의가 접수됐어요 · 현장로그</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="css/landing.css">
+</head>
+<body class="is-done">
+
+<header class="gnb">
+  <div class="gnb__in wrap">
+    <a href="./" class="gnb__logo">현장로그</a>
+    <nav class="gnb__nav only-d" aria-label="주요 메뉴">
+      <a href="./#how">어떻게 되나요</a>
+      <a href="./#pricing">요금제</a>
+      <a href="./#faq">자주 묻는 질문</a>
+    </nav>
+    <a href="./#form-full" class="gnb__cta">가입 문의</a>
+  </div>
+</header>
+
+<main class="done">
+  <div class="done__card">
+    <span class="done__icon" aria-hidden="true">✓</span>
+    <h1 class="done__title">문의가 접수됐어요</h1>
+    <p class="done__text">영업일 기준 1일 안에 연락드릴게요.</p>
+    <div class="done__summary">
+      <strong>남겨 주신 내용</strong>
+      <span id="summary">든든바닥 · 바닥 시공 · 인천 부평 / <span class="nowrap">010-****-1182</span></span>
+    </div>
+    <a href="./" class="btn btn--outline done__home">처음으로</a>
+  </div>
+</main>
+
+<script>
+  try {
+    var s = sessionStorage.getItem('hl-lead-summary');
+    if (s) {
+      var el = document.getElementById('summary'), i = s.lastIndexOf(' / ');
+      el.textContent = i > -1 ? s.slice(0, i + 3) : s;
+      if (i > -1) { var t = document.createElement('span'); t.className = 'nowrap'; t.textContent = s.slice(i + 3); el.appendChild(t); }
+    }
+  } catch (e) { /* 예시 문구 그대로 */ }
+</script>
+</body>
+</html>
