@@ -13,17 +13,17 @@ site/
 ```
 
 ## 로컬에서 보기
-`landing/index.html`을 브라우저로 바로 열어도 되고, 아래처럼 띄워도 됩니다.
+`site/landing/index.html`을 브라우저로 바로 열어도 되고, 아래처럼 띄워도 됩니다.
 ```
 cd site
-python3 -m http.server 8000
+python -m http.server 8000   # Mac/Linux는 python3
 # http://localhost:8000/landing/
 ```
 
 ## 실제 값 넣을 곳
-- `landing/js/landing.js` 맨 위 `CONFIG`
+- `site/landing/js/landing.js` 맨 위 `CONFIG`
   - `phone`: 모바일 하단 "전화 상담" 번호 (비우면 문의 폼으로 이동)
   - `formEndpoint`: 문의를 보낼 API 주소 (비우면 전송 없이 접수 완료 화면으로만 이동)
-- `landing/js/landing.js`의 `TAKEN`: 이미 운영 중인 업종×지역 조합
-- `landing/index.html`의 `실제 값 입력` 표시(`.todo-chip`)와 점선 빈칸(`.blank`): 운영 업종 수, 제작한 페이지 수, 실측 결과, 월 발행 수, 수정 반영 기한, 푸터 사업자 정보
+- `site/landing/js/landing.js`의 `TAKEN`: 이미 운영 중인 업종×지역 조합
+- `site/landing/index.html`의 `실제 값 입력` 표시(`.todo-chip`)와 점선 빈칸(`.blank`): 운영 업종 수, 제작한 페이지 수, 실측 결과, 월 발행 수, 수정 반영 기한, 푸터 사업자 정보
 - 개인정보처리방침·이용약관 링크(`#privacy`, `#terms`)
