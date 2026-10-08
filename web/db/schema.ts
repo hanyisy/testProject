@@ -173,6 +173,8 @@ export const photos = pgTable('photos', {
   hasPerson: boolean('has_person').notNull().default(false),
   partnerPublic: boolean('partner_public').notNull().default(false),
   duplicateOf: uuid('duplicate_of'),
+  /** 같은 파일을 두 번 올리지 않게 (내용 해시) */
+  contentHash: text('content_hash'),
   createdAt: createdAt()
 }, (t) => [index('photos_partner_idx').on(t.partnerId)]);
 

@@ -256,6 +256,7 @@ CREATE TABLE "photos" (
 	"has_person" boolean DEFAULT false NOT NULL,
 	"partner_public" boolean DEFAULT false NOT NULL,
 	"duplicate_of" uuid,
+	"content_hash" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint

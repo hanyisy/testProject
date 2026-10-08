@@ -1,5 +1,5 @@
 {
-  "id": "14209140-4739-45a5-bbde-5b5e8a50662b",
+  "id": "55798dc8-535d-4182-b80b-881362712565",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1889,6 +1889,12 @@
         "duplicate_of": {
           "name": "duplicate_of",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "content_hash": {
+          "name": "content_hash",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
