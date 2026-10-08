@@ -282,7 +282,7 @@
 .occ__v--warn { background: var(--warnb); color: var(--warnf); }
 .occ__v--gray { background: var(--chip); color: var(--s5f); }
 .occ__v--none { color: var(--sub3); }
-@media (max-width: 1100px) { .tplgrid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 1359px) { .tplgrid { grid-template-columns: minmax(0, 1fr); } }
 .okbox { display: flex; align-items: center; gap: 10px; background: var(--s4b); color: var(--s4f); border-radius: 14px; padding: 12px 16px; font-size: 15px; font-weight: 800; }
 
 /* 설정 (3n) */

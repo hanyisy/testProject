@@ -182,16 +182,6 @@
   .itop__note--m { font-size: 12px; color: var(--sub2); padding: 0 4px; margin-top: -4px; }
   .filters--scroll { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px; padding: 0 16px; }
   .filters--scroll .dd { height: 40px; }
-  .icards { flex-direction: column; gap: 12px; }
-  .icard { background: var(--card); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); }
-  .icard.is-needs { border-color: var(--redline); }
-  .icard__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .icard__mid { display: flex; flex-direction: column; gap: 4px; }
-  .icard__mid b { font-size: 17px; font-weight: 800; }
-  .icard__amt { font-size: 15px; font-weight: 700; color: var(--s4f); }
-  .icard .irow__page > span:last-child { color: var(--sub); }
-  .icard__bot { display: flex; align-items: center; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line2); }
-  .icards .pager { padding: 6px 0 0; border: 0; }
   /* 상태 변경은 하단 시트 */
   .spick__backdrop { display: block; position: fixed; inset: 0; background: rgba(10,12,16,.5); z-index: 40; }
   .spick__pop, .spick__pop.is-up { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; z-index: 41; border-radius: 24px 24px 0 0; padding: 10px 20px calc(34px + env(safe-area-inset-bottom)); gap: 16px; box-shadow: none; }
@@ -571,9 +561,33 @@
 .ilog__text { font-size: 15px; font-weight: 600; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 1023px) { .idetail { grid-template-columns: minmax(0,1fr); } }
 @media (max-width: 767px) {
-  .icard__acts .ibtns { justify-content: stretch; }
-  .icard__acts .callbtn { flex: 1; }
   .ihead__title { font-size: 20px; }
   .idl { grid-template-columns: 84px minmax(0,1fr); }
 }
 @media (min-width: 768px) { .ihead .spick__pop { left: auto; right: 0; } }
+
+/* 문의 목록: 1280 이상 표 · 그보다 좁으면 카드 (표 칸이 0으로 눌려 글자가 세로로 깨지는 것 막기) */
+.icards { flex-direction: column; gap: 12px; }
+.icard { background: var(--card); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); min-width: 0; }
+.icard.is-needs { border-color: var(--redline); }
+.icard__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.icard__mid { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.icard__mid b { font-size: 17px; font-weight: 800; }
+.icard__amt { font-size: 15px; font-weight: 700; color: var(--s4f); }
+.icard .irow__page > span:last-child { color: var(--sub); }
+.icard__bot { display: flex; align-items: center; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line2); }
+.icard__acts .ibtns { justify-content: stretch; }
+.icard__acts .callbtn { flex: 1; }
+.icards .pager { padding: 6px 0 0; border: 0; grid-column: 1 / -1; }
+.iview-cards { display: none; }
+.irow > * { min-width: 0; }
+.itable .callbtn { height: 38px; padding: 0 12px; font-size: 14px; border-radius: 10px; }
+@media (max-width: 1279px) {
+  .iview-table { display: none; }
+  .iview-cards { display: flex; }
+}
+@media (min-width: 768px) and (max-width: 1279px) {
+  .iview-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .itop__note--m { display: none; }
+  .icard .spick__pop { left: auto; right: 0; }
+}

@@ -46,12 +46,13 @@ export default async function TemplatesPage({ searchParams }: { searchParams: Pr
         <div className="grid tplgrid">
           <section className="table">
             <div className="tablehead" style={{ alignItems: 'center' }}><h2 className="panel__title">업종</h2><span style={{ marginLeft: 'auto' }}><NewIndustry /></span></div>
-            <div className="table__head" style={{ '--cols': 'minmax(0,1fr) 130px 90px 100px' } as React.CSSProperties}><span>업종명</span><span>코드</span><span className="r">파트너</span><span>상태</span></div>
+            <div className="table__scroll">
+            <div className="table__head" style={{ '--cols': 'minmax(90px,1fr) 130px 90px 100px', '--min': '500px' } as React.CSSProperties}><span>업종명</span><span>코드</span><span className="r">파트너</span><span>상태</span></div>
             {inds.map((x) => {
               const u = use(x.id), on = x.id === sel?.id;
               return (
                 <Link key={x.id} href={`/admin/templates?i=${x.code}`} scroll={false} className="table__row" aria-current={on ? 'true' : undefined}
-                  style={{ '--cols': 'minmax(0,1fr) 130px 90px 100px', minHeight: 60, background: on ? 'var(--surf)' : undefined } as React.CSSProperties}>
+                  style={{ '--cols': 'minmax(90px,1fr) 130px 90px 100px', '--min': '500px', minHeight: 60, background: on ? 'var(--surf)' : undefined } as React.CSSProperties}>
                   <span style={{ fontSize: 15, fontWeight: on ? 800 : 600, color: on ? 'var(--ink)' : 'var(--text2)' }}>{x.name}</span>
                   <span className="cell-mono" style={{ fontSize: 13, color: 'var(--text2)' }}>{x.code}</span>
                   <span className="cell-num">{u.active}{u.ended ? ` (종료 ${u.ended})` : ''}</span>
@@ -59,6 +60,7 @@ export default async function TemplatesPage({ searchParams }: { searchParams: Pr
                 </Link>
               );
             })}
+            </div>
           </section>
           {sel && (
             <section className="panel" style={{ padding: 22, gap: 16 }}>

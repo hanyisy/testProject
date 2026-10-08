@@ -168,6 +168,8 @@ h1, h2, h3, p { margin: 0; }
 .table__scroll { overflow-x: auto; }
 .table__head, .table__row { display: grid; grid-template-columns: var(--cols); gap: 12px; align-items: center; padding: 0 20px; min-width: var(--min, 0); }
 .table__head { height: 44px; font-size: 13px; font-weight: 700; color: var(--sub); border-bottom: 1px solid var(--line); }
+/* 칸이 좁아져도 머리글이 한 글자씩 세로로 쌓이지 않게 */
+.table__head > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .table__row { min-height: 62px; padding-top: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--line2); }
 a.table__row:hover { background: var(--field); }
 .cell-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }

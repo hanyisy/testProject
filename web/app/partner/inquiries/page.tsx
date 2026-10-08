@@ -16,7 +16,7 @@ export const metadata = { title: '문의' };
 
 const VER: Record<string, string> = { '확인됨': 'ok', '확인 중': 'warn', '본인 아님': 'red' };
 const TABS = ['전체', '신규', '결과 입력 필요'] as const;
-const COLS = '96px minmax(0,1.2fr) minmax(0,1.3fr) 96px 170px 112px 236px';
+const COLS = '88px minmax(110px,1.2fr) minmax(120px,1.3fr) 88px 150px 104px 190px';
 type SP = { tab?: string; period?: string; ptype?: string; ver?: string; page?: string };
 
 /* 시안 2d(데스크톱) · 1d(모바일) — 문의 */
@@ -73,8 +73,8 @@ export default async function Inquiries({ searchParams }: { searchParams: Promis
           {(sp.period || sp.ptype || sp.ver) && <Link href={href({ period: '', ptype: '', ver: '', page: '' })} className="reset-link only-desk">초기화</Link>}
         </div>
 
-        {/* 데스크톱 표 */}
-        <div className="table itable only-desk">
+        {/* 넓은 화면(1280~) 표 · 좁으면 카드 — 칸이 눌려 깨지지 않게 */}
+        <div className="table itable iview-table">
           <div className="table__head" style={{ '--cols': COLS, height: 52, fontSize: 14 } as React.CSSProperties}>
             <span>시간</span><span>문의</span><span>유입 페이지</span><span>본인 확인</span><span>상태</span><span style={{ textAlign: 'right' }}>금액</span><span />
           </div>
@@ -93,8 +93,8 @@ export default async function Inquiries({ searchParams }: { searchParams: Promis
           <Pager page={cur} size={10} total={rows.length} href={(n) => href({ page: String(n) })} />
         </div>
 
-        {/* 모바일 카드 */}
-        <div className="icards only-mob">
+        {/* 1279 이하 카드 (태블릿 2열 · 모바일 1열) */}
+        <div className="icards iview-cards">
           <span className="itop__note--m">본인 아님 {excluded}건은 홈·통계에서 제외돼요</span>
           {items.map((q) => (
             <div key={q.id} className={'icard' + (q.needsResult ? ' is-needs' : '')} style={{ opacity: q.verify === '본인 아님' ? 0.45 : 1 }}>

@@ -80,9 +80,10 @@ export default async function BillingAdmin({ searchParams }: { searchParams: Pro
         <div className="grid grid--2" style={{ alignItems: 'start' }}>
           <section className="table">
             <div className="tablehead"><h2 className="panel__title">입금 확인 대기</h2><span className="panel__sub">계좌 입금 건</span></div>
-            <div className="table__head" style={{ '--cols': 'minmax(0,1fr) 110px 128px' } as React.CSSProperties}><span>파트너 · 항목</span><span className="r">금액</span><span /></div>
+            <div className="table__scroll">
+            <div className="table__head" style={{ '--cols': 'minmax(140px,1fr) 110px 128px', '--min': '440px' } as React.CSSProperties}><span>파트너 · 항목</span><span className="r">금액</span><span /></div>
             {!deposits.length ? <ListState kind="empty" title="확인할 입금이 없어요" /> : deposits.map(({ c, partner }) => (
-              <div key={c.id} className="table__row" style={{ '--cols': 'minmax(0,1fr) 110px 128px', minHeight: 60 } as React.CSSProperties}>
+              <div key={c.id} className="table__row" style={{ '--cols': 'minmax(140px,1fr) 110px 128px', '--min': '440px', minHeight: 60 } as React.CSSProperties}>
                 <span className="cell-name"><b className="ell">{partner}</b><small>{c.item} · 입금자명 {c.payer ?? partner}</small></span>
                 <span className="cell-num">{won(c.amount)}</span>
                 <span className="cell-act">
@@ -92,12 +93,14 @@ export default async function BillingAdmin({ searchParams }: { searchParams: Pro
                 </span>
               </div>
             ))}
+            </div>
           </section>
           <section className="table">
             <div className="tablehead"><h2 className="panel__title">세금계산서 발행 요청</h2></div>
-            <div className="table__head" style={{ '--cols': 'minmax(0,1fr) 100px 138px' } as React.CSSProperties}><span>파트너 · 항목</span><span className="r">금액</span><span /></div>
+            <div className="table__scroll">
+            <div className="table__head" style={{ '--cols': 'minmax(140px,1fr) 100px 138px', '--min': '440px' } as React.CSSProperties}><span>파트너 · 항목</span><span className="r">금액</span><span /></div>
             {!taxes.length ? <ListState kind="empty" title="발행 요청이 없어요" /> : taxes.map(({ x, c, partner }) => (
-              <div key={x.id} className="table__row" style={{ '--cols': 'minmax(0,1fr) 100px 138px', minHeight: 60 } as React.CSSProperties}>
+              <div key={x.id} className="table__row" style={{ '--cols': 'minmax(140px,1fr) 100px 138px', '--min': '440px', minHeight: 60 } as React.CSSProperties}>
                 <span className="cell-name"><b className="ell">{partner}</b><small>{c.item} · 요청 {md(x.requestedOn)}</small></span>
                 <span className="cell-num">{won(c.amount)}</span>
                 <span className="cell-act">
@@ -107,6 +110,7 @@ export default async function BillingAdmin({ searchParams }: { searchParams: Pro
                 </span>
               </div>
             ))}
+            </div>
           </section>
         </div>
 
@@ -119,13 +123,13 @@ export default async function BillingAdmin({ searchParams }: { searchParams: Pro
         <section className="table">
           <div className="tablehead"><h2 className="panel__title">지원형 파트너 정산</h2><span className="panel__sub">우리 사이트 경유 계약 금액 × 정산율</span></div>
           <div className="table__scroll">
-            <div className="table__head" style={{ '--cols': COLS, '--min': '900px' } as React.CSSProperties}>
+            <div className="table__head" style={{ '--cols': COLS, '--min': '1100px' } as React.CSSProperties}>
               <span>파트너</span><span>기간</span><span className="r">경유 계약</span><span className="r">계약 금액</span><span className="r">정산율</span><span className="r">정산 금액</span><span>상태</span>
             </div>
             {!items.length ? <ListState kind="empty" title="조건에 맞는 정산이 없어요" /> : items.map(({ s, partner }) => {
               const [label, chip] = stOf(s);
               return (
-                <div key={s.id} className="table__row" style={{ '--cols': COLS, '--min': '900px', minHeight: 60 } as React.CSSProperties}>
+                <div key={s.id} className="table__row" style={{ '--cols': COLS, '--min': '1100px', minHeight: 60 } as React.CSSProperties}>
                   <b className="cell-strong ell" style={{ fontSize: 15 }}>{partner}</b>
                   <span className="cell-ell" style={{ fontWeight: 600 }}>{Number(s.month.slice(5))}월{s.month === month ? ' · 진행 중' : ''}</span>
                   <span className="cell-num cell-num--n">{s.contractCount}건</span>
