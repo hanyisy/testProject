@@ -44,7 +44,7 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
             groups={groups.map((x) => ({ key: x.key, label: `${md(x.day)} · ${x.place} · 사진 ${x.photos.length}장` }))}
             current={sel.key}
             place={sel.place}
-            photos={sel.photos.map((ph) => ({ id: ph.id, label: ph.label ?? '사진', person: ph.hasPerson, pub: ph.partnerPublic }))}
+            photos={sel.photos.map((ph) => ({ id: ph.id, label: ph.label ?? '사진', person: ph.hasPerson, pub: ph.partnerPublic, src: ph.fileKey.startsWith('demo/') ? null : `/files/${ph.fileKey}` }))}
             works={works}
             buildings={buildings}
           />

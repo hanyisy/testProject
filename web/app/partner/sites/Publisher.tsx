@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState, useTransition } from 'react';
 import { publishSite, type NewPage } from './actions';
 
-type Photo = { id: string; label: string; person: boolean; pub: boolean };
+type Photo = { id: string; label: string; person: boolean; pub: boolean; src: string | null };
 type Props = { groups: { key: string; label: string }[]; current: string; place: string; photos: Photo[]; works: string[]; buildings: string[] };
 const IDX: Record<string, string> = { '발행됨': 'gray', '색인 요청': 'warn', '색인 확인': 'ok' };
 const SHOW = 15;
@@ -82,7 +82,7 @@ export default function Publisher({ groups, current, place, photos, works, build
                 const on = pubSet.has(p.id);
                 return (
                   <button key={p.id} type="button" className={'ptile' + (on ? ' is-on' : '') + (p.person && on ? ' is-warn' : '')} disabled={!!done} onClick={() => toggle(p)}
-                    aria-pressed={on} aria-label={`${p.label}${p.person ? ' · 사람이 찍힘' : ''} · ${on ? '공개' : '비공개'}`}>
+                    style={p.src ? { background: `center / cover no-repeat url("${p.src}")` } : undefined} aria-pressed={on} aria-label={`${p.label}${p.person ? ' · 사람이 찍힘' : ''} · ${on ? '공개' : '비공개'}`}>
                     <span className="ptile__label">{p.label}</span>
                     <span className="ptile__box">{on ? '✓' : ''}</span>
                     {p.person && <span className="ptile__person">! 사람</span>}

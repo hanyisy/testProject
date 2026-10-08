@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRef, useState, type ReactNode } from 'react';
 import { addToSite, uploadPhoto } from './actions';
 
-type Tile = { name: string; state: '대기' | '올리는 중' | '완료' | '중복' | '실패'; error?: string };
+type Tile = { name: string; url: string; state: '대기' | '올리는 중' | '완료' | '중복' | '실패'; error?: string };
 type Site = { id: string; title: string; date: string; n: number };
 
 export default function Uploader({ drive, sites }: { drive: ReactNode; sites: Site[] }) {
@@ -20,7 +20,8 @@ export default function Uploader({ drive, sites }: { drive: ReactNode; sites: Si
     const list = files.filter((f) => f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name)).slice(0, 200);
     if (!list.length) return;
     setBusy(true); setAdded(null); setIds([]);
-    setTiles(list.map((f) => ({ name: f.name, state: '대기' })));
+    tiles.forEach((x) => URL.revokeObjectURL(x.url));
+    setTiles(list.map((f) => ({ name: f.name, url: URL.createObjectURL(f), state: '대기' })));
     const got: string[] = [];
     for (let i = 0; i < list.length; i++) {
       setTiles((ts) => ts.map((x, j) => (j === i ? { ...x, state: '올리는 중' } : x)));
@@ -76,7 +77,7 @@ export default function Uploader({ drive, sites }: { drive: ReactNode; sites: Si
           <div className="uptiles">
             {tiles.slice(0, 14).map((t, i) => (
               <div key={i} className="uptile">
-                <div className="uptile__img" style={{ opacity: t.state === '대기' ? 0.45 : 1 }}>{t.state === '완료' && <span>✓</span>}</div>
+                <div className="uptile__img" style={{ opacity: t.state === '대기' ? 0.45 : 1, background: `center / cover no-repeat url("${t.url}")` }}>{t.state === '완료' && <span>✓</span>}</div>
                 <span className="upbar upbar--sm"><span style={{ width: t.state === '완료' || t.state === '중복' ? '100%' : t.state === '올리는 중' ? '50%' : '0%' }} /></span>
                 <span className="uptile__l" data-state={t.state}>{t.state}</span>
               </div>
@@ -91,7 +92,7 @@ export default function Uploader({ drive, sites }: { drive: ReactNode; sites: Si
             <span className="mklabel">촬영일과 위치로 묶인 현장 후보</span>
             <section className="pcard" style={{ padding: 20, gap: 12 }}>
               <b style={{ fontSize: 17 }}>방금 올린 사진 {done}장</b>
-              <div className="thumbs6">{Array.from({ length: Math.min(6, done) }, (_, i) => <span key={i} />)}</div>
+              <div className="thumbs6">{tiles.filter((x) => x.state === '완료').slice(0, 6).map((x, i) => <span key={i} style={{ background: `center / cover no-repeat url("${x.url}")` }} />)}</div>
               <Link href="/partner/sites" className="pbtn pbtn--accent" style={{ width: '100%', height: 52 }}>이 사진으로 현장 만들기</Link>
             </section>
             <button type="button" className="btn-ghost btn-ghost--block" onClick={() => { setTiles([]); setIds([]); }}>사진 더 올리기</button>

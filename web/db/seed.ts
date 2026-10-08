@@ -197,6 +197,8 @@ async function seed(db: DB, d: Seed) {
   }
 
   /* 설정값 */
-  const settings = { ...d.settings, demo_today: d.today, demo_stats: d.demoStats, region_stats: regionStats, landing_values: { industries: null, pages: null, monthlyPages: null, fixDays: null, indexDays: null, business: { ceo: '', bizNo: '', address: '', email: '', phone: '' } } };
+  const { _note, ...regionCenters } = (await import('./region-centers.json')).default as Record<string, unknown>;
+  void _note;
+  const settings = { ...d.settings, region_centers: regionCenters, demo_today: d.today, demo_stats: d.demoStats, region_stats: regionStats, landing_values: { industries: null, pages: null, monthlyPages: null, fixDays: null, indexDays: null, business: { ceo: '', bizNo: '', address: '', email: '', phone: '' } } };
   await db.insert(t.settings).values(Object.entries(settings).map(([key, value]) => ({ key, value: value as object })));
 }
