@@ -27,7 +27,7 @@ function Alert({ kind, title, sub }: { kind: 'err' | 'lock' | 'info'; title: str
   );
 }
 
-export default function LoginForm({ next, expired }: { next: string; expired: boolean }) {
+export default function LoginForm({ next, expired, disabled }: { next: string; expired: boolean; disabled?: boolean }) {
   const [state, action, pending] = useActionState<LoginState, FormData>(login, { id: '' });
   const [show, setShow] = useState(false);
   const invalid = state.error === 'invalid';
@@ -37,7 +37,7 @@ export default function LoginForm({ next, expired }: { next: string; expired: bo
       {expired && !state.error && <Alert kind="info" title="로그인 시간이 지났어요" sub="다시 로그인하면 보던 화면으로 돌아가요" />}
       {invalid && <Alert kind="err" title="아이디 또는 비밀번호가 맞지 않아요" sub={`5번 틀리면 잠시 로그인할 수 없어요 · 남은 횟수 ${state.left}번`} />}
       {state.error === 'locked' && <Alert kind="lock" title="잠시 후 다시 시도해 주세요" sub="5번 틀려서 10분 동안 로그인할 수 없어요" />}
-      {state.error === 'disabled' && <Alert kind="err" title="사용 중지된 계정이에요" sub="본사 담당자에게 연락해 주세요" />}
+      {(state.error === 'disabled' || (disabled && !state.error)) && <Alert kind="err" title="사용 중지된 계정이에요" sub="본사 담당자에게 연락해 주세요" />}
 
       <input type="hidden" name="next" value={next} />
       <label className="auth__field">

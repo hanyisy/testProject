@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import { getDb, schema as t } from '@/db/client';
-import { requireStaff } from '@/lib/auth';
+import { requirePerm } from '@/lib/auth';
 import { LEAD_STATUSES } from '@/lib/admin';
 
 const isId = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f-]{36}$/.test(v);
@@ -14,7 +14,7 @@ async function audit(userId: string, action: string, leadId: string, detail: obj
 }
 
 export async function setLeadStatus(fd: FormData) {
-  const user = await requireStaff();
+  const user = await requirePerm('파트너 관리');
   const id = fd.get('id'), status = String(fd.get('status'));
   if (!isId(id) || !LEAD_STATUSES.includes(status as never)) return;
   const db = await getDb();
@@ -24,7 +24,7 @@ export async function setLeadStatus(fd: FormData) {
 }
 
 export async function setLeadOwner(fd: FormData) {
-  const user = await requireStaff();
+  const user = await requirePerm('파트너 관리');
   const id = fd.get('id'), owner = fd.get('owner');
   if (!isId(id)) return;
   const db = await getDb();
@@ -37,7 +37,7 @@ export async function setLeadOwner(fd: FormData) {
 }
 
 export async function addLeadMemo(fd: FormData) {
-  const user = await requireStaff();
+  const user = await requirePerm('파트너 관리');
   const id = fd.get('id'), body = String(fd.get('body') ?? '').trim();
   if (!isId(id) || !body) return;
   const db = await getDb();

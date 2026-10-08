@@ -58,6 +58,20 @@ export async function changePassword(_: PasswordState, fd: FormData): Promise<Pa
   redirect(landing(user.kind, safeNext(fd.get('next'))));
 }
 
+/** 컨펌용: 데모 계정으로 바로 들어가기 (비밀번호 없이). DEMO_LOGIN=off 이면 막힘 */
+export async function demoLogin(fd: FormData) {
+  const { DEMO_LOGIN } = await import('@/lib/config');
+  if (!DEMO_LOGIN) return;
+  const id = String(fd.get('id') ?? '');
+  const db = await getDb();
+  const [user] = await db.select().from(t.users).where(eq(t.users.loginId, id)).limit(1);
+  if (!user || user.status === '사용 중지') redirect('/login?switch=1&demo=disabled');
+  await destroySession();
+  await createSession(user.id, false);
+  const to = landing(user.kind, safeNext(fd.get('next')));
+  redirect(user.mustChangePassword ? `/login/password?next=${encodeURIComponent(to)}` : to);
+}
+
 export async function logout() {
   await destroySession();
   redirect('/login');

@@ -3,8 +3,9 @@ import TopBar from '@/components/TopBar';
 import Pager, { paginate } from '@/components/Pager';
 import FilterSelect from '@/components/FilterSelect';
 import ListState from '@/components/ListState';
-import { requireStaff } from '@/lib/auth';
-import { LEAD_STATUSES, LEAD_STATUS_CHIP, getSetting, leadList } from '@/lib/admin';
+import { requirePerm } from '@/lib/auth';
+import { LEAD_STATUSES, LEAD_STATUS_CHIP, leadList } from '@/lib/admin';
+import { today as getToday } from '@/lib/config';
 import { md } from '@/lib/format';
 
 export const metadata = { title: '가입 문의' };
@@ -17,9 +18,9 @@ type SP = { tab?: string; biz?: string; period?: string; owner?: string; page?: 
 
 /* 시안 3-lead — 랜딩의 가입 문의 폼으로 들어온 문의 */
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<SP> }) {
-  const user = await requireStaff();
+  const user = await requirePerm('파트너 관리');
   const sp = await searchParams;
-  const [all, today] = await Promise.all([leadList(), getSetting('demo_today', '2026-10-07')]);
+  const [all, today] = await Promise.all([leadList(), getToday()]);
   const tab = LEAD_STATUSES.includes(sp.tab as never) ? sp.tab! : '전체';
   const biz = BIZ.includes(sp.biz ?? '') ? sp.biz! : '전체';
   const period = sp.period ?? '30';

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import TopBar from '@/components/TopBar';
 import MemoForm from './MemoForm';
-import { requireStaff } from '@/lib/auth';
+import { requirePerm } from '@/lib/auth';
 import { LEAD_STATUSES, LEAD_STATUS_CHIP, leadDetail } from '@/lib/admin';
 import { md } from '@/lib/format';
 import { setLeadOwner, setLeadStatus } from '../actions';
@@ -11,7 +11,7 @@ export const metadata = { title: '가입 문의' };
 
 /* 시안 3-lead-2 — 가입 문의 상세 */
 export default async function LeadDetail({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireStaff();
+  const user = await requirePerm('파트너 관리');
   const { id } = await params;
   const d = await leadDetail(id);
   if (!d) notFound();

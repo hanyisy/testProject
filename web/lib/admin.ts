@@ -28,18 +28,23 @@ export async function workCounts() {
     db.select({ n }).from(t.taxRequests).where(eq(t.taxRequests.state, '요청됨')),
     db.select({ n }).from(t.blogPosts).where(and(eq(t.blogPosts.mode, '본사 대행'), eq(t.blogPosts.status, '승인'))),
     db.select({ n }).from(t.jobs).where(eq(t.jobs.status, '실패')),
-    db.select({ type: t.reviewBundles.type, state: t.reviewItems.state, bundle: t.reviewBundles.id, n })
+    db.select({ type: t.reviewBundles.type, state: t.reviewItems.state, bundle: t.reviewBundles.id, kind: t.reviewBundles.kind, partner: t.partners.name, n })
       .from(t.reviewItems).innerJoin(t.reviewBundles, eq(t.reviewBundles.id, t.reviewItems.bundleId))
+      .innerJoin(t.partners, eq(t.partners.id, t.reviewBundles.partnerId))
       .where(inArray(t.reviewItems.state, ['대기', '발행 중 · 수정 대기', '개별 검수']))
-      .groupBy(t.reviewBundles.type, t.reviewItems.state, t.reviewBundles.id)
+      .groupBy(t.reviewBundles.type, t.reviewItems.state, t.reviewBundles.id, t.reviewBundles.kind, t.partners.name)
   ]);
   const pagesPending = review.filter((r) => r.type !== '번역').reduce((a, r) => a + r.n, 0);
   const individual = review.filter((r) => r.state === '개별 검수').reduce((a, r) => a + r.n, 0);
   const bundles = new Set(review.filter((r) => r.type !== '번역' && r.state !== '개별 검수').map((r) => r.bundle)).size;
-  const translations = review.filter((r) => r.type === '번역').reduce((a, r) => a + r.n, 0);
+  const tr = review.filter((r) => r.type === '번역');
+  const translations = tr.reduce((a, r) => a + r.n, 0);
+  /* 처리할 일 보조 문구: 맑은집클린 · 영어·중국어 */
+  const uniq = (xs: string[]) => Array.from(new Set(xs));
+  const translationSub = [uniq(tr.map((r) => r.partner)).join('·'), uniq(tr.map((r) => r.kind.replace(/\s*번역$/, '').replace(/\(.*\)/, ''))).join('·')].filter(Boolean).join(' · ');
   return {
     leadNew: leadNew.n, deposits: dep.n, depositSum: dep.sum, taxes: tax.n, agency: agency.n, fails: fail.n,
-    pagesPending, individual, bundles, translations,
+    pagesPending, individual, bundles, translations, translationSub,
     nav: { leads: leadNew.n, review: pagesPending + translations, jobs: fail.n, money: dep.n + tax.n, agency: agency.n }
   };
 }
@@ -66,13 +71,13 @@ export async function dashboard() {
       { label: '이번 달 문의', num: stats?.monthInquiries ?? 0, unit: '건', note: stats ? `본인 아님 ${stats.notMine}건 제외` : '' }
     ],
     todos: [
-      { label: '신규 가입 문의', n: counts.leadNew, sub: '랜딩 가입 문의 폼', href: '/admin/leads?tab=신규' },
-      { label: '입금 확인 대기', n: counts.deposits, sub: won(counts.depositSum) + '원', href: '/admin/billing' },
-      { label: '세금계산서 발행 요청', n: counts.taxes, sub: '계좌 입금 건', href: '/admin/billing' },
-      { label: '블로그 대행 대기', n: counts.agency, sub: agencyPartners.map((p) => p.name).join(' · '), href: '/admin/agency' },
-      { label: '페이지 검수 대기', n: counts.pagesPending, sub: `묶음 ${counts.bundles} · 개별 ${counts.individual}`, href: '/admin/review' },
-      { label: '번역 검수 대기', n: counts.translations, sub: '맑은집클린 · 영어·중국어', href: '/admin/review' },
-      { label: '실패한 작업', n: counts.fails, sub: '오늘', href: '/admin/jobs', alert: true }
+      { perm: '파트너 관리' as const, label: '신규 가입 문의', n: counts.leadNew, sub: '랜딩 가입 문의 폼', href: '/admin/leads?tab=신규' },
+      { perm: '입금 확인 · 세금계산서' as const, label: '입금 확인 대기', n: counts.deposits, sub: won(counts.depositSum) + '원', href: '/admin/billing' },
+      { perm: '입금 확인 · 세금계산서' as const, label: '세금계산서 발행 요청', n: counts.taxes, sub: '계좌 입금 건', href: '/admin/billing' },
+      { perm: '대행 작업' as const, label: '블로그 대행 대기', n: counts.agency, sub: agencyPartners.map((p) => p.name).join(' · '), href: '/admin/agency' },
+      { perm: '검수' as const, label: '페이지 검수 대기', n: counts.pagesPending, sub: `묶음 ${counts.bundles} · 개별 ${counts.individual}`, href: '/admin/review' },
+      { perm: '검수' as const, label: '번역 검수 대기', n: counts.translations, sub: counts.translationSub, href: '/admin/review' },
+      { perm: '작업 로그' as const, label: '실패한 작업', n: counts.fails, sub: '오늘', href: '/admin/jobs', alert: true }
     ],
     attention: stats?.attention ?? []
   };

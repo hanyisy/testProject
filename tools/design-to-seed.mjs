@@ -76,7 +76,7 @@ const out = {
   hangyeol: { sites: P.SITES, pages: P.PAGES, queries: P.QUERIES, inquiries: P.INQ, chart: P.CHART, newPages: P.NEWP, usage: P.MK_USAGE, pageCount: P.PCOUNT },
   /* 시안 대시보드 · 파트너 목록에 적힌 합계 (파트너별 페이지가 시안에 다 있지 않아 합계만 보관 — 실제 운영에서는 집계로 대체) */
   demoStats: {
-    partners: Object.fromEntries(A.PARTNERS.map((p) => [p.name, { pages: p.pages, indexed: p.ok, requested: p.req, inquiries: p.inq }])),
+    partners: Object.fromEntries(A.PARTNERS.map((p) => [p.name, { pages: p.pages, indexed: p.ok, requested: p.req, inquiries: p.inq, ...(p.name === '맑은집클린' ? { photos: 286, sites: 24, newPhotos: 11, lastLogin: '오늘 08:12', syncedAgo: '10분 전' } : {}) }])),
     monthPublished: { '한결철거': 3, '맑은집클린': 6 },
     monthInquiries: 34, notMine: 2,
     indexRatio: { pct: 87, indexed: 78, total: 90 },

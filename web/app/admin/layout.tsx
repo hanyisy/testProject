@@ -1,28 +1,15 @@
+import '@/styles/admin-partners.css';
 import AdminNav, { type NavItem } from '@/components/AdminNav';
 import { requireStaff } from '@/lib/auth';
 import { workCounts } from '@/lib/admin';
+import { ADMIN_FOOT, ADMIN_MENU, can } from '@/lib/permissions';
 
-/* 본사 어드민 틀 — 로그인한 본사 직원만 (역할별 제한은 각 화면에서) */
+/* 본사 어드민 틀 — 로그인한 본사 직원만. 메뉴는 역할 권한(lib/permissions.ts)에 따라 보임 */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireStaff();
   const c = await workCounts();
-  const items: NavItem[] = [
-    { href: '/admin', label: '대시보드' },
-    { href: '/admin/leads', label: '가입 문의', count: c.nav.leads },
-    { href: '/admin/partners', label: '파트너' },
-    { href: '/admin/generate', label: '페이지 생성' },
-    { href: '/admin/templates', label: '업종 템플릿' },
-    { href: '/admin/plans', label: '요금제' },
-    { href: '/admin/indexing', label: '발행·색인' },
-    { href: '/admin/review', label: '검수', count: c.nav.review },
-    { href: '/admin/jobs', label: '작업 로그', count: c.nav.jobs },
-    { href: '/admin/billing', label: '문의·정산', count: c.nav.money },
-    { href: '/admin/agency', label: '대행 작업', count: c.nav.agency }
-  ];
-  const foot: NavItem[] = [
-    { href: '/admin/settings', label: '설정' },
-    ...(user.role === '최고 관리자' || user.role === '관리팀' ? [{ href: '/admin/settings/landing', label: '랜딩 관리', sub: true }] : [])
-  ];
+  const items: NavItem[] = ADMIN_MENU.filter((m) => can(user.role, m.perm)).map((m) => ({ href: m.href, label: m.label, count: m.count ? c.nav[m.count] : undefined }));
+  const foot: NavItem[] = ADMIN_FOOT.filter((m) => can(user.role, m.perm)).map((m) => ({ href: m.href, label: m.label, sub: m.sub }));
   return (
     <div className="shell">
       <AdminNav items={items} foot={foot} />

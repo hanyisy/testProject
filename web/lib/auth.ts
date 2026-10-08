@@ -87,6 +87,12 @@ export async function requireStaff(roles?: Role[]): Promise<SessionUser> {
   return user;
 }
 
+/** 본사 화면 + 권한 표(lib/permissions.ts) 검사 */
+export async function requirePerm(perm: import('./permissions').Perm): Promise<SessionUser> {
+  const { PERMS } = await import('./permissions');
+  return requireStaff([...PERMS[perm]] as Role[]);
+}
+
 /** 파트너 화면: 로그인 · 비밀번호 변경 · 파트너 계정 검사 */
 export async function requirePartner(): Promise<SessionUser & { partnerId: string }> {
   const { user, expired } = await readSession();

@@ -2208,7 +2208,12 @@
     "pages": 52,
     "indexed": 47,
     "requested": 5,
-    "inquiries": 21
+    "inquiries": 21,
+    "photos": 286,
+    "sites": 24,
+    "newPhotos": 11,
+    "lastLogin": "오늘 08:12",
+    "syncedAgo": "10분 전"
    },
    "온마루": {
     "pages": 0,

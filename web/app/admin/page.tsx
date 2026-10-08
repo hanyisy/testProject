@@ -2,6 +2,7 @@ import Link from 'next/link';
 import TopBar from '@/components/TopBar';
 import { requireStaff } from '@/lib/auth';
 import { dashboard } from '@/lib/admin';
+import { can } from '@/lib/permissions';
 
 export const metadata = { title: '대시보드' };
 
@@ -26,7 +27,7 @@ export default async function Dashboard() {
           <section className="panel" aria-labelledby="todo-h">
             <div className="panel__head"><h2 className="panel__title" id="todo-h">처리할 일</h2></div>
             <div className="gap8" />
-            {d.todos.map((t) => (
+            {d.todos.filter((t) => can(user.role, t.perm)).map((t) => (
               <Link key={t.label} href={t.href} className="todo">
                 <span className={'todo__n' + (t.n === 0 ? ' is-zero' : t.alert ? ' is-alert' : '')}>{t.n}</span>
                 <span className="todo__label">{t.label}</span>
