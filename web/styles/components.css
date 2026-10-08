@@ -2,6 +2,8 @@
 .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .seg--w420 { width: 420px; max-width: 100%; }
 .seg--w320 { width: 320px; max-width: 100%; }
+.seg--w300 { width: 300px; max-width: 100%; }
+.seg__opt .seg__n { margin-left: 4px; }
 .seg__opt--sm { height: 36px; padding: 0 12px; gap: 4px; }
 .seg__n { font-weight: 600; color: var(--sub2); }
 .search-box {
