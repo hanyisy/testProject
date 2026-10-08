@@ -211,6 +211,54 @@ ${sec('6. 그 밖의 페이지 종류', [L('지역 허브', '/p/hangyeol/춘천'
   /* 저장소 첫 주소(https://hanyisy.github.io/testProject/)는 바로 랜딩으로 */
   fs.writeFileSync(path.join(ROOT, 'index.html'), `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>현장로그</title><meta name="robots" content="noindex, nofollow"><meta http-equiv="refresh" content="0; url=${BASE}/landing/"><link rel="canonical" href="${BASE}/landing/"></head><body><a href="${BASE}/landing/">현장로그 랜딩으로 이동</a> · <a href="${BASE}/">미리보기 목차</a></body></html>\n`);
 
+  /* 컨펌용 링크 문서(docs/confirm-links.md) — 깃허브 페이지 주소로만, 저장한 화면 기준 */
+  const SITE = 'https://hanyisy.github.io' + BASE;
+  const U = (u) => { const k = normalize(u); return pages.has(k) ? `${SITE}${enc(pages.get(k))}/` : null; };
+  const row = (label, u, note = '') => { const url = U(u); return url ? `| ${label} | [${decodeURI(url.replace(SITE, ''))}](${url})${note ? ` · ${note}` : ''} |` : null; };
+  const table = (rows) => ['| 화면 | 주소 |', '|---|---|', ...rows.filter(Boolean)].join('\n');
+  const md = `# 컨펌용 페이지 링크
+
+모두 더미 데이터예요. 깃허브 페이지에서 바로 열려요(서버 없이).
+화면 · 화면 사이 링크는 되지만 **버튼 · 저장 · 폼 보내기는 동작하지 않아요**(누르면 "서버가 필요해요" 안내).
+계정 정보는 [demo-accounts.md](demo-accounts.md) · 사진은 확인용 스톡 사진이라 운영 전에 실제 현장 사진으로 바꿔야 해요.
+
+- **첫 화면 = 랜딩:** https://hanyisy.github.io/testProject/
+- **미리보기 목차:** ${SITE}/
+
+## 1. 랜딩 (가입 문의)
+${table([`| 랜딩 | [/landing/](${SITE}/landing/) |`, `| 접수 완료 | [/landing/done.html](${SITE}/landing/done.html) |`, `| 개인정보처리방침 | [/landing/privacy.html](${SITE}/landing/privacy.html) |`, `| 이용약관 | [/landing/terms.html](${SITE}/landing/terms.html) |`, row('로그인 화면', '/login')])}
+
+## 2. 본사 어드민 (최고 관리자 박서준으로 본 화면)
+${table([row('대시보드', '/admin'), row('가입 문의', '/admin/leads'), firstOf('/admin/leads') && row('가입 문의 상세', firstOf('/admin/leads')),
+    row('파트너 목록', '/admin/partners'), firstOf('/admin/partners') && row('파트너 상세', firstOf('/admin/partners'), '결제 · 도메인 · 기능 · 양산 범위 탭'), row('파트너 추가', '/admin/partners/new'),
+    row('페이지 생성', '/admin/generate', '위 "생성 기록"에서 지난 생성 열기'), row('업종 템플릿', '/admin/templates'), row('요금제', '/admin/plans'), row('발행 · 색인', '/admin/indexing'),
+    row('검수', '/admin/review'), firstOf('/admin/review') && row('검수 묶음 상세', firstOf('/admin/review')), row('작업 로그', '/admin/jobs'), row('문의 · 정산', '/admin/billing'), row('대행 작업', '/admin/agency'),
+    row('설정', '/admin/settings'), row('랜딩 관리', '/admin/settings/landing'), row('직원 계정', '/admin/staff'), row('직원 추가', '/admin/staff/new'), row('내 계정', '/admin/me')])}
+
+## 3. 파트너 관리자 (한결철거로 본 화면)
+${table([row('홈', '/partner'), row('현장 발행', '/partner/sites'), row('사진 추가', '/partner/photos'), row('검색 노출', '/partner/search'), row('만들고 있는 페이지', '/partner/making'),
+    row('문의', '/partner/inquiries'), row('문의 · 결과 입력 필요', '/partner/inquiries?tab=결과 입력 필요&period=all'), firstOf('/partner/inquiries') && row('문의 자세히', firstOf('/partner/inquiries')),
+    row('블로그', '/partner/blog'), row('결제 내역', '/partner/billing'), row('설정 (최근 알림)', '/partner/settings')])}
+
+## 4. 업체 공개 사이트 (검수 중 페이지는 위에 "미리보기 · 시안 X" 띠)
+${table([row('한결철거 홈 (철거)', '/p/hangyeol'), row('맑은집클린 홈 (입주청소)', '/p/malgeunjip'), row('단정인테리어 홈 (인테리어)', '/p/danjeong'), row('온마루 홈 (준비 중 · 미리보기)', '/p/onmaru')])}
+
+### 지역 × 작업 페이지 — 시안 A~F
+${table([row('A 사진 중심형', '/p/danjeong/성남/수내동-아파트인테리어'), row('B 현장 기록형', '/p/danjeong/성남/서현동-아파트인테리어'), row('C 질문 답변형', '/p/hangyeol/원주/단계동-학원철거'),
+    row('D 비용 안내형', '/p/hangyeol/춘천/석사동-학원철거'), row('E 지도 중심형', '/p/malgeunjip/강남/역삼동-오피스텔입주청소'), row('F 후기 인용형', '/p/malgeunjip/서초/서초동-오피스텔입주청소'),
+    row('발행된 지역 페이지', '/p/hangyeol/춘천/퇴계동-상가철거')])}
+
+### 그 밖의 페이지 종류
+${table([row('지역 허브', '/p/hangyeol/춘천'), row('역 주변', '/p/hangyeol/역/남춘천역'), row('업종 가이드', '/p/hangyeol/가이드/철거-비용-계산하는-법'), row('질문', '/p/hangyeol/질문/학원-철거-기간'),
+    row('문의', '/p/hangyeol/문의'), row('문의 접수 완료', '/p/hangyeol/contact/done'), row('개인정보처리방침', '/p/hangyeol/개인정보처리방침')])}
+
+## 다시 만들기 (화면을 고친 뒤)
+1. 개발 서버 켜기: \`cd web && npm run dev\`
+2. 저장소 루트에서 \`node tools/snapshot.mjs\` → \`preview/\` · 첫 화면 \`index.html\` · 이 문서가 새로 생김
+3. 커밋 · 푸시 → 1~2분 뒤 깃허브 페이지에 반영
+`;
+  fs.writeFileSync(path.join(ROOT, 'docs', 'confirm-links.md'), md);
+
   fs.writeFileSync(path.join(OUT, '.saved.json'), JSON.stringify({ at: new Date().toISOString(), pages: [...pages.keys()] }, null, 1));
   console.log('저장', pages.size, '화면 ·', assets.size, '파일 →', OUT);
 }

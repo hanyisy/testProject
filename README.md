@@ -11,7 +11,7 @@
 ```
 cd web
 npm install
-npm run dev          # 어드민 · 파트너: http://localhost:3000/login · 랜딩: http://localhost:3000/landing/
+npm run dev          # 개발 서버(내 컴퓨터에서만) — 공유는 깃허브 페이지 주소로: https://hanyisy.github.io/testProject/
 npm run db:reset     # 시안 더미 데이터로 처음 상태 되돌리기 (개발 서버를 끄고)
 npm run demo:photos  # 업체 공개 사이트 데모 사진 받기 (Unsplash 무료 스톡 61장 · 약 11MB · web/.data, git 제외)
 ```
