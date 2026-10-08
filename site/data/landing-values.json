@@ -1,0 +1,14 @@
+{
+  "industries": null,
+  "pages": null,
+  "monthlyPages": null,
+  "fixDays": null,
+  "indexDays": null,
+  "business": {
+    "ceo": "",
+    "bizNo": "",
+    "address": "",
+    "email": "",
+    "phone": ""
+  }
+}

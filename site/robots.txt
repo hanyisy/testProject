@@ -1,0 +1,4 @@
+# 현장로그 — 임시 주소(도메인 연결 전)용: 전부 색인 제외
+# 도메인을 연결하면 이 파일을 robots.production.txt 내용으로 바꿉니다. (README "도메인 연결할 때" 참고)
+User-agent: *
+Disallow: /

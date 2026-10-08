@@ -1,0 +1,122 @@
+/* 업체 공개 사이트 공통 — design/한결철거 공개 사이트.dc.html 의 색·머리·바닥·안내 블록을 그대로 옮김
+ * 업체마다 바뀌는 대표 색은 --brand 하나 (body style 또는 JS로 지정) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+:root {
+  --hg: #2F6B57; --mg: #2E77B8;
+  --ink: #1F1D1A; --text2: #45413B; --sub: #6F6A62; --sub2: #8C877E;
+  --line: #E6E2DA; --line2: #EFECE6; --paper: #FAF8F4; --card: #FFFFFF; --soft: #F3F0EA;
+  --ph1: #E2DED6; --ph2: #EAE7E0;
+  --brand: var(--ink);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif;
+  -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word;
+  min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+a:hover { color: inherit; }
+h1, h2, p { margin: 0; }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.ps-hidden { display: none !important; }
+
+.ps-wrap { width: 100%; padding: 0 20px; }
+@media (min-width: 1024px) { .ps-wrap { max-width: 1120px; margin: 0 auto; padding: 0; } }
+
+/* 머리 */
+.ps-head { background: var(--paper); border-bottom: 1px solid var(--line); }
+.ps-head__in { height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 12px 0 16px; }
+.ps-mark {
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 9px; background: var(--brand); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900;
+}
+.ps-name { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+.ps-area { display: none; font-size: 14px; color: var(--sub); margin-left: 4px; }
+.ps-tel {
+  margin-left: auto; height: 40px; padding: 0 14px; border-radius: 10px; border: 1.5px solid var(--brand); color: var(--brand);
+  display: flex; align-items: center; font-size: 15px; font-weight: 800; white-space: nowrap;
+}
+.ps-tel:hover { color: var(--brand); }
+.ps-tel__num { display: none; }
+@media (min-width: 1024px) {
+  .ps-head__in { max-width: 1120px; margin: 0 auto; height: 76px; padding: 0; gap: 12px; }
+  .ps-mark { width: 36px; height: 36px; font-size: 18px; }
+  .ps-name { font-size: 20px; }
+  .ps-area { display: inline; }
+  .ps-tel { height: 44px; padding: 0 16px; font-size: 16px; }
+  .ps-tel__label { display: none; }
+  .ps-tel__num { display: inline; }
+}
+
+/* 경로 · 제목 */
+.ps-crumb { padding: 14px 20px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 14px; color: var(--sub); }
+.ps-crumb a { color: var(--sub); }
+.ps-crumb span[aria-hidden] { color: var(--sub2); }
+.ps-crumb strong { color: var(--ink); font-weight: 700; }
+.ps-title { padding: 20px 20px 0; display: flex; flex-direction: column; gap: 10px; }
+.ps-title h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; }
+.ps-title p { font-size: 17px; line-height: 1.6; color: var(--text2); }
+.ps-done-icon {
+  width: 56px; height: 56px; border-radius: 28px; background: var(--brand); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900;
+}
+.ps-done-icon--mute { background: var(--soft); color: var(--sub); border: 1px solid var(--line); }
+@media (min-width: 1024px) {
+  .ps-crumb, .ps-title { padding-left: 0; padding-right: 0; }
+  .ps-crumb { padding-top: 24px; }
+  .ps-title { padding-top: 28px; }
+  .ps-title h1 { font-size: 44px; }
+  .ps-title p { font-size: 19px; max-width: 640px; }
+}
+
+/* 섹션 · 안내 블록 */
+.ps-sec { padding: 36px 20px; display: flex; flex-direction: column; gap: 20px; }
+.ps-sec h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.3; }
+.ps-steps { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.ps-step { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: flex; gap: 14px; }
+.ps-step__no {
+  width: 30px; height: 30px; flex-shrink: 0; border-radius: 15px; background: var(--brand); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 800;
+}
+.ps-step__txt { display: flex; flex-direction: column; gap: 4px; }
+.ps-step__txt strong { font-size: 17px; font-weight: 800; line-height: 1.4; }
+.ps-step__txt span { font-size: 15px; color: var(--sub); }
+.ps-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.ps-btn {
+  height: 54px; padding: 0 22px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; white-space: nowrap; flex: 1 1 160px;
+}
+.ps-btn--fill { background: var(--brand); color: #fff; }
+.ps-btn--fill:hover { color: #fff; filter: brightness(1.08); }
+.ps-btn--line { border: 1.5px solid var(--ink); }
+@media (min-width: 1024px) {
+  .ps-sec { padding: 56px 0; }
+  .ps-sec h2 { font-size: 28px; }
+  .ps-steps { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .ps-btn { flex: 0 0 auto; }
+}
+
+/* 바닥 */
+.ps-foot { margin-top: auto; background: var(--soft); border-top: 1px solid var(--line); padding: 28px 20px; }
+.ps-foot__in { display: flex; flex-direction: column; gap: 12px; }
+.ps-foot__brand { display: flex; align-items: center; gap: 10px; }
+.ps-foot__brand .ps-mark { width: 28px; height: 28px; font-size: 14px; }
+.ps-foot__brand strong { font-size: 17px; font-weight: 800; }
+.ps-foot__info { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--text2); line-height: 1.6; }
+.ps-foot__links { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; }
+.ps-foot__links a { font-weight: 800; }
+.ps-foot__links span { color: var(--sub); }
+@media (min-width: 1024px) {
+  .ps-foot { padding: 40px 0; }
+  .ps-foot__in { max-width: 1120px; margin: 0 auto; }
+  .ps-foot__info { flex-direction: row; flex-wrap: wrap; gap: 4px 20px; }
+}
+
+/* 비공개 전환 안내 */
+.ps-closed { flex: 1; display: flex; align-items: center; padding: 48px 0; }
+.ps-closed .ps-title { padding-top: 0; }
+@media (min-width: 1024px) { .ps-closed .ps-title { padding: 0; } }

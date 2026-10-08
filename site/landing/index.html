@@ -8,8 +8,13 @@
 <meta property="og:title" content="현장로그 · 사장님이 한 현장이 검색에 남습니다">
 <meta property="og:description" content="현장 사진을 올리면 현장마다 검색 페이지가 생기고, 그 페이지로 문의가 들어와요.">
 <meta property="og:type" content="website">
+<!-- 임시 주소(도메인 연결 전)는 색인 제외. 도메인을 연결할 때 지웁니다 -->
+<meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/components.css">
 <link rel="stylesheet" href="css/landing.css">
+<script src="js/config.js" defer></script>
+<script src="js/data.js" defer></script>
 <script src="js/landing.js" defer></script>
 </head>
 <body>
@@ -75,9 +80,12 @@
           </div>
         </div>
 
-        <form id="form" class="quick-form" data-lead-form novalidate>
+        <form id="form" class="quick-form" method="post" data-lead-form>
+          <input type="hidden" name="form_id" value="hero">
+          <input type="hidden" name="request_type" value="new">
           <h2 class="quick-form__title">가입 문의</h2>
           <p class="quick-form__desc">네 가지만 남겨 주세요. 영업일 기준 1일 안에 연락드려요.</p>
+          <p class="form-mode" data-form-mode hidden><span class="st st--warn">대기 신청</span><span data-form-mode-text>강원 춘천 · 철거</span></p>
           <label class="field">
             <span class="field__label">상호</span>
             <input name="company" placeholder="예) 한결철거" required autocomplete="organization">
@@ -92,14 +100,16 @@
           </label>
           <label class="field">
             <span class="field__label">지역</span>
-            <input name="region" placeholder="예) 인천 부평">
+            <input name="region" placeholder="예) 인천 부평" autocomplete="address-level2">
           </label>
-          <label class="agree agree--sm">
-            <input type="checkbox" name="agree" class="sr-only" data-agree>
-            <span class="agree__box" aria-hidden="true"></span>
-            <span>개인정보 수집·이용에 동의해요</span>
-            <a href="#privacy" class="agree__view">보기</a>
-          </label>
+          <div class="agree-row">
+            <label class="agree agree--sm">
+              <input type="checkbox" name="agree" value="y" class="sr-only" required>
+              <span class="agree__box" aria-hidden="true"></span>
+              <span>개인정보 수집·이용에 동의해요</span>
+            </label>
+            <a href="privacy.html#consent" class="agree__view" data-consent-open>보기</a>
+          </div>
           <button type="submit" class="btn btn--primary btn--block quick-form__submit" disabled>가입 문의 남기기</button>
         </form>
 
@@ -133,12 +143,12 @@
   <section class="stats" aria-label="현장로그 숫자">
     <div class="stats__grid wrap">
       <div class="stat">
-        <span class="stat__num"><span class="blank blank--light" style="--w:70px;--wd:90px"></span><span class="stat__unit">개</span></span>
-        <span class="stat__label">운영 업종 <span class="todo-chip">실제 값 입력</span></span>
+        <span class="stat__num"><span class="blank blank--light" style="--w:70px;--wd:90px" data-val="industries"></span><span class="stat__unit">개</span></span>
+        <span class="stat__label">운영 업종 <span class="todo-chip" data-val-todo="industries">실제 값 입력</span></span>
       </div>
       <div class="stat">
-        <span class="stat__num"><span class="blank blank--light" style="--w:110px;--wd:130px"></span><span class="stat__unit">건</span></span>
-        <span class="stat__label">제작한 페이지 <span class="todo-chip">실제 값 입력</span></span>
+        <span class="stat__num"><span class="blank blank--light" style="--w:110px;--wd:130px" data-val="pages"></span><span class="stat__unit">건</span></span>
+        <span class="stat__label">제작한 페이지 <span class="todo-chip" data-val-todo="pages">실제 값 입력</span></span>
       </div>
       <div class="stat">
         <span class="stat__num">1<span class="stat__unit stat__unit--dim">건</span><span class="stat__arrow">→</span>4<span class="stat__unit stat__unit--dim">장</span></span>
@@ -287,6 +297,18 @@
     </div>
   </section>
 
+  <!-- 6-1. 실제 검색 화면: 캡처가 1건 이상일 때만 보임 (data/captures.json) -->
+  <section class="sec" id="real-search" data-captures hidden>
+    <div class="sec__in wrap">
+      <div class="sec__head">
+        <span class="eyebrow">실제 검색 화면</span>
+        <h2 class="sec__title">실제 검색 결과에<br class="only-m"> 올라가 있는 화면입니다</h2>
+        <p class="sec__lead">파트너 현장 페이지가 검색 결과에 올라간 화면을 그대로 캡처했어요. 검색 결과는 날짜에 따라 달라질 수 있어 캡처한 날짜를 함께 적었어요.</p>
+      </div>
+      <div class="caps" data-cap-grid></div>
+    </div>
+  </section>
+
   <!-- 6. 실측 결과 -->
   <section class="sec">
     <div class="sec__in wrap">
@@ -298,8 +320,8 @@
       <div class="metrics">
         <div class="metric">
           <span class="metric__label">색인까지 걸린 기간</span>
-          <span class="metric__val"><span class="blank" style="--w:90px;--wd:110px"></span></span>
-          <span class="metric__note">운영 데이터가 쌓이면 실제 수치로 바뀝니다</span>
+          <span class="metric__val" data-val-box><span class="blank" style="--w:90px;--wd:110px" data-val="indexDays"></span>일</span>
+          <span class="metric__note" data-val-todo="indexDays">운영 데이터가 쌓이면 실제 수치로 바뀝니다</span>
         </div>
         <div class="metric">
           <span class="metric__label">페이지당 유입</span>
@@ -340,8 +362,8 @@
       </div>
       <div class="promises">
         <div class="promise">
-          <span class="promise__label">월 발행 수 <span class="todo-chip">실제 값 입력</span></span>
-          <span class="promise__val">매달 페이지 <span class="blank" style="--w:48px"></span> 장 이상 발행</span>
+          <span class="promise__label">월 발행 수 <span class="todo-chip" data-val-todo="monthlyPages">실제 값 입력</span></span>
+          <span class="promise__val">매달 페이지 <span class="blank" style="--w:48px" data-val="monthlyPages"></span>장 이상 발행</span>
           <span class="promise__note">요금제별로 계약서에 적어요</span>
         </div>
         <div class="promise">
@@ -350,8 +372,8 @@
           <span class="promise__note">어느 페이지가 색인됐고, 몇 번 들어왔는지</span>
         </div>
         <div class="promise">
-          <span class="promise__label">수정 반영 기한 <span class="todo-chip">실제 값 입력</span></span>
-          <span class="promise__val">요청 후 <span class="blank" style="--w:40px"></span> 영업일 안에 반영</span>
+          <span class="promise__label">수정 반영 기한 <span class="todo-chip" data-val-todo="fixDays">실제 값 입력</span></span>
+          <span class="promise__val">요청 후 <span class="blank" style="--w:40px" data-val="fixDays"></span>영업일 안에 반영</span>
           <span class="promise__note">틀린 정보나 사진 교체 요청</span>
         </div>
       </div>
@@ -389,7 +411,7 @@
           <div class="result result--taken" data-result="taken" hidden>
             <span class="result__icon">!</span>
             <span class="result__txt"><span data-chk-text>강원 춘천 · 철거</span> · 이미 다른 업체가 운영 중이에요</span>
-            <a href="#form-full" class="btn btn--outline-warn btn--md" data-apply>대기 신청</a>
+            <a href="#form-full" class="btn btn--outline-warn btn--md" data-apply="waitlist">대기 신청</a>
           </div>
         </div>
       </div>
@@ -483,23 +505,28 @@
         <h2 class="apply__title">사장님 현장,<br>검색에 남겨 보세요</h2>
         <p class="apply__lead">남겨 주시면 영업일 기준 1일 안에 연락드려요. 상담은 무료예요.</p>
       </div>
-      <form class="apply__form" data-lead-form novalidate>
+      <form class="apply__form" method="post" data-lead-form>
+        <input type="hidden" name="form_id" value="full">
+        <input type="hidden" name="request_type" value="new">
+        <p class="form-mode" data-form-mode hidden><span class="st st--warn">대기 신청</span><span data-form-mode-text>강원 춘천 · 철거</span></p>
         <div class="apply__grid">
           <label class="field"><span class="field__label">상호</span><input name="company" placeholder="예) 한결철거" required autocomplete="organization"></label>
           <label class="field"><span class="field__label">담당자 이름</span><input name="name" placeholder="이름" required autocomplete="name"></label>
           <label class="field"><span class="field__label">연락처</span><input name="phone" placeholder="010-0000-0000" inputmode="tel" required autocomplete="tel"></label>
           <label class="field"><span class="field__label">이메일 (선택)</span><input name="email" type="email" placeholder="답장 받을 이메일" autocomplete="email"></label>
           <label class="field"><span class="field__label">업종</span><span class="select"><select name="industry" data-ind-select></select></span></label>
-          <label class="field"><span class="field__label">지역</span><input name="region" placeholder="예) 강원 춘천"></label>
-          <label class="field field--full"><span class="field__label">현재 홈페이지 (선택)</span><input name="homepage" placeholder="주소가 있으면 적어 주세요" inputmode="url"></label>
+          <label class="field"><span class="field__label">지역</span><input name="region" placeholder="예) 강원 춘천" autocomplete="address-level2"></label>
+          <label class="field field--full"><span class="field__label">현재 홈페이지 (선택)</span><input name="homepage" placeholder="주소가 있으면 적어 주세요" inputmode="url" autocomplete="url"></label>
         </div>
         <label class="field"><span class="field__label">문의 내용 (선택)</span><textarea name="message" placeholder="궁금한 점을 적어 주세요"></textarea></label>
-        <label class="agree">
-          <input type="checkbox" name="agree" class="sr-only" data-agree>
-          <span class="agree__box" aria-hidden="true"></span>
-          <span>개인정보 수집·이용에 동의해요</span>
-          <a href="#privacy" class="agree__view">보기</a>
-        </label>
+        <div class="agree-row">
+          <label class="agree">
+            <input type="checkbox" name="agree" value="y" class="sr-only" required>
+            <span class="agree__box" aria-hidden="true"></span>
+            <span>개인정보 수집·이용에 동의해요</span>
+          </label>
+          <a href="privacy.html#consent" class="agree__view" data-consent-open>보기</a>
+        </div>
         <button type="submit" class="btn btn--primary btn--block btn--submit" disabled>가입 문의 남기기</button>
       </form>
     </div>
@@ -512,22 +539,57 @@
     <span class="footer__logo">현장로그</span>
     <div class="footer__info">
       <span>상호 (주)현장로그</span>
-      <span class="footer__item">대표자 <span class="blank blank--footer" style="--w:70px"></span><span class="todo-chip">실제 값 입력</span></span>
-      <span class="footer__item">사업자등록번호 <span class="blank blank--footer" style="--w:110px"></span><span class="todo-chip">실제 값 입력</span></span>
-      <span class="footer__item">주소 <span class="blank blank--footer" style="--w:160px"></span><span class="todo-chip">실제 값 입력</span></span>
-      <span class="footer__item">이메일 <span class="blank blank--footer" style="--w:140px"></span><span class="todo-chip">실제 값 입력</span></span>
+      <span class="footer__item">대표자 <span class="blank blank--footer" style="--w:70px" data-val="business.ceo"></span><span class="todo-chip" data-val-todo="business.ceo">실제 값 입력</span></span>
+      <span class="footer__item">사업자등록번호 <span class="blank blank--footer" style="--w:110px" data-val="business.bizNo"></span><span class="todo-chip" data-val-todo="business.bizNo">실제 값 입력</span></span>
+      <span class="footer__item">주소 <span class="blank blank--footer" style="--w:160px" data-val="business.address"></span><span class="todo-chip" data-val-todo="business.address">실제 값 입력</span></span>
+      <span class="footer__item">이메일 <span class="blank blank--footer" style="--w:140px" data-val="business.email"></span><span class="todo-chip" data-val-todo="business.email">실제 값 입력</span></span>
+      <span class="footer__item">전화 <span class="blank blank--footer" style="--w:110px" data-val="business.phone"></span><span class="todo-chip" data-val-todo="business.phone">실제 값 입력</span></span>
     </div>
     <div class="footer__links">
-      <a href="#privacy" class="footer__privacy" id="privacy">개인정보처리방침</a>
-      <a href="#terms">이용약관</a>
+      <a href="privacy.html" class="footer__privacy">개인정보처리방침</a>
+      <a href="terms.html">이용약관</a>
     </div>
   </div>
 </footer>
 
+<!-- 개인정보 수집·이용 동의 보기 (데스크톱: 오른쪽, 모바일: 아래에서 열림) -->
+<dialog class="sheet sheet--side" data-consent aria-labelledby="consent-title">
+  <div class="sheet__in">
+    <div class="sheet__head">
+      <h2 class="sheet__title" id="consent-title">개인정보 수집·이용 동의</h2>
+      <button type="button" class="sheet__close" data-consent-close aria-label="닫기">&times;</button>
+    </div>
+    <dl class="consent">
+      <div class="consent__row"><dt>수집 항목 <span class="todo-chip">실제 내용 입력</span></dt><dd><span class="blank" style="--w:200px"></span></dd></div>
+      <div class="consent__row"><dt>수집·이용 목적 <span class="todo-chip">실제 내용 입력</span></dt><dd><span class="blank" style="--w:200px"></span></dd></div>
+      <div class="consent__row"><dt>보관 기간 <span class="todo-chip">실제 내용 입력</span></dt><dd><span class="blank" style="--w:140px"></span></dd></div>
+    </dl>
+    <p class="consent__note">동의하지 않을 수 있어요. 다만 동의하지 않으면 가입 문의를 받을 수 없어요. <span class="todo-chip">실제 내용 입력</span></p>
+    <div class="sheet__foot">
+      <a href="privacy.html" class="consent__link">개인정보처리방침 전체 보기</a>
+      <button type="button" class="btn btn--primary-flat btn--md" data-consent-close>확인</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 실제 검색 화면 크게 보기 -->
+<dialog class="sheet sheet--wide" data-cap-view aria-label="검색 화면 캡처 크게 보기">
+  <div class="sheet__in">
+    <div class="sheet__head">
+      <div class="cap-view__txt">
+        <strong class="sheet__title" data-cap-view-q></strong>
+        <span class="cap-view__meta" data-cap-view-meta></span>
+      </div>
+      <button type="button" class="sheet__close" data-cap-view-close aria-label="닫기">&times;</button>
+    </div>
+    <div class="cap-view__img"><img data-cap-view-img alt=""></div>
+  </div>
+</dialog>
+
 <!-- 모바일 하단 고정 바 -->
 <div class="mbar only-m">
   <a href="#" class="btn btn--outline mbar__call" data-tel>전화 상담</a>
-  <a href="#form-full" class="btn btn--primary mbar__apply">가입 문의</a>
+  <a href="#form-full" class="btn btn--primary mbar__apply" data-apply>가입 문의</a>
 </div>
 
 </body>

@@ -1,12 +1,9 @@
-/* 현장로그 가입 문의 랜딩 */
+/* 현장로그 가입 문의 랜딩 — config.js, data.js 다음에 불러옵니다. */
 (function () {
   'use strict';
 
-  /* ---- 운영 설정 (실제 값 입력) ---- */
-  var CONFIG = {
-    phone: '',          // 전화 상담 번호. 예) '1588-0000' — 비어 있으면 전체 문의 폼으로 이동
-    formEndpoint: ''    // 문의를 보낼 API 주소. 비어 있으면 전송 없이 접수 완료 화면으로만 이동(데모)
-  };
+  var CONFIG = window.HL_CONFIG || { data: {} };
+  var HL = window.HL || {};
 
   /* ---- 업종별 예시 ---- */
   var IND = {
@@ -22,10 +19,11 @@
   var REGS = ['강원 춘천', '강원 원주', '강원 홍천', '서울 서초', '서울 강남', '서울 송파', '경기 수원', '경기 용인', '인천 부평'];
   var TAKEN = { '철거': ['강원 춘천', '강원 원주', '강원 홍천'], '입주청소': ['서울 서초', '서울 강남'], '바닥 시공': ['경기 수원', '경기 용인'] };
 
-  var state = { ind: '철거', reg: '강원 춘천' };
+  var state = { ind: '철거', reg: '강원 춘천', waitlist: false };
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var isDesktop = function () { return window.matchMedia('(min-width: 1024px)').matches; };
+  var isTaken = function () { return (TAKEN[state.ind] || []).indexOf(state.reg) > -1; };
 
   /* ---- 칩 만들기 ---- */
   function buildChips() {
@@ -64,29 +62,50 @@
     $$('[data-ind-select]').forEach(function (s) { s.value = state.ind; });
 
     var etc = state.ind === '기타';
-    var taken = (TAKEN[state.ind] || []).indexOf(state.reg) > -1;
-    var kind = etc ? 'etc' : taken ? 'taken' : 'ok';
+    var kind = etc ? 'etc' : isTaken() ? 'taken' : 'ok';
     $$('[data-result]').forEach(function (el) { el.hidden = el.dataset.result !== kind; });
     $$('[data-chk-text]').forEach(function (el) { el.textContent = state.reg + ' · ' + state.ind; });
+
+    /* 대기 신청 중에 운영 중이 아닌 조합으로 바꾸면 일반 가입 문의로 돌아감 */
+    if (state.waitlist && (etc || !isTaken())) setWaitlist(false);
+    sortCaptures();
+  }
+
+  /* ---- 대기 신청: 폼에 업종·지역을 채우고 request_type=waitlist로 보냄 ---- */
+  function setWaitlist(on) {
+    state.waitlist = on;
+    $$('[data-lead-form]').forEach(function (form) {
+      form.elements.request_type.value = on ? 'waitlist' : 'new';
+      if (on) form.elements.region.value = state.reg;
+      var mode = $('[data-form-mode]', form);
+      mode.hidden = !on;
+      $('[data-form-mode-text]', mode).textContent = state.reg + ' · ' + state.ind;
+      $('button[type=submit]', form).textContent = on ? '대기 신청 남기기' : '가입 문의 남기기';
+    });
   }
 
   /* ---- 가입 문의 버튼: 데스크톱은 첫 화면 폼, 모바일은 아래 전체 폼 ---- */
   function bindApplyLinks() {
     $$('[data-apply]').forEach(function (a) {
       a.addEventListener('click', function (e) {
+        setWaitlist(a.dataset.apply === 'waitlist');
         var target = isDesktop() ? $('#form') : $('#form-full');
         if (!target) return;
         e.preventDefault();
         target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
-        var first = target.querySelector('input:not([type=checkbox])');
+        var first = target.querySelector('input:not([type=checkbox]):not([type=hidden])');
         if (first) setTimeout(function () { first.focus({ preventScroll: true }); }, 400);
       });
     });
-    var tel = $('[data-tel]');
-    if (tel) tel.setAttribute('href', CONFIG.phone ? 'tel:' + CONFIG.phone.replace(/[^0-9+]/g, '') : '#form-full');
+    var setTel = function (num) {
+      var tel = $('[data-tel]');
+      if (tel) tel.setAttribute('href', num ? 'tel:' + String(num).replace(/[^0-9+]/g, '') : '#form-full');
+    };
+    setTel(CONFIG.phone);
+    if (!CONFIG.phone && HL.values) HL.values.then(function (v) { setTel(v.business && v.business.phone); });
   }
 
-  /* ---- 폼: 동의해야 버튼 켜짐, 보내면 접수 완료로 ---- */
+  /* ---- 폼: 실제 <form method="post">. 전송은 브라우저 기본 동작 그대로 ---- */
   function maskPhone(v) {
     var d = String(v || '').replace(/\D/g, '');
     if (d.length < 8) return v || '';
@@ -95,39 +114,103 @@
 
   function bindForms() {
     $$('[data-lead-form]').forEach(function (form) {
-      var agree = form.querySelector('[data-agree]');
-      var btn = form.querySelector('button[type=submit]');
+      form.action = CONFIG.leadEndpoint;
+      var agree = form.elements.agree;
+      var btn = $('button[type=submit]', form);
       var sync = function () { btn.disabled = !agree.checked; };
       agree.addEventListener('change', sync); sync();
 
-      form.addEventListener('input', function (e) { if (e.target.getAttribute('aria-invalid')) e.target.removeAttribute('aria-invalid'); });
-
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (!agree.checked) return;
-        var bad = $$('[required]', form).filter(function (el) { return !el.value.trim(); });
-        bad.forEach(function (el) { el.setAttribute('aria-invalid', 'true'); });
-        if (bad.length) { bad[0].focus(); return; }
-
-        var data = {};
-        new FormData(form).forEach(function (v, k) { data[k] = typeof v === 'string' ? v.trim() : v; });
-        data.industry = data.industry || state.ind;
-
-        var summary = [data.company, IND_LABEL(data.industry), data.region].filter(Boolean).join(' · ') +
-          (data.phone ? ' / ' + maskPhone(data.phone) : '');
-
-        var go = function () {
-          try { sessionStorage.setItem('hl-lead-summary', summary); } catch (err) { /* 저장 불가 시 예시 문구 사용 */ }
-          location.href = 'done.html';
-        };
-
-        if (!CONFIG.formEndpoint) { go(); return; }
-        btn.disabled = true;
-        fetch(CONFIG.formEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-          .then(function (r) { if (!r.ok) throw new Error(r.status); go(); })
-          .catch(function () { btn.disabled = false; alert('보내지 못했어요. 잠시 후 다시 시도해 주세요.'); });
+      /* 막지 않고, 접수 완료 화면에 보여 줄 요약만 남김 */
+      form.addEventListener('submit', function () {
+        var f = form.elements;
+        var summary = (f.request_type.value === 'waitlist' ? '대기 신청 · ' : '') +
+          [f.company.value.trim(), IND_LABEL(f.industry.value), f.region.value.trim()].filter(Boolean).join(' · ') +
+          (f.phone.value ? ' / ' + maskPhone(f.phone.value) : '');
+        try { sessionStorage.setItem('hl-lead-summary', summary); } catch (err) { /* 저장 불가 시 완료 화면 기본 문구 */ }
       });
     });
+  }
+
+  /* ---- 개인정보 수집·이용 동의 "보기" 창 ---- */
+  function bindConsent() {
+    var dlg = $('[data-consent]');
+    if (!dlg) return;
+    $$('[data-consent-open]').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (typeof dlg.showModal === 'function') dlg.showModal(); else location.href = 'privacy.html';
+      });
+    });
+    $$('[data-consent-close]', dlg).forEach(function (b) { b.addEventListener('click', function () { dlg.close(); }); });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+  }
+
+  /* ---- 실제 검색 화면 캡처 ---- */
+  var captures = [];
+
+  function fmtDate(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || '');
+    return m ? m[1] + '. ' + Number(m[2]) + '. ' + Number(m[3]) + '.' : '';
+  }
+
+  function capCard(c) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'cap'; b.dataset.industry = c.industry;
+    b.innerHTML =
+      '<span class="cap__img"><img loading="lazy" alt=""></span>' +
+      '<span class="cap__body"><span class="cap__q"></span>' +
+      '<span class="cap__meta"><span class="st st--surf cap__ind"></span><span class="cap__date"></span></span></span>';
+    var img = $('img', b);
+    img.src = c.src;
+    img.alt = '“' + c.query + '” 검색 결과 캡처';
+    $('.cap__q', b).textContent = '“' + c.query + '”';
+    $('.cap__ind', b).textContent = c.industry;
+    $('.cap__date', b).textContent = fmtDate(c.capturedAt) + ' 캡처';
+    b.addEventListener('click', function () { openCapture(c); });
+    return b;
+  }
+
+  /* 고른 업종이 앞, 그 안에서는 order 순 */
+  function sortCaptures() {
+    var grid = $('[data-cap-grid]');
+    if (!grid || !captures.length) return;
+    var list = captures.slice().sort(function (a, b) {
+      var sa = a.industry === state.ind ? 0 : 1, sb = b.industry === state.ind ? 0 : 1;
+      return sa - sb || a.order - b.order;
+    });
+    list.forEach(function (c) { grid.appendChild(c.el); });
+  }
+
+  function openCapture(c) {
+    var dlg = $('[data-cap-view]');
+    $('[data-cap-view-img]', dlg).src = c.src;
+    $('[data-cap-view-img]', dlg).alt = '“' + c.query + '” 검색 결과 캡처';
+    $('[data-cap-view-q]', dlg).textContent = '“' + c.query + '”';
+    $('[data-cap-view-meta]', dlg).textContent = c.industry + ' · ' + fmtDate(c.capturedAt) + ' 캡처';
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else window.open(c.src, '_blank', 'noopener');
+  }
+
+  function initCaptures() {
+    var sec = $('[data-captures]');
+    if (!sec || !HL.getJSON) return;
+    var dlg = $('[data-cap-view]');
+    $$('[data-cap-view-close]', dlg).forEach(function (b) { b.addEventListener('click', function () { dlg.close(); }); });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+
+    HL.getJSON(CONFIG.data && CONFIG.data.captures).then(function (res) {
+      var items = Array.isArray(res.data) ? res.data : (res.data && res.data.items) || [];
+      captures = items
+        .filter(function (c) { return c && c.visible === true && c.image && c.query; })
+        .map(function (c, i) {
+          var o = { query: String(c.query), industry: String(c.industry || ''), capturedAt: c.capturedAt,
+            order: typeof c.order === 'number' ? c.order : i, src: new URL(c.image, res.base).href };
+          o.el = capCard(o);
+          return o;
+        });
+      if (!captures.length) return;          /* 0건이면 섹션은 계속 숨김 */
+      sortCaptures();
+      sec.hidden = false;
+    }).catch(function () { /* 못 읽으면 숨김 그대로 */ });
   }
 
   /* ---- 흐르는 검색어 띠: 한 벌 더 복제해 끊김 없이 ---- */
@@ -143,6 +226,8 @@
     render();
     bindApplyLinks();
     bindForms();
+    bindConsent();
+    initCaptures();
     initMarquee();
   });
 })();

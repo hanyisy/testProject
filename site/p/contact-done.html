@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>문의가 접수됐어요</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- 업체 공개 사이트 /contact 접수 완료. 업체 정보는 /data/partner-sites.json 에서 주소의 slug로 찾음 (서버가 생기면 서버가 채워서 내려도 됨) -->
+<link rel="stylesheet" href="/p/css/partner-site.css">
+<script src="/p/js/partner-site.js" defer></script>
+</head>
+<body data-ps>
+
+<header class="ps-head">
+  <div class="ps-head__in">
+    <span class="ps-mark" data-ps="mark" aria-hidden="true"></span>
+    <a href="../../" class="ps-name" data-ps="name"></a>
+    <span class="ps-area" data-ps="area"></span>
+    <a href="#" class="ps-tel" data-ps-tel><span class="ps-tel__label">전화</span><span class="ps-tel__num" data-ps="phone"></span></a>
+  </div>
+</header>
+
+<main>
+  <div class="ps-wrap">
+    <nav class="ps-crumb" aria-label="현재 위치">
+      <a href="../../">홈</a><span aria-hidden="true">›</span>
+      <a href="../">문의</a><span aria-hidden="true">›</span>
+      <strong>접수 완료</strong>
+    </nav>
+    <div class="ps-title">
+      <span class="ps-done-icon" aria-hidden="true">&#10003;</span>
+      <h1>문의가 접수됐어요</h1>
+      <p><span data-ps="name"></span>에서 하루 안에 연락드려요. 급하시면 전화로 물어봐 주세요.</p>
+    </div>
+  </div>
+
+  <section class="ps-sec ps-wrap" aria-labelledby="ps-next">
+    <h2 id="ps-next">접수 후 안내</h2>
+    <div class="ps-steps">
+      <div class="ps-step"><span class="ps-step__no">1</span><div class="ps-step__txt"><strong>접수되면 확인 알림톡을 보내드려요</strong><span>남겨 주신 연락처로 바로 보내요</span></div></div>
+      <div class="ps-step"><span class="ps-step__no">2</span><div class="ps-step__txt"><strong>하루 안에 연락드려요</strong><span>작업 중이면 저녁에 연락드릴 수 있어요</span></div></div>
+      <div class="ps-step"><span class="ps-step__no">3</span><div class="ps-step__txt"><strong>사진을 보고 견적을 안내해요</strong><span>필요하면 현장에 직접 가서 확인해요</span></div></div>
+    </div>
+    <div class="ps-btns">
+      <a href="#" class="ps-btn ps-btn--fill" data-ps-tel>전화하기</a>
+      <a href="../../" class="ps-btn ps-btn--line">홈으로</a>
+    </div>
+  </section>
+</main>
+
+<footer class="ps-foot">
+  <div class="ps-foot__in">
+    <div class="ps-foot__brand"><span class="ps-mark" data-ps="mark" aria-hidden="true"></span><strong data-ps="name"></strong></div>
+    <div class="ps-foot__info">
+      <span>상호 <span data-ps="name"></span></span>
+      <span>대표자 <span data-ps="business.ceo"></span></span>
+      <span>사업자등록번호 <span data-ps="business.bizNo"></span></span>
+      <span>주소 <span data-ps="business.address"></span></span>
+      <span>전화 <span data-ps="phone"></span></span>
+    </div>
+    <div class="ps-foot__links"><a href="../../privacy/">개인정보처리방침</a><span>이 사이트의 현장 기록은 <span data-ps="name" data-ps-josa="이가"></span> 직접 작업한 현장이에요</span></div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+# 현장로그 — 도메인 연결 후 robots.txt 로 바꿔 쓸 내용
+# 실제 도메인 입력: 아래 Sitemap 줄의 https://도메인 을 바꿔 주세요
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /landing/done.html
+Disallow: /maintenance.html
+Disallow: /error.html
+
+Sitemap: https://도메인/sitemap.xml
