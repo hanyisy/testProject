@@ -3,6 +3,8 @@ import 'server-only';
 import { and, asc, desc, eq, inArray, ne, sql } from 'drizzle-orm';
 import { getDb, schema as t } from '@/db/client';
 import { getSetting, occupancy, type DemoStats } from './admin';
+import { today } from './config';
+import { rel } from './format';
 
 export const isUuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f-]{36}$/.test(v);
 
@@ -17,21 +19,40 @@ export function regionText(regions: string[]) {
   return groups.map(([k, v]) => (v.length ? `${k} ${v.join('·')}` : k)).join(' · ');
 }
 
+/** 파트너 숫자 — 파트너 화면과 같은 기준으로 DB에서 셈 (어드민 · 파트너가 같은 숫자를 보게)
+ *  발행 페이지 = 손님에게 보이는 페이지 · 이번 달 문의 = 기준일의 달에 들어온 문의(본인 아님 제외) · 새 사진 = 현장에 아직 안 묶인 사진 */
+export async function partnerCounts() {
+  const db = await getDb();
+  const month = (await today()).slice(0, 7);
+  const LIVE_SQL = sql`${t.pages.status} in ('발행됨', '색인 요청', '색인 확인')`;
+  const [pages, inqs, photos, sites] = await Promise.all([
+    db.select({ id: t.pages.partnerId, n: sql<number>`count(*)::int`, indexed: sql<number>`count(*) filter (where ${t.pages.status} = '색인 확인')::int` }).from(t.pages).where(LIVE_SQL).groupBy(t.pages.partnerId),
+    db.select({ id: t.inquiries.partnerId, n: sql<number>`count(*)::int` }).from(t.inquiries)
+      .where(and(ne(t.inquiries.verify, '본인 아님'), sql`to_char(${t.inquiries.receivedAt} at time zone 'Asia/Seoul', 'YYYY-MM') = ${month}`)).groupBy(t.inquiries.partnerId),
+    db.select({ id: t.photos.partnerId, n: sql<number>`count(*) filter (where ${t.photos.siteId} is null)::int` }).from(t.photos).groupBy(t.photos.partnerId),
+    db.select({ id: t.sites.partnerId, n: sql<number>`count(*)::int`, photos: sql<number>`coalesce(sum(${t.sites.photoCount}),0)::int` }).from(t.sites).where(eq(t.sites.status, '발행됨')).groupBy(t.sites.partnerId)
+  ]);
+  return (id: string) => {
+    const pg = pages.find((x) => x.id === id);
+    const st = sites.find((x) => x.id === id);
+    return { pages: pg?.n ?? 0, indexed: pg?.indexed ?? 0, monthInquiries: inqs.find((x) => x.id === id)?.n ?? 0, newPhotos: photos.find((x) => x.id === id)?.n ?? 0, sites: st?.n ?? 0, photos: st?.photos ?? 0 };
+  };
+}
+
 export async function partnerList() {
   const db = await getDb();
-  const [rows, regions, stats] = await Promise.all([
+  const [rows, regions, count] = await Promise.all([
     db.select({ p: t.partners, industry: t.industries.name, plan: t.plans.name })
       .from(t.partners).innerJoin(t.industries, eq(t.industries.id, t.partners.industryId)).innerJoin(t.plans, eq(t.plans.id, t.partners.planId))
       .orderBy(asc(t.partners.createdAt)),
     db.select().from(t.partnerRegions).orderBy(asc(t.partnerRegions.sort)),
-    getSetting<DemoStats | null>('demo_stats', null)
+    partnerCounts()
   ]);
   return rows.map(({ p, industry, plan }) => {
-    const s = stats?.partners[p.name];
-    const pages = s?.pages ?? 0, indexed = s?.indexed ?? 0;
+    const c = count(p.id);
     return {
       ...p, industry, plan, regions: regions.filter((r) => r.partnerId === p.id).map((r) => r.region),
-      pages, indexPct: pages ? Math.round((indexed / pages) * 100) : null, inquiries: p.status === '운영 중' ? s?.inquiries ?? 0 : null
+      pages: c.pages, indexPct: c.pages ? Math.round((c.indexed / c.pages) * 100) : null, inquiries: p.status === '운영 중' ? c.monthInquiries : null
     };
   });
 }
@@ -43,22 +64,20 @@ export async function partnerDetail(id: string) {
     .from(t.partners).innerJoin(t.industries, eq(t.industries.id, t.partners.industryId)).innerJoin(t.plans, eq(t.plans.id, t.partners.planId))
     .where(eq(t.partners.id, id)).limit(1);
   if (!row) return null;
-  const [regions, [features], [account], stats, [photoCount], [siteCount]] = await Promise.all([
+  const [regions, [features], [account], count, day] = await Promise.all([
     db.select().from(t.partnerRegions).where(eq(t.partnerRegions.partnerId, id)).orderBy(asc(t.partnerRegions.sort)),
     db.select().from(t.partnerFeatures).where(eq(t.partnerFeatures.partnerId, id)).limit(1),
     db.select().from(t.users).where(and(eq(t.users.partnerId, id), eq(t.users.kind, 'partner'))).limit(1),
-    getSetting<DemoStats | null>('demo_stats', null),
-    db.select({ n: sql<number>`count(*)::int` }).from(t.photos).where(eq(t.photos.partnerId, id)),
-    db.select({ n: sql<number>`count(*)::int`, photos: sql<number>`coalesce(sum(${t.sites.photoCount}),0)::int` }).from(t.sites).where(eq(t.sites.partnerId, id))
+    partnerCounts(),
+    today()
   ]);
-  const s = stats?.partners[row.p.name] as (DemoStats['partners'][string] & { photos?: number; sites?: number; newPhotos?: number; lastLogin?: string; syncedAgo?: string }) | undefined;
-  const pages = s?.pages ?? 0, indexed = s?.indexed ?? 0;
+  const c = count(id);
   return {
     partner: row.p, industry: row.industry, plan: row.plan, features: features!, account,
     regions: regions.map((r) => r.region),
-    pages, indexPct: pages ? Math.round((indexed / pages) * 100) : null,
-    photos: s?.photos ?? siteCount.photos ?? photoCount.n, sites: s?.sites ?? siteCount.n,
-    newPhotos: s?.newPhotos ?? 0, syncedAgo: s?.syncedAgo ?? null, lastLoginText: s?.lastLogin ?? null
+    pages: c.pages, indexPct: c.pages ? Math.round((c.indexed / c.pages) * 100) : null,
+    photos: c.photos, sites: c.sites,
+    newPhotos: c.newPhotos, syncedAgo: row.p.driveSyncedAt ? rel(row.p.driveSyncedAt, day) : null, lastLoginText: null as string | null
   };
 }
 

@@ -17,6 +17,7 @@ export async function setInquiryStatus(id: string, status: string, amount?: numb
   const [before] = await db.select({ status: t.inquiries.status, amount: t.inquiries.amount }).from(t.inquiries).where(and(eq(t.inquiries.id, id), eq(t.inquiries.partnerId, user.partnerId))).limit(1);
   if (!before) return { ok: false };
   const amt = status === '계약' ? Math.max(0, Math.round(amount ?? 0)) : before.amount;
+  if (status === '계약' && !amt) return { ok: false, error: '계약 금액을 입력해 주세요' };
   await db.update(t.inquiries)
     .set({ status: status as '신규', needsResult: false, ...(status === '계약' ? { amount: amt } : {}) })
     .where(and(eq(t.inquiries.id, id), eq(t.inquiries.partnerId, user.partnerId)));
@@ -24,7 +25,7 @@ export async function setInquiryStatus(id: string, status: string, amount?: numb
     await db.insert(t.inquiryLogs).values({ inquiryId: id, kind: '상태', text: `${before.status} → ${status}${status === '계약' && amt ? ` · ${amt.toLocaleString('ko-KR')}원` : ''}`, userId: user.id });
   }
   /* 지원형 파트너면 이번 달 정산에 반영 */
-  await applyContract(user.partnerId, before, { status, amount: amt });
+  await applyContract(user.partnerId, id, before, { status, amount: amt });
   revalidatePath('/partner', 'layout');
   return { ok: true };
 }

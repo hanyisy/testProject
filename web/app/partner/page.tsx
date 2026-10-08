@@ -5,6 +5,7 @@ import { requirePartner } from '@/lib/auth';
 import { partnerHome } from '@/lib/partner-app';
 import { md, won } from '@/lib/format';
 import { today } from '@/lib/config';
+import { href as siteHref } from '@/lib/site';
 
 export const metadata = { title: '홈' };
 
@@ -59,9 +60,11 @@ export default async function PartnerHome() {
             </div>
           </div>
           <div className="leak__side">
-            <Link href="/partner/inquiries" className="alertlink">
-              <span className="alertlink__i">!</span><span className="alertlink__t">{h.stall.step} 단계에 {h.stall.n}건이 멈춰 있어요</span><span className="alertlink__go">보기 ›</span>
-            </Link>
+            {h.stall.n > 0 && (
+              <Link href={`/partner/inquiries?period=all${h.stall.step === '견적' && h.needs ? '&tab=결과 입력 필요' : ''}`} className="alertlink">
+                <span className="alertlink__i">!</span><span className="alertlink__t">{h.stall.step} 단계에 {h.stall.n}건이 멈춰 있어요</span><span className="alertlink__go">보기 ›</span>
+              </Link>
+            )}
             {h.needs > 0 && <span className="pnote pnote--desk">견적을 보낸 뒤 결과를 입력하지 않은 건이 {h.needs}건 있어요</span>}
           </div>
         </section>
@@ -69,17 +72,19 @@ export default async function PartnerHome() {
         <h2 className="psec">할 일</h2>
         <div className="pgrid pgrid--2">
           <Link href="/partner/sites" className="todo2"><span className="todo2__n">{h.newPhotos}</span><span className="todo2__t">새 사진 {h.newPhotos}장 검토 대기</span><span className="chev">›</span></Link>
-          <Link href="/partner/inquiries" className="todo2"><span className="todo2__n">{h.needs}</span><span className="todo2__t">문의 {h.needs}건 결과 입력 필요</span><span className="chev">›</span></Link>
+          <Link href="/partner/inquiries?tab=결과 입력 필요&period=all" className="todo2"><span className="todo2__n">{h.needs}</span><span className="todo2__t">문의 {h.needs}건 결과 입력 필요</span><span className="chev">›</span></Link>
         </div>
 
-        <div className="psec psec--row"><h2 className="psec">최근 발행 현장</h2><Link href="/partner/search" className="psec__more">전체 ›</Link></div>
+        {/* 최근 발행 현장 — 누르면 내 사이트의 그 현장 기록 · 전체는 검색 노출의 현장 페이지 목록 */}
+        <div className="psec psec--row"><h2 className="psec">최근 발행 현장</h2><Link href="/partner/search?type=현장" className="psec__more">전체 ›</Link></div>
         <div className="sitecards">
           {h.sites.map((s) => (
-            <div key={s.id} className="sitecard">
-              <div className="ph-img">현장 사진</div>
+            <a key={s.id} href={siteHref(h.slug, `현장/${s.id.slice(0, 8)}`)} target="_blank" rel="noopener" className="sitecard">
+              {s.cover ? <img src={s.cover.src} alt={s.cover.alt} className="sitecard__img" loading="lazy" /> : <div className="ph-img">사진 없음</div>}
               <div className="sitecard__body"><span className="sitecard__t">{s.title}</span><span className="sitecard__m">{md(s.workedAt)} · 사진 {s.photoCount}장</span></div>
-            </div>
+            </a>
           ))}
+          {!h.sites.length && <span className="hint">아직 발행한 현장이 없어요 · 현장에서 새 사진을 검토해 발행해 보세요</span>}
         </div>
       </div>
     </>

@@ -28,8 +28,8 @@ export async function seedDemoWorld(db: DB) {
     const plan = plans.find((p) => p.name === n.plan)!;
     const [row] = await db.insert(t.partners).values({
       slug: n.slug, name: n.name, industryId: ind.id, planId: plan.id, status: n.status as '운영 중', ceo: n.ceo, bizRegNo: n.bizRegNo, tel: n.tel, manager: n.manager,
-      mobile: n.mobile, email: n.email, bizName: n.name, taxEmail: n.email, brandColor: n.brandColor, mark: n.mark, payMode: n.payMode as '계좌 입금',
-      startedAt: n.startedAt, address: n.address, driveConnected: true, driveSyncedAt: at('2026-10-07', '09:30')
+      mobile: n.mobile, email: n.email, bizName: n.name, taxRegNo: n.bizRegNo, taxEmail: n.email, brandColor: n.brandColor, mark: n.mark, payMode: n.payMode as '계좌 입금',
+      startedAt: n.startedAt, address: n.address, driveConnected: true, driveFolderUrl: `https://drive.google.com/drive/folders/demo_${n.slug}_photos`, driveSyncedAt: at('2026-10-07', '09:30')
     }).returning();
     await db.insert(t.partnerRegions).values(n.regions.map((region, i) => ({ partnerId: row.id, region, sort: i })));
     await db.insert(t.partnerFeatures).values({ partnerId: row.id, ...plan.defaultFeatures });
@@ -146,6 +146,14 @@ export async function seedDemoWorld(db: DB) {
     { key: 'site_content', value: siteContent },
     { key: 'city_names', value: world.cityNames }
   ]);
+  /* 검색엔진 데모 자료(클릭 · 검색어 차트)를 상호 대신 업체 주소(slug)로 — 상호를 바꿔도 남게 */
+  const [ds] = await db.select().from(t.settings).where(eq(t.settings.key, 'demo_stats'));
+  const dv = ds?.value as { search?: Record<string, unknown> } | undefined;
+  if (dv?.search) {
+    dv.search = Object.fromEntries(Object.entries(dv.search).map(([name, v]) => [partners.find((x) => x.p.name === name)?.p.slug ?? name, v]));
+    await db.update(t.settings).set({ value: dv }).where(eq(t.settings.key, 'demo_stats'));
+  }
+
   /* 시안 A~F 공통 본문: 업종에 상관없이 쓰는 판(시안 원본은 철거 문장이 박혀 있어 다른 업종에 그대로 나갔음) */
   await db.update(t.settings).set({ value: world.draftStyles }).where(eq(t.settings.key, 'draft_styles'));
 

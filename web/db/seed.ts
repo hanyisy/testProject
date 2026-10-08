@@ -55,9 +55,9 @@ async function seed(db: DB, d: Seed) {
       /* 사업자 정보: 등록번호가 있는 업체는 저장된 상태로 (세금계산서 바로 요청), 없으면 요청 때 입력 창 */
       /* 공개 사이트 시안의 사업장 주소 */
       address: sites.items.find((x) => x.slug === p.slug)?.business.address ?? null,
-      bizName: p.bizRegNo ? p.name : null, taxEmail: p.bizRegNo ? p.email ?? null : null,
+      bizName: p.bizRegNo ? p.name : null, taxRegNo: p.bizRegNo ?? null, taxEmail: p.bizRegNo ? p.email ?? null : null,
       brandColor: p.brandColor ?? null, mark: p.mark ?? null, payMode: p.payMode as '계좌 입금', startedAt: p.startedAt ?? null,
-      driveConnected: p.status === '운영 중', driveSyncedAt: p.status === '운영 중' ? at(d.today, '09:50') : null,
+      driveConnected: p.status === '운영 중', driveFolderUrl: p.status === '운영 중' ? `https://drive.google.com/drive/folders/demo_${p.slug}_photos` : null, driveSyncedAt: p.status === '운영 중' ? at(d.today, '09:50') : null,
       endedAt: p.status === '종료' ? '2026-09-30' : null
     }).returning();
     partnerId[p.name] = row.id;

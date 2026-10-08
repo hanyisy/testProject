@@ -107,6 +107,10 @@ export async function requirePartner(): Promise<SessionUser & { partnerId: strin
   if (!user) redirect(`/login?next=${encodeURIComponent(here)}${expired ? '&reason=expired' : ''}`);
   if (user.mustChangePassword && !(await pwLater())) redirect(`/login/password?next=${encodeURIComponent(here)}`);
   if (user.kind !== 'partner' || !user.partnerId) redirect(`/forbidden?from=${encodeURIComponent(here)}`);
+  /* 계약이 끝난(종료) 업체: 결제 내역(영수증 · 세금계산서)만 보고, 사진 · 발행 · 문의 처리는 막음 */
+  const db = await getDb();
+  const [p] = await db.select({ status: t.partners.status }).from(t.partners).where(eq(t.partners.id, user.partnerId)).limit(1);
+  if (p?.status === '종료' && !here.startsWith('/partner/billing')) redirect(`/forbidden?from=${encodeURIComponent(here)}&ended=1`);
   return user as SessionUser & { partnerId: string };
 }
 

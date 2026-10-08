@@ -57,7 +57,7 @@ export default function StatusPicker({ id, title, status, amount, needs, up }: {
                 </label>
                 <div className="spick__btns">
                   <button type="button" className="spick__cancel" onClick={() => setOpen(false)}>취소</button>
-                  <button type="button" className="spick__save" disabled={pending} onClick={() => save('계약', amt)}>저장</button>
+                  <button type="button" className="spick__save" disabled={pending || amt <= 0} onClick={() => save('계약', amt)}>{amt > 0 ? '저장' : '금액을 입력해 주세요'}</button>
                 </div>
               </div>
             )}

@@ -1,5 +1,5 @@
 {
-  "id": "fa7cab2a-8bd1-4268-82f8-2ab7c6eab9ac",
+  "id": "ca5ad3e0-5267-4e0d-aba4-644e42c08ce8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1397,6 +1397,87 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.notify_logs": {
+      "name": "notify_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "partner_id": {
+          "name": "partner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sent": {
+          "name": "sent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "notify_logs_partner_idx": {
+          "name": "notify_logs_partner_idx",
+          "columns": [
+            {
+              "expression": "partner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "notify_logs_partner_id_partners_id_fk": {
+          "name": "notify_logs_partner_id_partners_id_fk",
+          "tableFrom": "notify_logs",
+          "tableTo": "partners",
+          "columnsFrom": [
+            "partner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.page_queries": {
       "name": "page_queries",
       "schema": "",
@@ -1930,6 +2011,12 @@
         },
         "tax_email": {
           "name": "tax_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tax_reg_no": {
+          "name": "tax_reg_no",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -3023,6 +3110,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'[]'::jsonb"
+        },
+        "details": {
+          "name": "details",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
         "worked_at": {
           "name": "worked_at",

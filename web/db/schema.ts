@@ -98,6 +98,8 @@ export const partners = pgTable('partners', {
   /** 세금계산서용 사업자 정보 (상호 · 사업자등록번호 · 받을 이메일) — 셋 다 있어야 바로 요청됨 */
   bizName: text('biz_name'),
   taxEmail: text('tax_email'),
+  /** 세금계산서용 사업자등록번호 — 업체 정보(bizRegNo · 사이트 바닥에 나옴)와 따로 지우고 바꿀 수 있게 */
+  taxRegNo: text('tax_reg_no'),
   /** 알림 설정: 새 문의 알림톡 · 결과 입력 알림 · 색인 완료 알림 */
   notify: jsonb('notify').$type<{ lead: boolean; result: boolean; indexed: boolean }>().notNull().default({ lead: true, result: true, indexed: true }),
   industryId: uuid('industry_id').notNull().references(() => industries.id),
@@ -168,6 +170,8 @@ export const sites = pgTable('sites', {
   floorNote: text('floor_note'),
   summary: text('summary'),
   issues: jsonb('issues').$type<{ title: string; body: string }[]>().notNull().default([]),
+  /** 업종 템플릿 "현장 입력 항목" 중 평수 · 기간 · 특이사항 밖의 값 (예: 방 개수, 작업 인원, 자재) */
+  details: jsonb('details').$type<Record<string, string>>().notNull().default({}),
   workedAt: date('worked_at'),
   photoCount: integer('photo_count').notNull().default(0),
   status: text('status').$type<'작성 중' | '발행됨'>().notNull().default('작성 중'),
@@ -374,6 +378,17 @@ export const inquiries = pgTable('inquiries', {
 }, (t) => [index('inquiries_partner_idx').on(t.partnerId)]);
 
 /** 문의 진행 기록 (파트너): 메모 · 상태 변경 · 전화 · 문자 */
+/** 파트너 알림(알림톡) 기록 — 알림 설정(partners.notify)이 꺼져 있으면 보내지 않고 "꺼짐"으로 남김
+ * 컨펌 단계는 실제 발송 없이 기록만 (lib/adapters/alimtalk) */
+export const notifyLogs = pgTable('notify_logs', {
+  id: id(),
+  partnerId: uuid('partner_id').notNull().references(() => partners.id),
+  kind: text('kind').$type<'lead' | 'result' | 'indexed'>().notNull(),
+  text: text('text').notNull(),
+  sent: boolean('sent').notNull(),
+  createdAt: createdAt()
+}, (t) => [index('notify_logs_partner_idx').on(t.partnerId)]);
+
 export const inquiryLogs = pgTable('inquiry_logs', {
   id: id(),
   inquiryId: uuid('inquiry_id').notNull().references(() => inquiries.id),

@@ -6,7 +6,7 @@ import { approveBlog, requestToHq, saveBlogUrl } from './actions';
 
 type Post = { id: string; title: string; body: string[]; url: string | null; status: '초안' | '승인 대기' | '승인' | '올림'; label: string; chip: string };
 
-export default function Preview({ mode, post }: { mode: '직접 올리기' | '본사 대행'; post: Post }) {
+export default function Preview({ mode, post, photos }: { mode: '직접 올리기' | '본사 대행'; post: Post; photos: { src: string; alt: string }[] }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState(post.url ?? '');
@@ -29,7 +29,7 @@ export default function Preview({ mode, post }: { mode: '직접 올리기' | '�
         <span className={`chip chip--${post.chip}`}>{post.label}</span>
       </div>
       <h2 className="blogprev__title">{post.title}</h2>
-      <div className="blogprev__ph">{[1, 2, 3].map((n) => <div key={n} className="phb">현장 사진 {n}</div>)}</div>
+      <div className="blogprev__ph">{photos.length ? photos.map((p) => <img key={p.src} src={p.src} alt={p.alt} className="blogprev__img" loading="lazy" />) : <div className="phb">현장 사진이 아직 없어요</div>}</div>
       {post.body.map((b, i) => <p key={i} className="blogprev__p">{b}</p>)}
 
       {mode === '직접 올리기' ? (

@@ -15,14 +15,17 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
   const user = await requirePartner();
   const { g } = await searchParams;
   const db = await getDb();
-  const [groups, [p]] = await Promise.all([
+  const [groups, [p], regions] = await Promise.all([
     photoGroups(user.partnerId),
-    db.select({ industryId: t.partners.industryId }).from(t.partners).where(eq(t.partners.id, user.partnerId)).limit(1)
+    db.select({ industryId: t.partners.industryId }).from(t.partners).where(eq(t.partners.id, user.partnerId)).limit(1),
+    db.select({ region: t.partnerRegions.region }).from(t.partnerRegions).where(eq(t.partnerRegions.partnerId, user.partnerId)).orderBy(asc(t.partnerRegions.sort))
   ]);
-  /* 작업 종류 · 건물 유형 선택지는 업종 템플릿에서 */
+  /* 작업 종류 · 대상 유형 선택지와 입력 칸("현장 입력 항목")은 업종 템플릿에서 */
   const items = await db.select().from(t.industryItems).where(and(eq(t.industryItems.industryId, p.industryId))).orderBy(asc(t.industryItems.sort));
   const works = items.filter((i) => i.group === '작업 종류').map((i) => i.label);
   const buildings = items.filter((i) => i.group === '대상 유형').map((i) => i.label);
+  const fields = items.filter((i) => i.group === '현장 입력 항목').map((i) => i.label);
+  const cities = regions.map((r) => r.region.split(' ').slice(-1)[0]);
   const total = groups.reduce((a, x) => a + x.photos.length, 0);
   const sel = groups.find((x) => x.key === g) ?? groups[0];
   const md = (ymd: string) => { const m = /\d{4}-(\d{2})-(\d{2})/.exec(ymd); return m ? `${Number(m[1])}월 ${Number(m[2])}일` : ymd; };
@@ -47,6 +50,8 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
             photos={sel.photos.map((ph) => ({ id: ph.id, label: ph.label ?? '사진', person: ph.hasPerson, pub: ph.partnerPublic, src: ph.fileKey.startsWith('demo/') ? null : `/files/${ph.fileKey}` }))}
             works={works}
             buildings={buildings}
+            fields={fields}
+            cities={cities}
           />
         )}
       </div>

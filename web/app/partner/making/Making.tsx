@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { saveDraftNote, toggleDraftLike } from './actions';
 
-type Draft = { label: string; style: string; n: number; like: boolean; note: string };
+type Draft = { label: string; style: string; n: number; like: boolean; note: string; href: string | null };
 type Props = {
   runId: string; drafts: Draft[]; partnerName: string;
   preview: { region: string; name: string; info: string | null; photos: number; sites: number }; work: string;
@@ -11,7 +11,8 @@ type Props = {
   usage: { site: string; date: string; n: number; pages: { name: string; k: string; st: string }[] }[];
 };
 const ST: Record<string, string> = { '배포됨': 'ok', '검수 중': 'warn' };
-const kindOf = (style: string) => (style.includes('사진') ? 'A' : style.includes('기록') ? 'B' : style.includes('비용') ? 'D' : 'A');
+/* 스케치 미리보기는 시안 A · B · D 판만 — 나머지(C · E · F)는 실제 페이지 미리보기로 */
+const kindOf = (label: string) => (['A', 'B', 'D'].includes(label) ? label : 'X');
 const md = (ymd: string) => { const m = /\d{4}-(\d{2})-(\d{2})/.exec(ymd); return m ? `${Number(m[1])}월 ${Number(m[2])}일` : ymd; };
 
 function Ph({ h, label = '' }: { h: number; label?: string }) {
@@ -21,6 +22,7 @@ function Line({ w, h = 8 }: { w: string; h?: number }) {
   return <span className="skl" style={{ width: w, height: h }} />;
 }
 function Thumb({ kind }: { kind: string }) {
+  if (kind === 'X') return <div className="mthumb"><Line w="70%" h={10} /><Ph h={56} label="실제 페이지로 확인" /><Line w="90%" /><Line w="60%" /></div>;
   if (kind === 'B') {
     return (
       <div className="mthumb">
@@ -59,7 +61,7 @@ export default function Making({ runId, drafts, partnerName, preview, work, time
   const [draft, setDraft] = useState('');
   const [pending, start] = useTransition();
   const cur = drafts.find((d) => d.label === sel) ?? drafts[0];
-  const kind = cur ? kindOf(cur.style) : 'A';
+  const kind = cur ? kindOf(cur.label) : 'A';
   return (
     <div className="mkgrid">
       <div className="stack" style={{ gap: 12 }}>
@@ -68,11 +70,12 @@ export default function Making({ runId, drafts, partnerName, preview, work, time
           <div key={d.label} className={'mkcard' + (sel === d.label ? ' is-sel' : '')}>
             <button type="button" className="mkcard__view" onClick={() => setSel(d.label)} aria-pressed={sel === d.label}>
               <div className="mkcard__head"><span className="mkcard__k">{d.label}</span><span className="mkcard__name">{d.style}</span><span className="mkcard__n">{d.n}장</span></div>
-              <Thumb kind={kindOf(d.style)} />
+              <Thumb kind={kindOf(d.label)} />
             </button>
             <div className="row">
               <button type="button" className={'mkbtn' + (d.like ? ' is-on' : '')} disabled={pending} onClick={() => start(() => toggleDraftLike(runId, d.label))}>{d.like ? '좋아요 ✓' : '좋아요'}</button>
               <button type="button" className="mkbtn" onClick={() => { setNoteOpen(noteOpen === d.label ? null : d.label); setDraft(d.note); }}>의견 남기기</button>
+              {d.href && <a href={d.href} target="_blank" rel="noopener" className="mkbtn">실제 페이지 ↗</a>}
             </div>
             {noteOpen === d.label && (
               <form className="row" onSubmit={(e) => { e.preventDefault(); start(async () => { await saveDraftNote(runId, d.label, draft); setNoteOpen(null); }); }}>
@@ -89,6 +92,7 @@ export default function Making({ runId, drafts, partnerName, preview, work, time
         <section className="pcard" style={{ gap: 14, padding: 22 }}>
           <div className="row" style={{ alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
             <span className="pcard__title">시안 {sel} 미리보기</span><span className="hint">예시 · {preview.region}</span>
+            {cur?.href && <a href={cur.href} target="_blank" rel="noopener" className="link-accent" style={{ marginLeft: 'auto' }}>실제 페이지로 보기 ↗</a>}
           </div>
           <div className="seg">
             {drafts.map((d) => <button key={d.label} type="button" className="seg__opt" aria-pressed={sel === d.label} onClick={() => setSel(d.label)}>{d.label} {d.style}</button>)}
@@ -98,6 +102,7 @@ export default function Making({ runId, drafts, partnerName, preview, work, time
               <span className="pv__brand">{partnerName} · {work}</span>
               <span className="pv__title">{preview.region} {work}</span>
               {preview.info && <span className="pv__info">{preview.info}</span>}
+              {kind === 'X' && <span className="pv__text">이 시안은 스케치 대신 실제 페이지로 확인해 주세요 · 위의 “실제 페이지로 보기”</span>}
               {kind === 'A' && (
                 <>
                   <Ph h={220} label="대표 현장 사진" />

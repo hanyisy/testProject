@@ -231,7 +231,11 @@ async function SitePage({ s, id, err }: { s: Site; id: string; err: boolean }) {
   const near = all.filter((x) => x.region === site.region && x.id !== site.id).slice(0, 3);
   /* 이 현장이 있는 동의 지역 페이지 (현장 → 지역 페이지로 이어지게) */
   const dongPages = live.filter((p) => p.type === '지역' && p.regionKey === site.region).slice(0, 6);
-  const kv: [string, string][] = [['건물 유형', site.buildingType ?? '—'], ['평수', site.areaPyeong ? `${site.areaPyeong}평` : '—'], ['기간', site.days ? `${site.days}일` : '—'], ['층', site.floorNote ?? '—']];
+  /* 현장 정보: 있는 값만 (업종마다 입력 항목이 달라 — 방 개수 · 자재 같은 값은 details) */
+  const kv: [string, string][] = ([
+    ['유형', site.buildingType ?? ''], ['평수', site.areaPyeong ? `${site.areaPyeong}평` : ''], ['기간', site.days ? `${site.days}일` : ''], ['층', site.floorNote ?? ''],
+    ...Object.entries(site.details ?? {})
+  ] as [string, string][]).filter(([, v]) => v);
   return (
     <>
       <Crumb slug={slug} items={[[s.cityName(site.city), site.city], [site.dong], ['현장 기록']]} />

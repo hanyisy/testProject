@@ -187,6 +187,15 @@ CREATE TABLE "login_attempts" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "notify_logs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"partner_id" uuid NOT NULL,
+	"kind" text NOT NULL,
+	"text" text NOT NULL,
+	"sent" boolean NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "page_queries" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"partner_id" uuid NOT NULL,
@@ -259,6 +268,7 @@ CREATE TABLE "partners" (
 	"email" text,
 	"biz_name" text,
 	"tax_email" text,
+	"tax_reg_no" text,
 	"notify" jsonb DEFAULT '{"lead":true,"result":true,"indexed":true}'::jsonb NOT NULL,
 	"industry_id" uuid NOT NULL,
 	"plan_id" uuid NOT NULL,
@@ -404,6 +414,7 @@ CREATE TABLE "sites" (
 	"floor_note" text,
 	"summary" text,
 	"issues" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"details" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"worked_at" date,
 	"photo_count" integer DEFAULT 0 NOT NULL,
 	"status" text DEFAULT '작성 중' NOT NULL,
@@ -465,6 +476,7 @@ ALTER TABLE "lead_memos" ADD CONSTRAINT "lead_memos_lead_id_leads_id_fk" FOREIGN
 ALTER TABLE "lead_memos" ADD CONSTRAINT "lead_memos_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "leads" ADD CONSTRAINT "leads_owner_user_id_users_id_fk" FOREIGN KEY ("owner_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "leads" ADD CONSTRAINT "leads_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "notify_logs" ADD CONSTRAINT "notify_logs_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "page_queries" ADD CONSTRAINT "page_queries_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "page_queries" ADD CONSTRAINT "page_queries_page_id_pages_id_fk" FOREIGN KEY ("page_id") REFERENCES "public"."pages"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pages" ADD CONSTRAINT "pages_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -492,6 +504,7 @@ ALTER TABLE "translations" ADD CONSTRAINT "translations_partner_id_partners_id_f
 ALTER TABLE "users" ADD CONSTRAINT "users_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "inquiries_partner_idx" ON "inquiries" USING btree ("partner_id");--> statement-breakpoint
 CREATE INDEX "inquiry_logs_inq_idx" ON "inquiry_logs" USING btree ("inquiry_id");--> statement-breakpoint
+CREATE INDEX "notify_logs_partner_idx" ON "notify_logs" USING btree ("partner_id");--> statement-breakpoint
 CREATE INDEX "pages_partner_idx" ON "pages" USING btree ("partner_id");--> statement-breakpoint
 CREATE INDEX "photos_partner_idx" ON "photos" USING btree ("partner_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "settlements_partner_month" ON "settlements" USING btree ("partner_id","month");--> statement-breakpoint

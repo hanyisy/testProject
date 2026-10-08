@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { asc } from 'drizzle-orm';
+import { asc, inArray, sql } from 'drizzle-orm';
 import TopBar from '@/components/TopBar';
 import Pager, { paginate } from '@/components/Pager';
 import FilterSelect from '@/components/FilterSelect';
@@ -41,14 +41,17 @@ export default async function IndexingPage({ searchParams }: { searchParams: Pro
   const user = await requireStaff();
   const sp = await searchParams;
   const db = await getDb();
-  const [partners, stats, idxDays] = await Promise.all([
-    db.select({ name: t.partners.name, status: t.partners.status }).from(t.partners).orderBy(asc(t.partners.createdAt)),
+  /* 파트너별 발행 · 색인 요청 · 색인 확인은 pages에서 셈 (파트너 화면과 같은 숫자) · 색인 기간 분포만 검색엔진 자료(데모) */
+  const [partners, counts, stats, idxDays] = await Promise.all([
+    db.select({ id: t.partners.id, name: t.partners.name, status: t.partners.status }).from(t.partners).orderBy(asc(t.partners.createdAt)),
+    db.select({ id: t.pages.partnerId, status: t.pages.status, n: sql<number>`count(*)::int` }).from(t.pages).where(inArray(t.pages.status, ['발행됨', '색인 요청', '색인 확인'])).groupBy(t.pages.partnerId, t.pages.status),
     getSetting<(DemoStats & { indexHist?: [string, number][] }) | null>('demo_stats', null),
     getSetting<number>('index_days', 23)
   ]);
   const rows = partners.map((p) => {
-    const s = stats?.partners[p.name] ?? { pages: 0, indexed: 0, requested: 0 };
-    return { ...p, pub: s.pages, req: s.requested, ok: s.indexed, ratio: s.pages ? s.indexed / s.pages : null };
+    const mine = counts.filter((c) => c.id === p.id);
+    const pub = mine.reduce((a, c) => a + c.n, 0), req = mine.find((c) => c.status === '색인 요청')?.n ?? 0, ok = mine.find((c) => c.status === '색인 확인')?.n ?? 0;
+    return { name: p.name, status: p.status, pub, req, ok, ratio: pub ? ok / pub : null };
   });
   const sum = (xs: typeof rows, k: 'pub' | 'req' | 'ok') => xs.reduce((a, r) => a + r[k], 0);
   const live = rows.filter((r) => r.status === '운영 중');

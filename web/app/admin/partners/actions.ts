@@ -1,7 +1,7 @@
 'use server';
 /* 파트너 상세: 업체 정보 · 서비스 지역 · 기능 스위치 · 다국어 · 양산 범위 · 도메인 · 결제 방식 · 임시 비밀번호 */
 import { revalidatePath } from 'next/cache';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import { getDb, schema as t } from '@/db/client';
 import { requirePerm, type SessionUser } from '@/lib/auth';
 import { BLOG_MODES, COUNTRIES, DOMESTIC, LANGS, ML_SCOPE, PAY_MODES, REGISTRARS, TIERS } from '@/lib/constants';
@@ -64,6 +64,8 @@ export async function setFeature(fd: FormData) {
   if (key === 'blog') {
     if (!BLOG_MODES.includes(value as never)) return;
     await db.update(t.partnerFeatures).set({ blog: value as '꺼짐' }).where(eq(t.partnerFeatures.partnerId, id));
+    /* 아직 안 올린 글은 새 방식으로 맞춤 (파트너 블로그 화면 · 본사 대행 목록이 같은 방식을 보게) */
+    if (value === '직접 올리기' || value === '본사 대행') await db.update(t.blogPosts).set({ mode: value }).where(and(eq(t.blogPosts.partnerId, id), ne(t.blogPosts.status, '올림')));
   } else if (['alim', 'place', 'ml', 'sheet'].includes(key)) {
     await db.update(t.partnerFeatures).set({ [key]: value === 'on' }).where(eq(t.partnerFeatures.partnerId, id));
   } else return;

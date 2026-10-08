@@ -16,9 +16,12 @@ export async function saveCompany(name: string, tel: string) {
   return { ok: true as const };
 }
 
-export async function setNotify(key: 'lead' | 'result' | 'indexed', on: boolean) {
+const NOTIFY_KEYS = ['lead', 'result', 'indexed'] as const;
+export async function setNotify(key: (typeof NOTIFY_KEYS)[number], on: boolean) {
   const user = await requirePartner();
+  if (!NOTIFY_KEYS.includes(key) || typeof on !== 'boolean') return;
   const db = await getDb();
   const [p] = await db.select({ notify: t.partners.notify }).from(t.partners).where(eq(t.partners.id, user.partnerId)).limit(1);
   await db.update(t.partners).set({ notify: { ...p.notify, [key]: on } }).where(eq(t.partners.id, user.partnerId));
+  revalidatePath('/partner/settings');
 }

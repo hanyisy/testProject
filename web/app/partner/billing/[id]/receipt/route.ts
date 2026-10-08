@@ -27,7 +27,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const title = kind === 'card' ? '카드 결제 영수증' : '세금계산서 발행 내역';
   const rows: [string, string][] = kind === 'card'
     ? [['결제 항목', c.item], ['결제 금액', `${won(c.amount)}원`], ['결제 수단', c.payer ?? '카드'], ['결제 일시', kst(c.confirmedAt)], ['청구일', c.billedOn], ['결제한 업체', p.name]]
-    : [['공급자', bill.holder], ['공급받는 자', `${p.bizName ?? p.name} (${p.bizRegNo ?? '—'})`], ['받는 이메일', p.taxEmail ?? '—'], ['품목', c.item],
+    : [['공급자', bill.holder], ['공급받는 자', `${p.bizName ?? p.name} (${p.taxRegNo ?? p.bizRegNo ?? '—'})`], ['받는 이메일', p.taxEmail ?? '—'], ['품목', c.item],
        ['공급가액', `${won(Math.round(c.amount / 1.1))}원`], ['세액', `${won(c.amount - Math.round(c.amount / 1.1))}원`], ['합계', `${won(c.amount)}원`], ['요청일', tax.requestedOn], ['발행일', kst(tax.issuedAt)]];
   const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${esc(title)}</title>
 <style>body{font-family:system-ui,-apple-system,'Malgun Gothic',sans-serif;max-width:560px;margin:40px auto;padding:0 16px;color:#111}h1{font-size:22px}table{width:100%;border-collapse:collapse}th,td{padding:10px 4px;border-bottom:1px solid #ddd;text-align:left;font-size:15px}th{color:#666;width:34%;font-weight:600}p{color:#666;font-size:13px}</style></head>

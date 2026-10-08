@@ -6,6 +6,7 @@ import { getDb, schema as t } from '@/db/client';
 import { getSetting } from '@/lib/admin';
 import { contentHash, putFile } from '@/lib/adapters/storage';
 import { readExif } from '@/lib/exif';
+import { detectPerson } from '@/lib/adapters/vision';
 
 const MAX = 15 * 1024 * 1024;
 const OK_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
@@ -42,9 +43,10 @@ export async function savePhoto(partnerId: string, file: FormDataEntryValue | nu
     }
     place = best.km <= 30 ? best.region.split(' ').slice(-1)[0] : '서비스 지역 밖';
   }
+  const hasPerson = await detectPerson(data);
   const [row] = await db.insert(t.photos).values({
     partnerId, fileKey: key, label: file.name.replace(/\.[^.]+$/, ''), contentHash: hash, takenAt, place,
-    source: '직접 올림', hasPerson: false, partnerPublic: false
+    source: '직접 올림', hasPerson, partnerPublic: false
   }).returning();
   return { ok: true, id: row.id, duplicate: false };
 }

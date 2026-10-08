@@ -10,6 +10,8 @@ import { getSetting } from '@/lib/admin';
 import { today } from '@/lib/config';
 import { md, won } from '@/lib/format';
 import { photoGroups } from '@/lib/partner-app';
+import { billMonthly, closeSettlements } from '@/lib/settlement';
+import { josa } from '@/lib/text';
 import PhotoActions from '../PhotoActions';
 import { CopyAccount, PayButton, TaxRequest } from './BillingActions';
 
@@ -27,6 +29,9 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   const user = await requirePartner();
   const sp = await searchParams;
   const db = await getDb();
+  /* 이번 달 월 관리비 · 지난 달 정산 수수료 청구가 아직 없으면 만듦 (매달 1일 청구 — 여러 번 불러도 한 번만) */
+  await billMonthly();
+  await closeSettlements();
   const [[p], charges, groups, bill, day] = await Promise.all([
     db.select({ partner: t.partners, plan: t.plans }).from(t.partners).innerJoin(t.plans, eq(t.plans.id, t.partners.planId)).where(eq(t.partners.id, user.partnerId)).limit(1),
     db.select().from(t.charges).where(eq(t.charges.partnerId, user.partnerId)).orderBy(desc(t.charges.billedOn)),
@@ -36,7 +41,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   ]);
   const taxes = charges.length ? await db.select().from(t.taxRequests).where(inArray(t.taxRequests.chargeId, charges.map((c) => c.id))) : [];
   const taxOf = (id: string) => taxes.find((x) => x.chargeId === id)?.state ?? null;
-  const hasBiz = !!(p.partner.bizName && p.partner.bizRegNo && p.partner.taxEmail);
+  const hasBiz = !!(p.partner.bizName && p.partner.taxRegNo && p.partner.taxEmail);
   const newPhotos = groups.reduce((a, g) => a + g.photos.length, 0);
 
   const month = day.slice(0, 7);
@@ -45,8 +50,9 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   const online = thisMonth.find((c) => c.method === '온라인 결제');
   const billed = thisMonth.reduce((a, c) => a + c.amount, 0);
   const due = thisMonth.filter((c) => c.state === '입금 대기' || c.state === '미결제').reduce((a, c) => a + c.amount, 0);
+  /* 계약 기간: 종료일이 있으면 그 날, 없으면 시작 달부터 12개월(년 · 월 숫자로 — 시간대에 안 흔들리게) */
   const start = p.partner.startedAt;
-  const end = start ? new Date(new Date(start + 'T00:00:00+09:00').setMonth(new Date(start).getMonth() + 11)).toISOString().slice(0, 10) : null;
+  const end = p.partner.endedAt ?? (start ? (() => { const [y, m] = start.split('-').map(Number); const k = y * 12 + (m - 1) + 11; return `${Math.floor(k / 12)}-${String((k % 12) + 1).padStart(2, '0')}-01`; })() : null);
   const accountShort = `${bill.bank} ${bill.account.split('-').slice(0, 2).join('-')}-···`;
 
   /* 지난 내역: 위 두 카드에 나온 건 빼고, 필터 · 페이지 */
@@ -70,7 +76,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
     }
     return (
       <>
-        {!tax && c.state !== '면제' && <TaxRequest id={c.id} hasBiz={hasBiz} height={h} defaults={{ name: p.partner.bizName ?? p.partner.name, reg: p.partner.bizRegNo ?? '', email: p.partner.taxEmail ?? p.partner.email ?? '' }} />}
+        {!tax && c.state !== '면제' && <TaxRequest id={c.id} hasBiz={hasBiz} height={h} defaults={{ name: p.partner.bizName ?? p.partner.name, reg: p.partner.taxRegNo ?? p.partner.bizRegNo ?? '', email: p.partner.taxEmail ?? p.partner.email ?? '' }} />}
         {tax && <><span className="taxk">세금계산서</span><span className={`taxchip taxchip--${tax === '발행 완료' ? 'ok' : 'warn'}`}>{tax}</span></>}
         {tax === '발행 완료' && <a className="btn-ghost" style={{ height: h, marginLeft: 'auto' }} href={receipt(c, 'tax')} download>다운로드</a>}
       </>
@@ -114,7 +120,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
                   </>
                 ) : online.state === '결제 완료' && (
                   <>
-                    <span className="hint" style={{ fontSize: 14 }}>{online.payer ?? '카드'}로 결제했어요</span>
+                    <span className="hint" style={{ fontSize: 14 }}>{josa(online.payer ?? '카드', '으로')} 결제했어요</span>
                     <a className="btn-ghost" style={{ height: 48 }} href={receipt(online, 'card')} download>카드 영수증 다운로드</a>
                   </>
                 )}

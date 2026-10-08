@@ -1,7 +1,7 @@
 'use server';
 /* 결제 내역 (2g): 세금계산서 발행 요청(사업자 정보 없으면 입력 후 요청) · 온라인 결제 */
 import { revalidatePath } from 'next/cache';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { getDb, schema as t } from '@/db/client';
 import { requirePartner } from '@/lib/auth';
 import { today } from '@/lib/config';
@@ -25,7 +25,7 @@ export async function requestTax(chargeId: string): Promise<{ ok: true } | { ok:
   const { db, c, user } = await ownCharge(chargeId);
   if (!c || c.method !== '계좌 입금') return { ok: false, error: '요청할 수 없는 항목이에요' };
   const [p] = await db.select().from(t.partners).where(eq(t.partners.id, user.partnerId)).limit(1);
-  if (!p.bizName || !p.bizRegNo || !p.taxEmail) return { ok: false, needBiz: true };
+  if (!p.bizName || !p.taxRegNo || !p.taxEmail) return { ok: false, needBiz: true };
   const [has] = await db.select({ id: t.taxRequests.id }).from(t.taxRequests).where(eq(t.taxRequests.chargeId, chargeId)).limit(1);
   if (!has) await db.insert(t.taxRequests).values({ chargeId, requestedOn: await today() });
   revalidatePath('/partner/billing');
@@ -37,7 +37,7 @@ export async function saveBiz(b: Biz) {
   const user = await requirePartner();
   if (!bizValid(b)) return { ok: false as const, error: '상호 · 사업자등록번호(000-00-00000) · 이메일을 확인해 주세요' };
   const db = await getDb();
-  await db.update(t.partners).set({ bizName: b.name.trim(), bizRegNo: b.reg, taxEmail: b.email.trim() }).where(eq(t.partners.id, user.partnerId));
+  await db.update(t.partners).set({ bizName: b.name.trim(), taxRegNo: b.reg, taxEmail: b.email.trim() }).where(eq(t.partners.id, user.partnerId));
   revalidatePath('/partner/settings');
   return { ok: true as const };
 }
@@ -51,7 +51,7 @@ export async function saveBizAndRequest(chargeId: string, b: Biz) {
 export async function clearBiz() {
   const user = await requirePartner();
   const db = await getDb();
-  await db.update(t.partners).set({ bizName: null, taxEmail: null }).where(eq(t.partners.id, user.partnerId));
+  await db.update(t.partners).set({ bizName: null, taxRegNo: null, taxEmail: null }).where(eq(t.partners.id, user.partnerId));
   revalidatePath('/partner/settings');
 }
 
@@ -59,9 +59,13 @@ export async function clearBiz() {
 export async function payOnline(chargeId: string) {
   const { db, c } = await ownCharge(chargeId);
   if (!c || c.method !== '온라인 결제' || c.state !== '미결제') return { ok: false as const, error: '결제할 수 없는 항목이에요' };
+  /* 두 번 눌러도 한 번만 결제: 미결제 · 진행 표시(confirmedAt) 없는 건을 먼저 잡고, 결제가 안 되면 놓음 */
+  const [claimed] = await db.update(t.charges).set({ confirmedAt: new Date() })
+    .where(and(eq(t.charges.id, chargeId), eq(t.charges.state, '미결제'), isNull(t.charges.confirmedAt))).returning({ id: t.charges.id });
+  if (!claimed) return { ok: false as const, error: '이미 결제를 진행하고 있어요' };
   const r = await chargeOnline({ chargeId, amount: c.amount, orderName: c.item });
-  if (!r.ok) return r;
-  await db.update(t.charges).set({ state: '결제 완료', confirmedAt: r.approvedAt, payer: r.method }).where(eq(t.charges.id, chargeId));
+  if (!r.ok) { await db.update(t.charges).set({ confirmedAt: null }).where(eq(t.charges.id, chargeId)); return r; }
+  await db.update(t.charges).set({ state: '결제 완료', confirmedAt: r.approvedAt, payer: r.method }).where(and(eq(t.charges.id, chargeId), eq(t.charges.state, '미결제')));
   revalidatePath('/partner/billing');
   return { ok: true as const };
 }

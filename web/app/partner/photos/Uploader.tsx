@@ -108,7 +108,7 @@ export default function Uploader({ drive, sites }: { drive: ReactNode; sites: Si
               ))}
               {added ? <div className="okbox" style={{ marginTop: 12 }}>{added}</div> : (
                 <button type="button" className="btn-ink" style={{ marginTop: 12, height: 52, fontSize: 16, borderRadius: 14 }} disabled={!ids.length}
-                  onClick={async () => { const r = await addToSite(site, ids); if (r.ok) { setAdded(`${r.title}에 사진 ${r.n}장을 더했어요 · 공개 확인 후 페이지에 반영돼요`); setIds([]); } }}>
+                  onClick={async () => { const r = await addToSite(site, ids); if (r.ok) { setAdded(`${r.title}에 사진 ${r.n}장을 더했어요 · 내 사이트 현장 기록에 바로 보여요${r.hidden ? ` (사람이 찍힌 ${r.hidden}장은 비공개)` : ''}`); setIds([]); } }}>
                   선택한 현장에 {ids.length}장 추가
                 </button>
               )}

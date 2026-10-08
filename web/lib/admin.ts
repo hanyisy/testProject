@@ -49,13 +49,36 @@ export async function workCounts() {
   };
 }
 
+/** 이번 달 숫자 (DB에서 · 파트너 화면과 같은 기준)
+ *  발행 = 이번 달 손님에게 보이게 된 페이지 · 색인 비율 = 운영 중 파트너의 보이는 페이지 중 색인 확인 · 문의 = 이번 달 접수(본인 아님 제외) */
+export async function monthStats() {
+  const db = await getDb();
+  /* 기준일(데모 기준일 설정 · 없으면 오늘) — lib/config.today와 같은 값 (config가 이 파일을 불러서 직접 읽음) */
+  const month = (await getSetting<string>('demo_today', new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(new Date()))).slice(0, 7);
+  const inMonth =(col: typeof t.pages.publishedAt | typeof t.inquiries.receivedAt) => sql`to_char(${col} at time zone 'Asia/Seoul', 'YYYY-MM') = ${month}`;
+  const live = sql`${t.pages.status} in ('발행됨', '색인 요청', '색인 확인')`;
+  const [pub, idx, inq] = await Promise.all([
+    db.select({ name: t.partners.name, n }).from(t.pages).innerJoin(t.partners, eq(t.partners.id, t.pages.partnerId)).where(and(live, inMonth(t.pages.publishedAt))).groupBy(t.partners.name),
+    db.select({ total: n, indexed: sql<number>`count(*) filter (where ${t.pages.status} = '색인 확인')::int` }).from(t.pages).innerJoin(t.partners, eq(t.partners.id, t.pages.partnerId)).where(and(live, eq(t.partners.status, '운영 중'))),
+    db.select({ name: t.partners.name, mine: sql<number>`count(*) filter (where ${t.inquiries.verify} <> '본인 아님')::int`, notMine: sql<number>`count(*) filter (where ${t.inquiries.verify} = '본인 아님')::int` })
+      .from(t.inquiries).innerJoin(t.partners, eq(t.partners.id, t.inquiries.partnerId)).where(inMonth(t.inquiries.receivedAt)).groupBy(t.partners.name)
+  ]);
+  const total = idx[0]?.total ?? 0, indexed = idx[0]?.indexed ?? 0;
+  return {
+    published: pub.reduce((a, r) => a + r.n, 0), publishedBy: pub.filter((r) => r.n).map((r) => `${r.name} ${r.n}`),
+    indexPct: total ? Math.round((indexed / total) * 100) : 0, indexTotal: total, indexed,
+    inquiries: inq.reduce((a, r) => a + r.mine, 0), notMine: inq.reduce((a, r) => a + r.notMine, 0), inquiriesBy: inq.filter((r) => r.mine).map((r) => `${r.name} ${r.mine}`)
+  };
+}
+
 /* ---------- 대시보드 ---------- */
 export async function dashboard() {
   const db = await getDb();
-  const [counts, stats, partnerRows] = await Promise.all([
+  const [counts, stats, partnerRows, ms] = await Promise.all([
     workCounts(),
     getSetting<DemoStats | null>('demo_stats', null),
-    db.select({ status: t.partners.status, n }).from(t.partners).groupBy(t.partners.status)
+    db.select({ status: t.partners.status, n }).from(t.partners).groupBy(t.partners.status),
+    monthStats()
   ]);
   const by = Object.fromEntries(partnerRows.map((r) => [r.status, r.n])) as Record<string, number>;
   const agencyPartners = await db.selectDistinct({ name: t.partners.name }).from(t.blogPosts)
@@ -64,13 +87,12 @@ export async function dashboard() {
   const reqs = await db.select({ id: t.partners.id, name: t.partners.name }).from(t.partnerRequests).innerJoin(t.partners, eq(t.partners.id, t.partnerRequests.partnerId)).where(eq(t.partnerRequests.status, '접수'));
   const reqNames = Array.from(new Set(reqs.map((r) => r.name)));
   const won = (v: number) => v.toLocaleString('ko-KR');
-  const published = stats ? Object.values(stats.monthPublished).reduce((a, b) => a + b, 0) : 0;
   return {
     stats: [
       { label: '활성 파트너', num: by['운영 중'] ?? 0, unit: '곳', note: `준비 중 ${by['준비 중'] ?? 0} · 종료 ${by['종료'] ?? 0}` },
-      { label: '이번 달 발행 페이지', num: published, unit: '장', note: stats ? Object.entries(stats.monthPublished).map(([k, v]) => `${k} ${v}`).join(' · ') : '' },
-      { label: '색인 확인 비율', num: stats?.indexRatio.pct ?? 0, unit: '%', note: stats ? `운영 중 파트너 ${stats.indexRatio.total}장 중 ${stats.indexRatio.indexed}장` : '' },
-      { label: '이번 달 문의', num: stats?.monthInquiries ?? 0, unit: '건', note: stats ? `본인 아님 ${stats.notMine}건 제외` : '' }
+      { label: '이번 달 발행 페이지', num: ms.published, unit: '장', note: ms.publishedBy.join(' · ') },
+      { label: '색인 확인 비율', num: ms.indexPct, unit: '%', note: `운영 중 파트너 ${ms.indexTotal}장 중 ${ms.indexed}장` },
+      { label: '이번 달 문의', num: ms.inquiries, unit: '건', note: `본인 아님 ${ms.notMine}건 제외` }
     ],
     todos: [
       { perm: '파트너 관리' as const, label: '신규 가입 문의', n: counts.leadNew, sub: '랜딩 가입 문의 폼', href: '/admin/leads?tab=신규' },

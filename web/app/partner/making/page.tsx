@@ -27,7 +27,7 @@ export default async function MakingPage() {
           <>
             <div className="mkhead"><h2>{mk.run.pageType} {mk.total}장</h2><span>{mk.cities}</span></div>
             <div className="pcard mksteps">
-              {[['시안 준비 중', true], ['확인 요청 도착', true], ['검수 중', true], [`배포 중 ${mk.deployed}/${mk.total}`, mk.deployed >= mk.total]].map(([label, done], i) => (
+              {[[mk.steps.drafted ? '시안 준비됨' : '시안 준비 중', mk.steps.drafted], ['확인 요청 도착', mk.steps.requested], ['검수 중', mk.steps.inReview], [`배포 ${mk.deployed}/${mk.total}`, mk.total > 0 && mk.deployed >= mk.total]].map(([label, done], i) => (
                 <div key={String(label)} className="mksteps__i">
                   <span className="mksteps__n">{done ? '✓' : i + 1}</span>
                   <span className="mksteps__l" style={{ fontWeight: done ? 600 : 800 }}>{label}</span>
@@ -39,7 +39,7 @@ export default async function MakingPage() {
             <div className="infobox infobox--i"><span className="infobox__i">i</span>페이지 구성과 배포는 본사에서 진행해요</div>
             <Making
               runId={mk.run.id}
-              drafts={mk.drafts.map((d) => ({ label: d.label, style: d.style, n: d.n, like: d.partnerLike, note: d.partnerNote }))}
+              drafts={mk.drafts.map((d) => ({ label: d.label, style: d.style, n: d.n, like: d.partnerLike, note: d.partnerNote, href: d.href }))}
               preview={mk.preview}
               work={mk.run.pageType.split('×').pop() ?? ''}
               partnerName={mk.partnerName}

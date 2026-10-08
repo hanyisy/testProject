@@ -5,6 +5,7 @@ import FilterSelect from '@/components/FilterSelect';
 import ListState from '@/components/ListState';
 import { requirePartner } from '@/lib/auth';
 import { partnerMaking, partnerSearch } from '@/lib/partner-app';
+import { href as siteHref } from '@/lib/site';
 import PhotoActions from '../PhotoActions';
 
 export const metadata = { title: '검색 노출' };
@@ -21,7 +22,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const [s, mk] = await Promise.all([partnerSearch(user.partnerId), partnerMaking(user.partnerId)]);
   const type = TYPES.includes(sp.type ?? '') ? sp.type! : '전체';
   let rows = s.pages.filter((p) => type === '전체' || p.type === type).filter((p) => !sp.idx || p.status === sp.idx);
-  if ((sp.sort ?? 'clicks') === 'clicks') rows = [...rows].sort((a, b) => b.visits30d - a.visits30d);
+  /* 정렬: 클릭 많은 순(최근 30일) · 유형 순(현장 → 지역 → 역 주변 → 가이드 → 질문, 같은 유형 안은 클릭 순) */
+  rows = (sp.sort ?? 'clicks') === 'type'
+    ? [...rows].sort((a, b) => TYPES.indexOf(a.type) - TYPES.indexOf(b.type) || b.visits30d - a.visits30d)
+    : [...rows].sort((a, b) => b.visits30d - a.visits30d);
   const { cur, items } = paginate(rows, Number(sp.page), 10);
   const href = (o: Partial<SP>) => {
     const v = { ...sp, ...o };
@@ -51,7 +55,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           <div className="stack" style={{ gap: 12 }}>
             <div className="filters filters--scroll">
               <span className="filters__label only-desk">필터</span>
-              <FilterSelect name="clicks" label="클릭 기간" value="month" options={[{ value: 'month', label: '이번 달' }]} />
               <FilterSelect name="idx" label="색인 상태" value={sp.idx ?? ''} options={[{ value: '', label: '전체' }, ...Object.keys(IDX).map((x) => ({ value: x, label: x }))]} />
               <FilterSelect name="sort" label="정렬" value={sp.sort ?? 'clicks'} options={[{ value: 'clicks', label: '클릭 많은 순' }, { value: 'type', label: '유형 순' }]} />
               {(sp.idx || sp.sort) && <Link href={href({ idx: '', sort: '', page: '' })} className="reset-link only-desk">초기화</Link>}
@@ -64,11 +67,11 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   </Link>
                 ))}
               </div>
-              <div className="plist__head"><span style={{ width: 60 }}>유형</span><span style={{ flex: 1 }}>페이지</span><span>색인 상태</span><span style={{ width: 64, textAlign: 'right' }}>이번 달 클릭</span></div>
+              <div className="plist__head"><span style={{ width: 60 }}>유형</span><span style={{ flex: 1 }}>페이지</span><span>색인 상태</span><span style={{ width: 64, textAlign: 'right' }}>30일 클릭</span></div>
               {items.map((p) => (
                 <div key={p.id} className="plist__row">
                   <span className="chip chip--plain">{p.type}</span>
-                  <span className="plist__t">{p.title}</span>
+                  {p.path ? <a href={siteHref(s.slug, p.path)} target="_blank" rel="noopener" className="plist__t plist__link">{p.title}</a> : <span className="plist__t">{p.title}</span>}
                   <span className={`chip chip--${IDX[p.status] ?? 'gray'}`}>{p.status}</span>
                   <span className="plist__c" style={{ color: p.visits30d ? 'var(--ink)' : 'var(--sub3)' }}>{p.visits30d ? `${p.visits30d}회` : '—'}</span>
                 </div>

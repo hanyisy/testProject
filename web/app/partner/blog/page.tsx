@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import PartnerTop from '@/components/PartnerTop';
 import { requirePartner } from '@/lib/auth';
 import { getDb, schema as t } from '@/db/client';
 import { partnerFrame, photoGroups } from '@/lib/partner-app';
+import { today } from '@/lib/config';
 import PhotoActions from '../PhotoActions';
 import Preview, { RequestButton } from './Preview';
 
@@ -20,10 +21,11 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
   const user = await requirePartner();
   const sp = await searchParams;
   const db = await getDb();
-  const [frame, groups, posts] = await Promise.all([
+  const [frame, groups, posts, day] = await Promise.all([
     partnerFrame(user.partnerId),
     photoGroups(user.partnerId),
-    db.select().from(t.blogPosts).where(eq(t.blogPosts.partnerId, user.partnerId)).orderBy(asc(t.blogPosts.sort))
+    db.select().from(t.blogPosts).where(eq(t.blogPosts.partnerId, user.partnerId)).orderBy(asc(t.blogPosts.sort)),
+    today()
   ]);
   const mode = frame.blogMode;
   const newPhotos = groups.reduce((a, g) => a + g.photos.length, 0);
@@ -51,7 +53,15 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
 
   const label = LABEL[mode];
   const cur = posts.find((p) => p.id === sp.d) ?? posts.find((p) => p.status !== '올림') ?? posts[0];
-  const month = posts.filter((p) => p.status === '올림' && p.billedThisMonth).length;
+  /* 초안 미리보기 사진: 그 현장의 공개 사진 3장 (사람 사진 · 자리표시 제외) — 현장 연결이 없으면 현장 제목으로 찾음 */
+  const siteId = cur?.siteId ?? (cur ? (await db.select({ id: t.sites.id }).from(t.sites).where(and(eq(t.sites.partnerId, user.partnerId), eq(t.sites.title, cur.siteTitle))).limit(1))[0]?.id : null);
+  const curPhotos = siteId
+    ? (await db.select().from(t.photos).where(and(eq(t.photos.siteId, siteId), eq(t.photos.partnerPublic, true), eq(t.photos.hasPerson, false))).orderBy(asc(t.photos.sort)))
+      .filter((p) => !p.fileKey.startsWith('demo/')).slice(0, 3).map((p) => ({ src: `/files/${p.fileKey}`, alt: p.caption ?? p.label ?? cur!.siteTitle }))
+    : [];
+  /* 이번 달 발행 = 올린 날이 이번 달(기준일의 달)인 글 */
+  const ym = (d: Date) => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(d).slice(0, 7);
+  const month = posts.filter((p) => p.status === '올림' && p.publishedAt && ym(p.publishedAt) === day.slice(0, 7)).length;
   const second = mode === '직접 올리기'
     ? { k: '올릴 초안', n: posts.filter((p) => p.status !== '올림').length }
     : { k: '승인 대기', n: posts.filter((p) => p.status === '초안' || p.status === '승인 대기').length };
@@ -84,7 +94,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
               })}
             </div>
             {cur && (
-              <Preview key={cur.id} mode={mode}
+              <Preview key={cur.id} mode={mode} photos={curPhotos}
                 post={{ id: cur.id, title: cur.title, body: cur.body, url: cur.url, status: cur.status, label: label[cur.status][0], chip: label[cur.status][1] }} />
             )}
           </div>

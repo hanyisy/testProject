@@ -6,10 +6,10 @@ import FilterSelect from '@/components/FilterSelect';
 import ListState from '@/components/ListState';
 import { requirePerm } from '@/lib/auth';
 import { getDb, schema as t } from '@/db/client';
-import { getSetting, type DemoStats } from '@/lib/admin';
+import { monthStats } from '@/lib/admin';
 import { today } from '@/lib/config';
 import { md, won, type ChipKind } from '@/lib/format';
-import { closeSettlements } from '@/lib/settlement';
+import { billMonthly, closeSettlements } from '@/lib/settlement';
 import { confirmDeposit, issueTax } from './actions';
 
 export const metadata = { title: '문의·정산' };
@@ -23,9 +23,10 @@ export default async function BillingAdmin({ searchParams }: { searchParams: Pro
   const user = await requirePerm('입금 확인 · 세금계산서');
   const sp = await searchParams;
   await closeSettlements();
+  await billMonthly();
   const db = await getDb();
   const recent = new Date(Date.now() - DAY);
-  const [deposits, taxes, settles, stats, day] = await Promise.all([
+  const [deposits, taxes, settles, ms, day] = await Promise.all([
     db.select({ c: t.charges, partner: t.partners.name }).from(t.charges).innerJoin(t.partners, eq(t.partners.id, t.charges.partnerId))
       .where(and(eq(t.charges.method, '계좌 입금'), or(eq(t.charges.state, '입금 대기'), and(eq(t.charges.state, '입금 확인'), gt(t.charges.confirmedAt, recent)))))
       .orderBy(desc(t.charges.billedOn)),
@@ -34,7 +35,7 @@ export default async function BillingAdmin({ searchParams }: { searchParams: Pro
       .where(or(eq(t.taxRequests.state, '요청됨'), and(eq(t.taxRequests.state, '발행 완료'), gt(t.taxRequests.issuedAt, recent))))
       .orderBy(desc(t.taxRequests.requestedOn)),
     db.select({ s: t.settlements, partner: t.partners.name }).from(t.settlements).innerJoin(t.partners, eq(t.partners.id, t.settlements.partnerId)).orderBy(desc(t.settlements.month)),
-    getSetting<DemoStats | null>('demo_stats', null),
+    monthStats(),
     today()
   ]);
   const chargeIds = settles.map((r) => r.s.chargeId).filter((x): x is string => !!x);
@@ -49,7 +50,7 @@ export default async function BillingAdmin({ searchParams }: { searchParams: Pro
 
   const waiting = deposits.filter((r) => r.c.state === '입금 대기');
   const cur = settles.filter((r) => r.s.month === month);
-  const partnerInq = stats ? Object.entries(stats.partners).filter(([, v]) => v.inquiries > 0).map(([k, v]) => `${k} ${v.inquiries}`) : [];
+  const partnerInq = ms.inquiriesBy;
 
   const years = Array.from(new Set(settles.map((r) => r.s.month.slice(0, 4))));
   const year = sp.year ?? day.slice(0, 4);
@@ -69,8 +70,8 @@ export default async function BillingAdmin({ searchParams }: { searchParams: Pro
       <TopBar title="문의·정산" user={user} />
       <div className="page">
         <div className="grid grid--3">
-          <div className="stat"><span className="stat__label">이번 달 문의</span><span className="stat__num">{stats?.monthInquiries ?? 0}<small>건</small></span>
-            <span className="stat__note">{[...partnerInq, stats ? `본인 아님 ${stats.notMine} 제외` : ''].filter(Boolean).join(' · ')}</span></div>
+          <div className="stat"><span className="stat__label">이번 달 문의</span><span className="stat__num">{ms.inquiries}<small>건</small></span>
+            <span className="stat__note">{[...partnerInq, `본인 아님 ${ms.notMine} 제외`].filter(Boolean).join(' · ')}</span></div>
           <div className="stat"><span className="stat__label">입금 확인 대기</span><span className="stat__num">{won(waiting.reduce((a, r) => a + r.c.amount, 0))}<small>원</small></span>
             <span className="stat__note">{waiting.length}건</span></div>
           <div className="stat"><span className="stat__label">이번 달 정산 예정</span><span className="stat__num">{won(cur.reduce((a, r) => a + r.s.fee, 0))}<small>원</small></span>
