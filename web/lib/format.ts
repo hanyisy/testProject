@@ -24,7 +24,8 @@ export function rel(d: Date | string, today: string) {
   const t = new Date(today + 'T00:00:00+09:00');
   const y = new Date(t.getTime() - 86400000);
   const yKey = parts(y);
-  if (key === today) return `오늘 ${p.hm}`;
+  /* 시안 기준일 이후(데모에서 방금 한 일)는 오늘로 보여 줌 */
+  if (key >= today) return `오늘 ${p.hm}`;
   if (p.y === yKey.y && p.m === yKey.m && p.d === yKey.d) return `어제 ${p.hm}`;
   return `${p.m}월 ${p.d}일`;
 }

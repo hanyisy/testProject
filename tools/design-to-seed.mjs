@@ -22,6 +22,8 @@ function loadDesign(file, names) {
 const A = loadDesign('현장로그 본사 어드민.dc.html', ['PARTNERS', 'LEADS', 'TPLS', 'LOGIN_ACCTS', 'RV0', 'G_REG', 'G_DRAFTS', 'G_ASSIGN', 'G_INFO', 'PA_REG', 'HIST']);
 const P = loadDesign('현장로그 파트너 v2.dc.html', ['SITES', 'PAGES', 'QUERIES', 'INQ', 'DRAFTS', 'LEDGER', 'BIZ', 'CHART', 'NEWP', 'MK_USAGE', 'PCOUNT']);
 const S = A.state;
+/* 시안 검수 묶음의 공통 본문 (시안 A · B · D) */
+const RV_BODY = Object.fromEntries(A.RV0.filter((b) => / · 시안 [A-F]$/.test(b.kind)).map((b) => [b.kind.slice(-1), b.body]));
 
 const SLUG = { '한결철거': 'hangyeol', '맑은집클린': 'malgeunjip', '온마루': 'onmaru', '다온플라워': 'daon' };
 const REGIONS = {
@@ -90,6 +92,28 @@ const out = {
       { partner: '온마루', tag: '2주 이상 현장 없음', desc: '드라이브 폴더에 현장 사진이 아직 없어요', value: '준비 중 18일째', to: 'partner' }
     ]
   },
+  /* 페이지 생성(3r–3x): 시안 구성 6종 + 공통 본문 틀. A·B·D 본문은 시안 검수 묶음 본문에서 업체·작업 이름만 칸으로 바꿈
+   * {업체} {작업} 은 묶음을 만들 때 채우고, {지역명} {지역 정보} {현장 수} {사진 수} 는 페이지마다 채움 */
+  draftStyles: (() => {
+    const body = (k) => (RV_BODY[k] || []).map((p) => p.replaceAll('한결철거', '{업체}').replaceAll('상가 철거', '{작업}'));
+    return A.G_DRAFTS.map(([label, style, desc]) => ({
+      label, style, desc,
+      body: body(label).length ? body(label) : ({
+        C: ['{지역명} {작업}, 많이 물어보시는 질문을 {업체} 현장 기록으로 답해요.', '{지역 정보}', '작업 기간, 작업 범위, 폐기물 처리, 이웃 피해를 현장 {현장 수}곳의 사진과 함께 설명해요.', '{지역명} {작업} 문의는 현장 사진과 함께 남겨 주세요.'],
+        E: ['{지역명}에서 가까운 {업체} 현장 {현장 수}곳을 지도에 모았어요.', '{지역 정보}', '현장마다 작업 날짜와 사진 {사진 수}장을 함께 볼 수 있어요.', '가까운 현장 사진으로 {지역명} {작업} 견적을 먼저 확인해 보세요.'],
+        F: ['{지역명} {작업} 현장 사진과 고객이 남긴 후기를 함께 보여드려요.', '{지역 정보}', '후기는 고객 동의를 받은 것만 실어요 · {업체} 현장 {현장 수}곳 기준이에요.', '{지역명} {작업} 문의는 현장 사진과 함께 남겨 주세요.']
+      })[label] ?? []
+    }));
+  })(),
+  /* 업종별 미리보기 재료(3u 시안 C 질문 · D 비용표) — 시안 화면 표기 그대로. 없는 업종은 업종 템플릿의 가이드 뼈대로 대신함 */
+  generationPresets: {
+    demolition: {
+      faq: ['{작업}는 며칠 걸리나요?', '원상복구 범위는 어디까지인가요?', '폐기물은 따로 처리해야 하나요?', '영업 중인 옆 가게에 피해가 없나요?'],
+      table: { head: ['평수', '작업 범위', '기간'], rows: [['20평 이하', '천장 · 칸막이', '1일'], ['20–40평', '천장 · 칸막이 · 바닥', '1–2일'], ['40평 이상', '전체 철거 · 원상복구', '2–3일']], note: '비용은 현장 사진을 보고 안내해 드려요' }
+    }
+  },
+  /* 사진 현황(3r) — 시안 표기 합계 (파트너 사진이 시안에 다 있지 않아 합계만 보관) */
+  photoStatus: { '한결철거': { total: 412, usable: 368, unconfirmed: 31, person: 13, byCity: { '춘천': 214, '원주': 118, '홍천': 36 } } },
   /* 지원형 정산 (어드민 3l 시안 표: 9월 마감 · 10월 진행 중) */
   settles: [
     { partner: '맑은집클린', month: '2026-09', count: 4, amount: 6800000, rate: 5, chargeItem: '정산 수수료 · 9월' },

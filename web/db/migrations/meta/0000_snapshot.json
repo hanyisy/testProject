@@ -1,5 +1,5 @@
 {
-  "id": "9199fd1a-3a02-4290-a099-75baf5767b89",
+  "id": "89d85f77-26cb-4bfb-8d43-e73520fd979e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -378,6 +378,13 @@
           "notNull": true,
           "default": "'{}'::uuid[]"
         },
+        "photo_seed": {
+          "name": "photo_seed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
         "override": {
           "name": "override",
           "type": "boolean",
@@ -538,6 +545,33 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'사진 연결'"
+        },
+        "work": {
+          "name": "work",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "regen_count": {
+          "name": "regen_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "preview_requested_at": {
+          "name": "preview_requested_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_by": {
           "name": "created_by",

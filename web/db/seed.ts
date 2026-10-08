@@ -181,10 +181,12 @@ async function seed(db: DB, d: Seed) {
   const regionStats: Record<string, { photos: number; sites: number; info: string | null }> = {};
   for (const [city, dongs] of gen.regions) for (const [dong, photos, sites] of dongs) {
     cityOf[dong] = city;
-    regionStats[`${city} ${dong}`] = { photos, sites, info: gen.info[dong] ?? null };
+    /* 지역 정보: 시안 G_INFO → 없으면 시안 검수 묶음 행의 지역 정보 요약 */
+    const fromReview = (d.review.bundles as Array<{ rows: unknown[][] }>).flatMap((b) => b.rows).find((r) => r[0] === `${city} ${dong}`)?.[1] as string | undefined;
+    regionStats[`${city} ${dong}`] = { photos, sites, info: gen.info[dong] ?? fromReview ?? null };
   }
   const [run] = await db.insert(t.generationRuns).values({
-    partnerId: hg, pageType: '지역×상가철거', regions: gen.selected.map((g) => `${cityOf[g]} ${g}`), draftCount: 4, status: '검수로 넘김', createdAt: at('2026-10-06', '14:00')
+    partnerId: hg, pageType: '지역×상가철거', regions: gen.selected.map((g) => `${cityOf[g]} ${g}`), draftCount: 4, status: '검수로 넘김', work: '상가철거', createdAt: at('2026-10-06', '14:00'), startedAt: at('2026-10-06', '14:00'), previewRequestedAt: at('2026-10-06', '15:10')
   }).returning();
   await db.insert(t.generationDrafts).values(gen.drafts.slice(0, 4).map(([label, style, description]) => ({
     runId: run.id, label, style, description, picked: !!gen.picked[label],
@@ -217,6 +219,6 @@ async function seed(db: DB, d: Seed) {
   /* 설정값 */
   const { _note, ...regionCenters } = (await import('./region-centers.json')).default as Record<string, unknown>;
   void _note;
-  const settings = { ...d.settings, review_min_unique: 35, review_min_photos: 3, region_centers: regionCenters, billing: d.billing, demo_today: d.today, demo_stats: d.demoStats, region_stats: regionStats, landing_values: { industries: null, pages: null, monthlyPages: null, fixDays: null, indexDays: null, business: { ceo: '', bizNo: '', address: '', email: '', phone: '' } } };
+  const settings = { ...d.settings, draft_styles: d.draftStyles, generation_presets: d.generationPresets, photo_status: d.photoStatus, photo_max_use: 2, review_min_unique: 35, review_min_photos: 3, region_centers: regionCenters, billing: d.billing, demo_today: d.today, demo_stats: d.demoStats, region_stats: regionStats, region_order: Object.keys(regionStats), landing_values: { industries: null, pages: null, monthlyPages: null, fixDays: null, indexDays: null, business: { ceo: '', bizNo: '', address: '', email: '', phone: '' } } };
   await db.insert(t.settings).values(Object.entries(settings).map(([key, value]) => ({ key, value: value as object })));
 }

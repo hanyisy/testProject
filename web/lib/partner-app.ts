@@ -1,6 +1,6 @@
 /* 파트너 관리자 조회 — 모든 조회는 로그인한 파트너의 partner_id 로만 거름 */
 import 'server-only';
-import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 import { getDb, schema as t } from '@/db/client';
 import { getSetting } from './admin';
 import { regionText } from './partners';
@@ -91,7 +91,8 @@ export async function partnerSearch(partnerId: string) {
 /** 만들고 있는 페이지 (2j): 가장 최근 생성 묶음 · 고른 시안 · 배포 진행 · 내 사진이 쓰이는 페이지 */
 export async function partnerMaking(partnerId: string) {
   const db = await getDb();
-  const [run] = await db.select().from(t.generationRuns).where(eq(t.generationRuns.partnerId, partnerId)).orderBy(desc(t.generationRuns.createdAt)).limit(1);
+  /* 본사가 미리보기 확인 요청을 보낸 생성만 파트너에게 보임 */
+  const [run] = await db.select().from(t.generationRuns).where(and(eq(t.generationRuns.partnerId, partnerId), isNotNull(t.generationRuns.previewRequestedAt))).orderBy(desc(t.generationRuns.createdAt)).limit(1);
   if (!run) return null;
   const [drafts, assigns, items, [p], regionStats, newPhotos] = await Promise.all([
     db.select().from(t.generationDrafts).where(and(eq(t.generationDrafts.runId, run.id), eq(t.generationDrafts.picked, true))).orderBy(asc(t.generationDrafts.label)),

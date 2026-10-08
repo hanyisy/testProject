@@ -53,6 +53,7 @@ CREATE TABLE "generation_assignments" (
 	"region" text NOT NULL,
 	"draft_label" text NOT NULL,
 	"photo_ids" uuid[] DEFAULT '{}'::uuid[] NOT NULL,
+	"photo_seed" integer DEFAULT 0 NOT NULL,
 	"override" boolean DEFAULT false NOT NULL,
 	CONSTRAINT "generation_assignments_run_id_region_pk" PRIMARY KEY("run_id","region")
 );
@@ -75,6 +76,10 @@ CREATE TABLE "generation_runs" (
 	"regions" text[] NOT NULL,
 	"draft_count" integer NOT NULL,
 	"status" text DEFAULT '사진 연결' NOT NULL,
+	"work" text DEFAULT '' NOT NULL,
+	"started_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"regen_count" integer DEFAULT 0 NOT NULL,
+	"preview_requested_at" timestamp with time zone,
 	"created_by" uuid,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );

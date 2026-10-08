@@ -224,6 +224,13 @@ export const generationRuns = pgTable('generation_runs', {
   regions: text('regions').array().notNull(),
   draftCount: integer('draft_count').notNull(),
   status: text('status').$type<'사진 연결' | '생성 중' | '완료' | '배분 확인' | '검수로 넘김'>().notNull().default('사진 연결'),
+  /** 작업 (예: 상가철거) — 업종 템플릿의 대상 유형 + 업종 */
+  work: text('work').notNull().default(''),
+  /** 시안 생성 시작 시각 (다시 생성하면 새로) · 다시 생성 횟수 */
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  regenCount: integer('regen_count').notNull().default(0),
+  /** 파트너에게 미리보기 확인 요청을 보낸 때 */
+  previewRequestedAt: timestamp('preview_requested_at', { withTimezone: true }),
   createdBy: uuid('created_by'),
   createdAt: createdAt()
 });
@@ -243,6 +250,8 @@ export const generationAssignments = pgTable('generation_assignments', {
   region: text('region').notNull(),
   draftLabel: text('draft_label').notNull(),
   photoIds: uuid('photo_ids').array().notNull().default(sql`'{}'::uuid[]`),
+  /** 배정 사진 바꾸기 횟수 (같은 지역 사진 중 다음 묶음으로) */
+  photoSeed: integer('photo_seed').notNull().default(0),
   override: boolean('override').notNull().default(false)
 }, (t) => [primaryKey({ columns: [t.runId, t.region] })]);
 
