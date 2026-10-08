@@ -44,3 +44,5 @@ export const PAY_MODE_NOTE: Record<string, string> = {
 };
 export const CHARGE_CHIP: Record<string, ChipKind> = { '입금 대기': 'warn', '미결제': 'red', '결제 완료': 'ok', '입금 확인': 'ok', '면제': 'gray' };
 export const TAX_CHIP: Record<string, ChipKind> = { '요청됨': 'warn', '발행 완료': 'ok', '요청 전': 'gray', '카드 영수증': 'gray', '해당 없음': 'gray' };
+/** 업종 템플릿 항목 묶음 (시안 3h 순서) */
+export const TEMPLATE_GROUPS = ['작업 종류', '대상 유형', '현장 입력 항목', '가이드 뼈대', '핵심 검색어'] as const;

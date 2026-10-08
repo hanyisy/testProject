@@ -19,7 +19,7 @@ function loadDesign(file, names) {
   return JSON.parse(JSON.stringify(ctx.out));
 }
 
-const A = loadDesign('현장로그 본사 어드민.dc.html', ['PARTNERS', 'LEADS', 'TPLS', 'LOGIN_ACCTS', 'RV0', 'G_REG', 'G_DRAFTS', 'G_ASSIGN', 'G_INFO', 'PA_REG']);
+const A = loadDesign('현장로그 본사 어드민.dc.html', ['PARTNERS', 'LEADS', 'TPLS', 'LOGIN_ACCTS', 'RV0', 'G_REG', 'G_DRAFTS', 'G_ASSIGN', 'G_INFO', 'PA_REG', 'HIST']);
 const P = loadDesign('현장로그 파트너 v2.dc.html', ['SITES', 'PAGES', 'QUERIES', 'INQ', 'DRAFTS', 'LEDGER', 'BIZ', 'CHART', 'NEWP', 'MK_USAGE', 'PCOUNT']);
 const S = A.state;
 
@@ -82,6 +82,8 @@ const out = {
     /* 파트너 검색 노출(2c): 이번 달 클릭 · 전월 대비, 최근 6개월 유형별 문의, 내 사진이 들어가는 페이지(2j) */
     search: { '한결철거': { monthClicks: 412, vsPrev: 68, chart: P.CHART, usage: P.MK_USAGE } },
     monthInquiries: 34, notMine: 2,
+    /* 발행·색인(3j) 색인 기간 분포: 최근 90일 발행 페이지가 며칠 만에 색인됐는지 [구간, 장수] */
+    indexHist: A.HIST,
     indexRatio: { pct: 87, indexed: 78, total: 90 },
     attention: [
       { partner: '맑은집클린', tag: '색인 비율 하락', desc: '새 페이지 5장이 색인 요청 상태로 15일 이상', value: '2주 전 95% → 현재 90%', to: 'indexing' },
