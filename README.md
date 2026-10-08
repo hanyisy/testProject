@@ -31,7 +31,18 @@ site/
     closed.html                 계약이 끝나 비공개가 된 업체 주소 (410 · 색인 제외)
 ```
 
-## 로컬에서 보기
+## 관리자 앱 (web/ · Next.js) — 본사 어드민 · 파트너
+설계: [docs/architecture.md](docs/architecture.md) · [docs/db.md](docs/db.md) · [docs/screens.md](docs/screens.md)
+```
+cd web
+npm install
+npm run dev          # http://localhost:3000/login
+npm run db:reset     # 시안 더미 데이터로 처음 상태 되돌리기
+```
+- Postgres 설치 없이 돌아요(PGlite, `web/.data/`). `DATABASE_URL`을 넣으면 실제 PostgreSQL을 씁니다.
+- 데모 계정은 시안 그대로입니다(`web/db/seed-data.json`의 `logins`). 컨펌용 더미 값이에요.
+
+## 로컬에서 보기 (정적 랜딩)
 ```
 node tools/dev-server.js
 ```
