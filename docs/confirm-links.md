@@ -1,5 +1,13 @@
 # 컨펌용 페이지 링크
 
+## 바로 보기 (깃허브 페이지 · 서버 없이)
+- **첫 화면 = 랜딩:** https://hanyisy.github.io/testProject/
+- **미리보기 목차 (어드민 · 파트너 · 업체 사이트 · 시안 A~F 전부):** https://hanyisy.github.io/testProject/preview/
+- 개발 서버의 더미 데이터 화면을 HTML로 저장한 것이라 **화면 · 링크 이동은 되지만 버튼 · 저장 · 폼은 동작하지 않아요.**
+- 다시 만들기: `cd web && npm run dev` 켠 상태에서 저장소 루트에서 `node tools/snapshot.mjs` → `preview/` · `index.html`이 새로 생김 → 커밋 · 푸시
+  - 로컬에서 깃허브 페이지처럼 보기: `node tools/pages-server.js 8100` → http://localhost:8100/testProject/
+
+## 직접 눌러 보기 (개발 서버)
 모두 더미 데이터예요. 개발 서버(`cd web && npm run dev`)를 켠 뒤 `http://localhost:3000` 기준으로 열어요.
 처음 상태로 되돌리기: 서버를 끄고 `npm --prefix web run db:reset`. 계정은 [demo-accounts.md](demo-accounts.md).
 
