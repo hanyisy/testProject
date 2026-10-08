@@ -149,13 +149,13 @@ export async function seedDemoWorld(db: DB) {
   /* 시안 A~F 공통 본문: 업종에 상관없이 쓰는 판(시안 원본은 철거 문장이 박혀 있어 다른 업종에 그대로 나갔음) */
   await db.update(t.settings).set({ value: world.draftStyles }).where(eq(t.settings.key, 'draft_styles'));
 
-  /* 6) 시안 C · E · F 확인용 생성 기록 — 어드민 페이지 생성과 같은 흐름(createRun → 시안 고르기 · 배분 → buildReview)으로
+  /* 6) 시안 A~F 확인용 생성 기록 — 어드민 페이지 생성과 같은 흐름(createRun → 시안 고르기 · 배분 → buildReview)으로
    *    db:reset 해도 남음 · 배분은 사진 많은 지역부터 돌아가며라 매번 같은 주소
-   *    한결철거 학원철거(시안 C · D) / 맑은집클린 오피스텔입주청소(시안 D · E · F) */
+   *    한결철거 학원철거(시안 C · D) / 맑은집클린 오피스텔입주청소(시안 D · E · F) / 단정인테리어 아파트인테리어(시안 A · B) */
   const [demoToday] = await db.select().from(t.settings).where(eq(t.settings.key, 'demo_today'));
   const createdOn = md(String(demoToday?.value ?? '2026-10-07'));
   const allStats = (rs ?? {}) as Record<string, { photos: number }>;
-  for (const [slug, work, count, picks] of [['hangyeol', '학원철거', 4, ['C', 'D']], ['malgeunjip', '오피스텔입주청소', 6, ['D', 'E', 'F']]] as const) {
+  for (const [slug, work, count, picks] of [['hangyeol', '학원철거', 4, ['C', 'D']], ['malgeunjip', '오피스텔입주청소', 6, ['D', 'E', 'F']], ['danjeong', '아파트인테리어', 4, ['A', 'B']]] as const) {
     const p = partners.find((x) => x.p.slug === slug)!.p;
     const cities = (await db.select({ region: t.partnerRegions.region }).from(t.partnerRegions).where(eq(t.partnerRegions.partnerId, p.id))).map((r) => r.region.split(' ').slice(-1)[0]);
     const regions = Object.keys(allStats).filter((k) => cities.some((c) => k.startsWith(c + ' ')) && allStats[k].photos > 0);
