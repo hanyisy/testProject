@@ -49,6 +49,8 @@ async function seed(db: DB, d: Seed) {
     const [row] = await db.insert(t.partners).values({
       slug: p.slug, name: p.name, industryId: industryId[p.industry], planId: planId[p.plan], status: p.status as '운영 중',
       ceo: p.ceo ?? null, bizRegNo: p.bizRegNo ?? null, tel: p.tel ?? null, manager: p.manager ?? null, mobile: p.mobile ?? null, email: p.email ?? null,
+      /* 사업자 정보: 등록번호가 있는 업체는 저장된 상태로 (세금계산서 바로 요청), 없으면 요청 때 입력 창 */
+      bizName: p.bizRegNo ? p.name : null, taxEmail: p.bizRegNo ? p.email ?? null : null,
       brandColor: p.brandColor ?? null, mark: p.mark ?? null, payMode: p.payMode as '계좌 입금', startedAt: p.startedAt ?? null,
       driveConnected: p.status === '운영 중', driveSyncedAt: p.status === '운영 중' ? at(d.today, '09:50') : null,
       endedAt: p.status === '종료' ? '2026-09-30' : null
@@ -114,7 +116,9 @@ async function seed(db: DB, d: Seed) {
   for (const [name, rows] of Object.entries(d.ledgers)) {
     for (const r of rows as Array<Record<string, unknown>>) {
       const method = bank(String(r.pay ?? r.method));
-      const [c] = await db.insert(t.charges).values({ partnerId: partnerId[name], billedOn: md(String(r.date)), item: String(r.item), method, amount: Number(r.amount), state: st(String(r.state), method) as '입금 대기', payer: name }).returning();
+      const [c] = await db.insert(t.charges).values({ partnerId: partnerId[name], billedOn: md(String(r.date)), item: String(r.item), method, amount: Number(r.amount), state: st(String(r.state), method) as '입금 대기',
+        /* 계좌 입금은 입금자명, 온라인 결제 완료는 결제 수단 (시안 표기) */
+        payer: method === '계좌 입금' ? name : st(String(r.state), method) === '결제 완료' ? '법인카드 ···4821' : null }).returning();
       const tax = String(r.tax ?? '');
       if (tax === 'requested' || tax === '요청됨' || tax === 'issued' || tax === '발행 완료') {
         const key = name + String(r.item).split(' · ')[0] + String(r.item).split(' · ')[1]?.slice(0, 2);
@@ -199,6 +203,6 @@ async function seed(db: DB, d: Seed) {
   /* 설정값 */
   const { _note, ...regionCenters } = (await import('./region-centers.json')).default as Record<string, unknown>;
   void _note;
-  const settings = { ...d.settings, region_centers: regionCenters, demo_today: d.today, demo_stats: d.demoStats, region_stats: regionStats, landing_values: { industries: null, pages: null, monthlyPages: null, fixDays: null, indexDays: null, business: { ceo: '', bizNo: '', address: '', email: '', phone: '' } } };
+  const settings = { ...d.settings, region_centers: regionCenters, billing: d.billing, demo_today: d.today, demo_stats: d.demoStats, region_stats: regionStats, landing_values: { industries: null, pages: null, monthlyPages: null, fixDays: null, indexDays: null, business: { ceo: '', bizNo: '', address: '', email: '', phone: '' } } };
   await db.insert(t.settings).values(Object.entries(settings).map(([key, value]) => ({ key, value: value as object })));
 }

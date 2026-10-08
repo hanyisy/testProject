@@ -47,7 +47,7 @@
 | 주소 | 화면 | 데스크톱 | 모바일 |
 |---|---|---|---|
 | `/partner` | 홈 | `2a` | `1a` |
-| `/partner/sites/new` | 현장 발행 | `2b` | `1b` |
+| `/partner/sites` | 현장 발행 (자동 묶음 `?g=`) | `2b` | `1b` |
 | `/partner/photos` | 사진 추가 (연결 전 · 올리는 중 · 올린 뒤) | `2i` `2i-2` `2i-3` | `1i` `1i-2` `1i-3` |
 | `/partner/search` | 검색 노출 | `2c` | `1c` |
 | `/partner/making` | 만들고 있는 페이지 | `2j` | `1j` |

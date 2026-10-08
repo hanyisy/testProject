@@ -89,6 +89,11 @@ export const partners = pgTable('partners', {
   manager: text('manager'),
   mobile: text('mobile'),
   email: text('email'),
+  /** 세금계산서용 사업자 정보 (상호 · 사업자등록번호 · 받을 이메일) — 셋 다 있어야 바로 요청됨 */
+  bizName: text('biz_name'),
+  taxEmail: text('tax_email'),
+  /** 알림 설정: 새 문의 알림톡 · 결과 입력 알림 · 색인 완료 알림 */
+  notify: jsonb('notify').$type<{ lead: boolean; result: boolean; indexed: boolean }>().notNull().default({ lead: true, result: true, indexed: true }),
   industryId: uuid('industry_id').notNull().references(() => industries.id),
   planId: uuid('plan_id').notNull().references(() => plans.id),
   status: text('status').$type<'준비 중' | '운영 중' | '종료'>().notNull().default('준비 중'),
@@ -385,6 +390,17 @@ export const blogPosts = pgTable('blog_posts', {
   approvedOn: text('approved_on'),
   publishedAt: timestamp('published_at', { withTimezone: true }),
   sort: integer('sort').notNull().default(0)
+});
+
+/** 파트너가 본사에 보내는 요청 (기능 추가 · 지역 추가 문의) — 본사 대시보드 할 일에 뜸 */
+export const partnerRequests = pgTable('partner_requests', {
+  id: id(),
+  partnerId: uuid('partner_id').notNull().references(() => partners.id),
+  kind: text('kind').$type<'기능 추가' | '지역 추가'>().notNull(),
+  subject: text('subject').notNull(),
+  note: text('note'),
+  status: text('status').$type<'접수' | '처리 완료'>().notNull().default('접수'),
+  createdAt: createdAt()
 });
 
 /* ---------- 운영 ---------- */

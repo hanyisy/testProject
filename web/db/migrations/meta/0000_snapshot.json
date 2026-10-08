@@ -1,5 +1,5 @@
 {
-  "id": "55798dc8-535d-4182-b80b-881362712565",
+  "id": "41062743-9d01-4409-b643-3617e65575c2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1627,6 +1627,78 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.partner_requests": {
+      "name": "partner_requests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "partner_id": {
+          "name": "partner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subject": {
+          "name": "subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'접수'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "partner_requests_partner_id_partners_id_fk": {
+          "name": "partner_requests_partner_id_partners_id_fk",
+          "tableFrom": "partner_requests",
+          "tableTo": "partners",
+          "columnsFrom": [
+            "partner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.partners": {
       "name": "partners",
       "schema": "",
@@ -1685,6 +1757,25 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "biz_name": {
+          "name": "biz_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tax_email": {
+          "name": "tax_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notify": {
+          "name": "notify",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{\"lead\":true,\"result\":true,\"indexed\":true}'::jsonb"
         },
         "industry_id": {
           "name": "industry_id",

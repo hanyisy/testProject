@@ -88,6 +88,8 @@ const out = {
       { partner: '온마루', tag: '2주 이상 현장 없음', desc: '드라이브 폴더에 현장 사진이 아직 없어요', value: '준비 중 18일째', to: 'partner' }
     ]
   },
+  /* 입금 계좌 · 납부 기한 (파트너 결제 내역 2g 시안 표기) */
+  billing: { bank: '농협', account: '301-0123-4567-81', holder: '(주)현장로그', dueDay: 10 },
   settings: { region_options: A.PA_REG.map((r) => r[0]), index_days: S.idxDays, cap_per_partner: Number(S.capPartner), cap_total: Number(S.capTotal), payment_key: S.payKey, alimtalk_codes: [S.alim1, S.alim2] }
 };
 

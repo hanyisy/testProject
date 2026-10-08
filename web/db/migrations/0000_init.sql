@@ -217,6 +217,16 @@ CREATE TABLE "partner_regions" (
 	CONSTRAINT "partner_regions_partner_id_region_pk" PRIMARY KEY("partner_id","region")
 );
 --> statement-breakpoint
+CREATE TABLE "partner_requests" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"partner_id" uuid NOT NULL,
+	"kind" text NOT NULL,
+	"subject" text NOT NULL,
+	"note" text,
+	"status" text DEFAULT '접수' NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "partners" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"slug" text NOT NULL,
@@ -227,6 +237,9 @@ CREATE TABLE "partners" (
 	"manager" text,
 	"mobile" text,
 	"email" text,
+	"biz_name" text,
+	"tax_email" text,
+	"notify" jsonb DEFAULT '{"lead":true,"result":true,"indexed":true}'::jsonb NOT NULL,
 	"industry_id" uuid NOT NULL,
 	"plan_id" uuid NOT NULL,
 	"status" text DEFAULT '준비 중' NOT NULL,
@@ -427,6 +440,7 @@ ALTER TABLE "pages" ADD CONSTRAINT "pages_partner_id_partners_id_fk" FOREIGN KEY
 ALTER TABLE "pages" ADD CONSTRAINT "pages_site_id_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."sites"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "partner_features" ADD CONSTRAINT "partner_features_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "partner_regions" ADD CONSTRAINT "partner_regions_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "partner_requests" ADD CONSTRAINT "partner_requests_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "partners" ADD CONSTRAINT "partners_industry_id_industries_id_fk" FOREIGN KEY ("industry_id") REFERENCES "public"."industries"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "partners" ADD CONSTRAINT "partners_plan_id_plans_id_fk" FOREIGN KEY ("plan_id") REFERENCES "public"."plans"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "photos" ADD CONSTRAINT "photos_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
