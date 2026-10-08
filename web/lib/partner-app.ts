@@ -63,3 +63,56 @@ export async function partnerHome(partnerId: string) {
     sites
   };
 }
+
+type DemoSearch = { monthClicks: number; vsPrev: number; chart: [string, ...number[]][]; usage: [string, string, number, [string, string, string][]][] };
+async function demoSearch(partnerName: string): Promise<DemoSearch | null> {
+  const s = await getSetting<{ search?: Record<string, DemoSearch> } | null>('demo_stats', null);
+  return s?.search?.[partnerName] ?? null;
+}
+
+/** 검색 노출 (2c): 페이지 · 색인 · 클릭 · 유입 검색어 · 유형별 문의 차트 */
+export async function partnerSearch(partnerId: string) {
+  const db = await getDb();
+  const [[p], pages, queries, indexDays] = await Promise.all([
+    db.select({ name: t.partners.name }).from(t.partners).where(eq(t.partners.id, partnerId)).limit(1),
+    db.select().from(t.pages).where(eq(t.pages.partnerId, partnerId)).orderBy(asc(t.pages.sort)),
+    db.select().from(t.pageQueries).where(eq(t.pageQueries.partnerId, partnerId)).orderBy(desc(t.pageQueries.clicks)),
+    getSetting<number>('index_days', 23)
+  ]);
+  const demo = await demoSearch(p.name);
+  const indexed = pages.filter((x) => x.status === '색인 확인').length;
+  return {
+    pages, indexed, waiting: pages.length - indexed, indexDays, queries,
+    monthClicks: demo?.monthClicks ?? pages.reduce((a, x) => a + x.visits30d, 0), vsPrev: demo?.vsPrev ?? null,
+    chart: (demo?.chart ?? []).map(([mon, ...v]) => ({ mon, v: v as number[] }))
+  };
+}
+
+/** 만들고 있는 페이지 (2j): 가장 최근 생성 묶음 · 고른 시안 · 배포 진행 · 내 사진이 쓰이는 페이지 */
+export async function partnerMaking(partnerId: string) {
+  const db = await getDb();
+  const [run] = await db.select().from(t.generationRuns).where(eq(t.generationRuns.partnerId, partnerId)).orderBy(desc(t.generationRuns.createdAt)).limit(1);
+  if (!run) return null;
+  const [drafts, assigns, items, [p], regionStats, newPhotos] = await Promise.all([
+    db.select().from(t.generationDrafts).where(and(eq(t.generationDrafts.runId, run.id), eq(t.generationDrafts.picked, true))).orderBy(asc(t.generationDrafts.label)),
+    db.select().from(t.generationAssignments).where(eq(t.generationAssignments.runId, run.id)),
+    db.select({ name: t.reviewItems.name, state: t.reviewItems.state }).from(t.reviewItems)
+      .innerJoin(t.reviewBundles, eq(t.reviewBundles.id, t.reviewItems.bundleId)).where(eq(t.reviewBundles.partnerId, partnerId)),
+    db.select({ name: t.partners.name }).from(t.partners).where(eq(t.partners.id, partnerId)).limit(1),
+    getSetting<Record<string, { photos: number; sites: number; info: string | null }>>('region_stats', {}),
+    photoGroups(partnerId)
+  ]);
+  const inRun = items.filter((i) => run.regions.includes(i.name));
+  const deployed = inRun.filter((i) => i.state === '검수 완료' || i.state === '발행 중 · 수정 대기').length;
+  const byCity: Record<string, number> = {};
+  for (const r of run.regions) { const c = r.split(' ')[0]; byCity[c] = (byCity[c] ?? 0) + 1; }
+  const demo = await demoSearch(p.name);
+  const preview = run.regions.find((r) => regionStats[r]?.info) ?? run.regions[0];
+  return {
+    run, deployed, total: run.regions.length, cities: Object.entries(byCity).map(([c, n]) => `${c} ${n}`).join(' · '),
+    drafts: drafts.map((d) => ({ ...d, n: assigns.filter((a) => a.draftLabel === d.label).length })),
+    preview: { region: preview, name: preview.split(' ').slice(1).join(' ') || preview, ...(regionStats[preview] ?? { photos: 0, sites: 0, info: '' }) },
+    partnerName: p.name, newPhotos: newPhotos.reduce((a, g) => a + g.photos.length, 0),
+    usage: (demo?.usage ?? []).map(([site, date, n, pages]) => ({ site, date, n, pages: pages.map(([name, k, st]) => ({ name, k, st })) }))
+  };
+}

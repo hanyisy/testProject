@@ -1,4 +1,4 @@
-/* 본사 어드민 · 파트너 화면 (3b · 3c–3g · 3y) */
+/* 공용 컴포넌트 (본사 어드민 · 파트너 함께 씀) — 선택 칩, 입력칸, 스위치, 단계 표시, 창 등 */
 .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .seg--w420 { width: 420px; max-width: 100%; }
 .seg--w320 { width: 320px; max-width: 100%; }

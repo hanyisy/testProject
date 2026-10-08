@@ -73,12 +73,14 @@ const out = {
   partnerBlog: P.DRAFTS,
   translations: S.trans,
   review: { bundles: A.RV0, state: S.rv.map((b) => ({ rows: b.rows.map((r) => ({ done: r.done, live: r.live })) })), history: S.rvHist, minUnique: S.rvMinUniq, minPhotos: S.rvMinPhotos },
-  generation: { regions: A.G_REG, drafts: A.G_DRAFTS, assign: A.G_ASSIGN, info: A.G_INFO, selected: S.gSel },
+  generation: { regions: A.G_REG, drafts: A.G_DRAFTS, assign: A.G_ASSIGN, info: A.G_INFO, selected: S.gSel, picked: S.gPicked, partnerLikes: P.state.mkLikes, partnerNotes: P.state.mkNotes },
   hangyeol: { sites: P.SITES, pages: P.PAGES, queries: P.QUERIES, inquiries: P.INQ, chart: P.CHART, newPages: P.NEWP, usage: P.MK_USAGE, pageCount: P.PCOUNT },
   /* 시안 대시보드 · 파트너 목록에 적힌 합계 (파트너별 페이지가 시안에 다 있지 않아 합계만 보관 — 실제 운영에서는 집계로 대체) */
   demoStats: {
     partners: Object.fromEntries(A.PARTNERS.map((p) => [p.name, { pages: p.pages, indexed: p.ok, requested: p.req, inquiries: p.inq, ...(p.name === '맑은집클린' ? { photos: 286, sites: 24, newPhotos: 11, lastLogin: '오늘 08:12', syncedAgo: '10분 전' } : {}) }])),
     monthPublished: { '한결철거': 3, '맑은집클린': 6 },
+    /* 파트너 검색 노출(2c): 이번 달 클릭 · 전월 대비, 최근 6개월 유형별 문의, 내 사진이 들어가는 페이지(2j) */
+    search: { '한결철거': { monthClicks: 412, vsPrev: 68, chart: P.CHART, usage: P.MK_USAGE } },
     monthInquiries: 34, notMine: 2,
     indexRatio: { pct: 87, indexed: 78, total: 90 },
     attention: [

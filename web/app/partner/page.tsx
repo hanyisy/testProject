@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import PartnerTop from '@/components/PartnerTop';
+import PhotoActions from './PhotoActions';
 import { requirePartner } from '@/lib/auth';
 import { partnerHome } from '@/lib/partner-app';
 import { md, won } from '@/lib/format';
@@ -17,10 +18,7 @@ export default async function PartnerHome() {
       <PartnerTop
         title="홈"
         mobileTitle={false}
-        actions={<>
-          <Link href="/partner/photos" className="pbtn pbtn--line">사진 추가</Link>
-          <Link href="/partner/sites" className="pbtn pbtn--accent">새 사진 검토{h.newPhotos > 0 && <span className="pbtn__n">{h.newPhotos}</span>}</Link>
-        </>}
+        actions={<PhotoActions newPhotos={h.newPhotos} />}
       />
       <div className="ppage">
         <div className="pgrid pgrid--home">

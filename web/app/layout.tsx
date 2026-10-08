@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import '@/styles/app.css';
+import '@/styles/components.css';
 
 export const metadata: Metadata = {
   title: { default: '현장로그', template: '%s · 현장로그' },

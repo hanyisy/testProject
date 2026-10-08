@@ -1,4 +1,3 @@
-import '@/styles/admin-partners.css';
 import AdminNav, { type NavItem } from '@/components/AdminNav';
 import { requireStaff } from '@/lib/auth';
 import { workCounts } from '@/lib/admin';

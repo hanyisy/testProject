@@ -153,8 +153,28 @@ async function seed(db: DB, d: Seed) {
     await db.insert(t.reviewHistory).values({ bundleLabel: h.bundle, who: h.who, what: h.what, reverted: !!(h as { reverted?: boolean }).reverted, whenText: h.when, userId: userId[h.who] ?? null });
   }
 
-  /* 한결철거 현장 · 페이지 · 검색어 · 고객 문의 (파트너 시안) */
+  /* 페이지 생성 (어드민 3r–3x · 파트너 2j): 한결철거 지역×상가철거, 지역 12곳 · 시안 A·B·D */
   const hg = partnerId['한결철거'];
+  const gen = d.generation as unknown as {
+    regions: [string, [string, number, number][]][]; drafts: [string, string, string][]; assign: Record<string, string>;
+    info: Record<string, string>; selected: string[]; picked: Record<string, boolean>; partnerLikes: Record<string, boolean>; partnerNotes: Record<string, string>;
+  };
+  const cityOf: Record<string, string> = {};
+  const regionStats: Record<string, { photos: number; sites: number; info: string | null }> = {};
+  for (const [city, dongs] of gen.regions) for (const [dong, photos, sites] of dongs) {
+    cityOf[dong] = city;
+    regionStats[`${city} ${dong}`] = { photos, sites, info: gen.info[dong] ?? null };
+  }
+  const [run] = await db.insert(t.generationRuns).values({
+    partnerId: hg, pageType: '지역×상가철거', regions: gen.selected.map((g) => `${cityOf[g]} ${g}`), draftCount: 4, status: '검수로 넘김', createdAt: at('2026-10-06', '14:00')
+  }).returning();
+  await db.insert(t.generationDrafts).values(gen.drafts.slice(0, 4).map(([label, style, description]) => ({
+    runId: run.id, label, style, description, picked: !!gen.picked[label],
+    partnerLike: !!gen.partnerLikes[label], partnerNote: gen.partnerNotes[label] ?? ''
+  })));
+  await db.insert(t.generationAssignments).values(gen.selected.map((g) => ({ runId: run.id, region: `${cityOf[g]} ${g}`, draftLabel: gen.assign[g] ?? 'A' })));
+
+  /* 한결철거 현장 · 페이지 · 검색어 · 고객 문의 (파트너 시안) */
   for (const s of d.hangyeol.sites) await db.insert(t.sites).values({ partnerId: hg, title: s.title, workedAt: md(s.date), photoCount: s.n, status: '발행됨', publishedAt: at(md(s.date)) });
   for (const [i, [type, title, status, visits]] of (d.hangyeol.pages as [string, string, string, number][]).entries()) {
     await db.insert(t.pages).values({ partnerId: hg, type: type as '현장', title, status: status as '발행됨', visits30d: visits, sort: i, publishedAt: at('2026-09-01') });
@@ -177,6 +197,6 @@ async function seed(db: DB, d: Seed) {
   }
 
   /* 설정값 */
-  const settings = { ...d.settings, demo_today: d.today, demo_stats: d.demoStats, landing_values: { industries: null, pages: null, monthlyPages: null, fixDays: null, indexDays: null, business: { ceo: '', bizNo: '', address: '', email: '', phone: '' } } };
+  const settings = { ...d.settings, demo_today: d.today, demo_stats: d.demoStats, region_stats: regionStats, landing_values: { industries: null, pages: null, monthlyPages: null, fixDays: null, indexDays: null, business: { ceo: '', bizNo: '', address: '', email: '', phone: '' } } };
   await db.insert(t.settings).values(Object.entries(settings).map(([key, value]) => ({ key, value: value as object })));
 }
