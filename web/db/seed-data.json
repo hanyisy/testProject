@@ -554,6 +554,12 @@
    "pw": "Wj63-kd2Rt",
    "where": "admin",
    "first": true
+  },
+  {
+   "id": "seojun.park",
+   "pw": "Sj35-hq8Lm",
+   "where": "admin",
+   "first": false
   }
  ],
  "leads": [
@@ -2257,6 +2263,20 @@
   ]
  },
  "settings": {
+  "region_options": [
+   "서울 마포",
+   "인천 부평",
+   "경기 용인",
+   "서울 서초",
+   "서울 강남",
+   "서울 송파",
+   "서울 강동",
+   "경기 성남",
+   "경기 수원",
+   "강원 춘천",
+   "강원 원주",
+   "대구"
+  ],
   "index_days": 23,
   "cap_per_partner": 5,
   "cap_total": 60,

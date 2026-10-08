@@ -302,6 +302,10 @@ a.table__row:hover { background: var(--field); }
 .demo { width: 440px; max-width: 100%; border: 1px dashed var(--line4); border-radius: 20px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
 .demo__head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 15px; }
 .demo__head span { font-size: 13px; color: var(--sub); }
+.demo__groups { display: flex; flex-direction: column; gap: 14px; }
+.demo__group { display: flex; flex-direction: column; gap: 8px; }
+.demo__gh { display: flex; align-items: center; gap: 8px; }
+.demo__gh small { font-size: 12px; color: var(--sub); }
 .demo__list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .demo__btn { text-align: left; border: 1px solid var(--line3); background: var(--card); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
 .demo__btn:hover { border-color: var(--ink); }

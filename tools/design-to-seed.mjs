@@ -19,7 +19,7 @@ function loadDesign(file, names) {
   return JSON.parse(JSON.stringify(ctx.out));
 }
 
-const A = loadDesign('현장로그 본사 어드민.dc.html', ['PARTNERS', 'LEADS', 'TPLS', 'LOGIN_ACCTS', 'RV0', 'G_REG', 'G_DRAFTS', 'G_ASSIGN', 'G_INFO']);
+const A = loadDesign('현장로그 본사 어드민.dc.html', ['PARTNERS', 'LEADS', 'TPLS', 'LOGIN_ACCTS', 'RV0', 'G_REG', 'G_DRAFTS', 'G_ASSIGN', 'G_INFO', 'PA_REG']);
 const P = loadDesign('현장로그 파트너 v2.dc.html', ['SITES', 'PAGES', 'QUERIES', 'INQ', 'DRAFTS', 'LEDGER', 'BIZ', 'CHART', 'NEWP', 'MK_USAGE', 'PCOUNT']);
 const S = A.state;
 
@@ -53,7 +53,8 @@ const out = {
   scopeLogs: { '맑은집클린': S.scopeLog },
   domains: { '맑은집클린': { domain: S.domain, registrar: S.registrar, connection: '미연결', certificate: '대기', verifyToken: '8f2c1a7d' } },
   staff: S.staff,
-  logins: A.LOGIN_ACCTS,
+  /* 시안 데모 계정 + 컨펌용으로 더한 최고 관리자 계정 (시안에는 비밀번호가 없어서 추가) */
+  logins: [...A.LOGIN_ACCTS, { id: 'seojun.park', pw: 'Sj35-hq8Lm', where: 'admin', first: false }],
   leads: A.LEADS.map((l) => ({ ...l, receivedOn: monthDay(l.date), memos: l.memos.map((m) => ({ ...m, on: monthDay(m.date) })) })),
   jobs: S.logs,
   deposits: S.deposits,
@@ -85,7 +86,7 @@ const out = {
       { partner: '온마루', tag: '2주 이상 현장 없음', desc: '드라이브 폴더에 현장 사진이 아직 없어요', value: '준비 중 18일째', to: 'partner' }
     ]
   },
-  settings: { index_days: S.idxDays, cap_per_partner: Number(S.capPartner), cap_total: Number(S.capTotal), payment_key: S.payKey, alimtalk_codes: [S.alim1, S.alim2] }
+  settings: { region_options: A.PA_REG.map((r) => r[0]), index_days: S.idxDays, cap_per_partner: Number(S.capPartner), cap_total: Number(S.capTotal), payment_key: S.payKey, alimtalk_codes: [S.alim1, S.alim2] }
 };
 
 fs.writeFileSync(OUT, JSON.stringify(out, null, 1) + '\n');
