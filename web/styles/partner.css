@@ -536,3 +536,44 @@
   .blogstats .pstat { padding: 16px 18px; }
   .blogstats .pstat__n { font-size: 28px !important; }
 }
+
+/* 문의 — 전화 · 문자 · 자세히 / 문의 자세히 */
+.ibtns { display: flex; gap: 6px; justify-content: flex-end; min-width: 0; }
+.callbtn--line { color: var(--s1f); }
+.callbtn--ghost { border-color: transparent; background: var(--chip); color: var(--text2); }
+.callbtn[aria-disabled='true'] { opacity: .35; }
+.irow__link { color: inherit; display: block; min-width: 0; }
+.irow__link:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.ihead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.ihead__main { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ihead__title { font-size: 24px; font-weight: 800; line-height: 1.35; word-break: keep-all; overflow-wrap: anywhere; }
+.idetail { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; align-items: start; }
+.idetail__col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.idetail .pcard { gap: 14px; }
+.idetail .ibtns { justify-content: flex-start; }
+.idetail .ibtns .callbtn { flex: 1; }
+.idl { display: grid; grid-template-columns: 96px minmax(0,1fr); gap: 10px 12px; margin: 0; font-size: 15px; }
+.idl dt { color: var(--sub); font-weight: 700; }
+.idl dd { margin: 0; font-weight: 700; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; overflow-wrap: anywhere; }
+.idl__sub { flex-basis: 100%; font-weight: 500; }
+.ibody { font-size: 16px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.imemo { display: flex; flex-direction: column; gap: 10px; }
+.imemo__in { height: auto; min-height: 92px; padding: 12px 14px; resize: vertical; line-height: 1.6; width: 100%; }
+.imemo__bot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ilog { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.ilog__i { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line2); }
+.ilog__i:first-child { border-top: 0; padding-top: 0; }
+.ilog__kind { flex-shrink: 0; width: 44px; height: 26px; border-radius: 8px; background: var(--chip); color: var(--text2); font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.ilog__i--메모 .ilog__kind { background: var(--warnb); color: var(--warnf); }
+.ilog__i--상태 .ilog__kind { background: var(--s2b); color: var(--s2f); }
+.ilog__i--전화 .ilog__kind, .ilog__i--문자 .ilog__kind { background: var(--s1b); color: var(--s1f); }
+.ilog__body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ilog__text { font-size: 15px; font-weight: 600; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 1023px) { .idetail { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 767px) {
+  .icard__acts .ibtns { justify-content: stretch; }
+  .icard__acts .callbtn { flex: 1; }
+  .ihead__title { font-size: 20px; }
+  .idl { grid-template-columns: 84px minmax(0,1fr); }
+}
+@media (min-width: 768px) { .ihead .spick__pop { left: auto; right: 0; } }

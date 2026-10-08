@@ -373,6 +373,16 @@ export const inquiries = pgTable('inquiries', {
   needsResult: boolean('needs_result').notNull().default(false)
 }, (t) => [index('inquiries_partner_idx').on(t.partnerId)]);
 
+/** 문의 진행 기록 (파트너): 메모 · 상태 변경 · 전화 · 문자 */
+export const inquiryLogs = pgTable('inquiry_logs', {
+  id: id(),
+  inquiryId: uuid('inquiry_id').notNull().references(() => inquiries.id),
+  kind: text('kind').$type<'메모' | '상태' | '전화' | '문자'>().notNull(),
+  text: text('text').notNull(),
+  userId: uuid('user_id').references(() => users.id),
+  createdAt: createdAt()
+}, (t) => [index('inquiry_logs_inq_idx').on(t.inquiryId)]);
+
 export const charges = pgTable('charges', {
   id: id(),
   partnerId: uuid('partner_id').notNull().references(() => partners.id),

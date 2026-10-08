@@ -10,12 +10,13 @@ import { today } from '@/lib/config';
 import { rel, won } from '@/lib/format';
 import { INQ_ORDER } from '@/lib/partner-app';
 import StatusPicker from './StatusPicker';
+import ContactButtons from './ContactButtons';
 
 export const metadata = { title: '문의' };
 
 const VER: Record<string, string> = { '확인됨': 'ok', '확인 중': 'warn', '본인 아님': 'red' };
 const TABS = ['전체', '신규', '결과 입력 필요'] as const;
-const COLS = '104px minmax(0,1.2fr) minmax(0,1.5fr) 104px 178px 120px 76px';
+const COLS = '96px minmax(0,1.2fr) minmax(0,1.3fr) 96px 170px 112px 236px';
 type SP = { tab?: string; period?: string; ptype?: string; ver?: string; page?: string };
 
 /* 시안 2d(데스크톱) · 1d(모바일) — 문의 */
@@ -45,8 +46,10 @@ export default async function Inquiries({ searchParams }: { searchParams: Promis
     return '/partner/inquiries' + (p.toString() ? '?' + p : '');
   };
   const hasAmt = (q: (typeof all)[number]) => INQ_ORDER.indexOf(q.status as never) >= 3 && (q.amount ?? 0) > 0;
-  const phone = (q: (typeof all)[number]) => (q.customerPhone ? `tel:${q.customerPhone.replace(/[^0-9+]/g, '')}` : undefined);
   const isNew = (q: (typeof all)[number]) => q.status === '신규' && q.verify !== '본인 아님';
+  const [partner] = await db.select({ name: t.partners.name }).from(t.partners).where(eq(t.partners.id, user.partnerId)).limit(1);
+  const sms = (q: (typeof all)[number]) => `[${partner.name}] ${q.customerName ? q.customerName + '님, ' : ''}문의 주셔서 감사합니다. "${q.title}" 관련해 연락드립니다.`;
+  const detail = (id: string) => `/partner/inquiries/${id}`;
 
   return (
     <>
@@ -78,12 +81,12 @@ export default async function Inquiries({ searchParams }: { searchParams: Promis
           {items.map((q, k) => (
             <div key={q.id} className="table__row irow" style={{ '--cols': COLS, opacity: q.verify === '본인 아님' ? 0.45 : 1 } as React.CSSProperties}>
               <span className="irow__time">{rel(q.receivedAt, day)}</span>
-              <span className="irow__title">{q.title}</span>
+              <Link href={detail(q.id)} className="irow__title irow__link">{q.title}</Link>
               <div className="irow__page"><span className="chip chip--plain">{q.pageType}</span><span>{q.pageTitle}</span></div>
               <span><span className={`chip chip--${VER[q.verify]}`}>{q.verify}</span></span>
               <StatusPicker id={q.id} title={q.title} status={q.status} amount={q.amount} needs={q.needsResult} up={k >= items.length - 4 && items.length > 5} />
               <span className="num" style={{ fontSize: 16, color: hasAmt(q) ? 'var(--s4f)' : 'var(--sub3)' }}>{hasAmt(q) ? `${won(q.amount)}원` : '—'}</span>
-              <a href={phone(q)} className={'callbtn' + (isNew(q) ? ' is-new' : '')} aria-disabled={!phone(q)}>전화</a>
+              <ContactButtons id={q.id} phone={q.customerPhone} smsText={sms(q)} isNew={isNew(q)} detail />
             </div>
           ))}
           {!items.length && <ListState kind="empty" title="조건에 맞는 문의가 없어요" desc="기간이나 필터를 바꿔 보세요" />}
@@ -96,12 +99,13 @@ export default async function Inquiries({ searchParams }: { searchParams: Promis
           {items.map((q) => (
             <div key={q.id} className={'icard' + (q.needsResult ? ' is-needs' : '')} style={{ opacity: q.verify === '본인 아님' ? 0.45 : 1 }}>
               <div className="icard__top"><span className="irow__time">{rel(q.receivedAt, day)}</span><StatusPicker id={q.id} title={q.title} status={q.status} amount={q.amount} needs={q.needsResult} /></div>
-              <div className="icard__mid"><b>{q.title}</b>{hasAmt(q) && <span className="icard__amt">계약 {won(q.amount)}원</span>}</div>
+              <div className="icard__mid"><Link href={detail(q.id)} className="irow__link"><b>{q.title}</b></Link>{hasAmt(q) && <span className="icard__amt">계약 {won(q.amount)}원</span>}</div>
               <div className="irow__page"><span className="chip chip--plain">{q.pageType}</span><span>{q.pageTitle}</span></div>
               <div className="icard__bot">
                 <span className="hint" style={{ fontWeight: 600 }}>본인 확인</span><span className={`chip chip--${VER[q.verify]}`}>{q.verify}</span>
-                <span style={{ flex: 1 }} />
-                <a href={phone(q)} className={'callbtn callbtn--m' + (isNew(q) ? ' is-new' : '')} aria-disabled={!phone(q)}>전화</a>
+              </div>
+              <div className="icard__acts">
+                <ContactButtons id={q.id} phone={q.customerPhone} smsText={sms(q)} isNew={isNew(q)} detail size="m" />
               </div>
             </div>
           ))}

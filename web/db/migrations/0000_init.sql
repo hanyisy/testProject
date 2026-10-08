@@ -120,6 +120,15 @@ CREATE TABLE "inquiries" (
 	"needs_result" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "inquiry_logs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"inquiry_id" uuid NOT NULL,
+	"kind" text NOT NULL,
+	"text" text NOT NULL,
+	"user_id" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "jobs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"partner_id" uuid,
@@ -448,6 +457,8 @@ ALTER TABLE "generation_runs" ADD CONSTRAINT "generation_runs_partner_id_partner
 ALTER TABLE "industry_items" ADD CONSTRAINT "industry_items_industry_id_industries_id_fk" FOREIGN KEY ("industry_id") REFERENCES "public"."industries"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "inquiries" ADD CONSTRAINT "inquiries_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "inquiries" ADD CONSTRAINT "inquiries_page_id_pages_id_fk" FOREIGN KEY ("page_id") REFERENCES "public"."pages"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "inquiry_logs" ADD CONSTRAINT "inquiry_logs_inquiry_id_inquiries_id_fk" FOREIGN KEY ("inquiry_id") REFERENCES "public"."inquiries"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "inquiry_logs" ADD CONSTRAINT "inquiry_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "jobs" ADD CONSTRAINT "jobs_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "landing_captures" ADD CONSTRAINT "landing_captures_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "lead_memos" ADD CONSTRAINT "lead_memos_lead_id_leads_id_fk" FOREIGN KEY ("lead_id") REFERENCES "public"."leads"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -480,6 +491,7 @@ ALTER TABLE "tax_requests" ADD CONSTRAINT "tax_requests_charge_id_charges_id_fk"
 ALTER TABLE "translations" ADD CONSTRAINT "translations_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users" ADD CONSTRAINT "users_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "inquiries_partner_idx" ON "inquiries" USING btree ("partner_id");--> statement-breakpoint
+CREATE INDEX "inquiry_logs_inq_idx" ON "inquiry_logs" USING btree ("inquiry_id");--> statement-breakpoint
 CREATE INDEX "pages_partner_idx" ON "pages" USING btree ("partner_id");--> statement-breakpoint
 CREATE INDEX "photos_partner_idx" ON "photos" USING btree ("partner_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "settlements_partner_month" ON "settlements" USING btree ("partner_id","month");--> statement-breakpoint

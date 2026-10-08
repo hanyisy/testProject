@@ -109,6 +109,29 @@ export async function seedDemoWorld(db: DB) {
     }
   }
 
+  /* 4-1) 한결철거 문의: 데모 고객(010-0000-…은 가짜 번호) · 유입 페이지 연결 · 진행 기록 */
+  const NAMES = ['김지훈', '이서연', '박준호', '최유진', '정하늘', '강민지', '조성우', '윤다은', '장태현', '임수빈', '한도윤', '오세린', '서지호', '신예린'];
+  const inqs = await db.select().from(t.inquiries).where(eq(t.inquiries.partnerId, hg.id));
+  const allPages = await db.select().from(t.pages).where(eq(t.pages.partnerId, hg.id));
+  for (const [i, q] of [...inqs].sort((a, b) => b.receivedAt.getTime() - a.receivedAt.getTime()).entries()) {
+    const call = i % 4 === 3;
+    const pg = allPages.find((p) => p.title.replace(/[?\s]/g, '') === (q.pageTitle ?? '').replace(/[?\s]/g, '') && p.path);
+    await db.update(t.inquiries).set({
+      customerName: NAMES[i % NAMES.length], customerPhone: `010-0000-${String(101 + i).padStart(4, '0')}`, channel: call ? '전화' : '폼', pageId: pg?.id ?? null,
+      body: call ? null : `${q.title} 문의드려요. 현장 사진은 따로 보내 드릴 수 있어요. 가능한 날짜와 대략적인 비용 알려 주세요.`
+    }).where(eq(t.inquiries.id, q.id));
+    const log = (kind: '메모' | '상태' | '전화' | '문자', text: string, h: number) => db.insert(t.inquiryLogs).values({ inquiryId: q.id, kind, text, createdAt: new Date(q.receivedAt.getTime() + h * 3600e3) });
+    /* 지금 상태까지 걸어온 단계 (무산은 견적 다음) */
+    const ORDER = ['신규', '상담', '견적', '계약', '완료'];
+    const chain = q.status === '무산' ? ['신규', '상담', '견적', '무산'] : ORDER.slice(0, ORDER.indexOf(q.status) + 1);
+    if (chain.length > 1) await log('전화', '고객에게 전화했어요', 1);
+    if (chain.includes('견적')) await log('메모', '현장 사진 받음 · 천장과 칸막이 철거, 엘리베이터 없음', 3);
+    for (let k = 1; k < chain.length; k++) {
+      const amt = chain[k] === '계약' && q.amount ? ` · ${q.amount.toLocaleString('ko-KR')}원` : '';
+      await log('상태', `${chain[k - 1]} → ${chain[k]}${amt}`, k * 20);
+    }
+  }
+
   /* 5) 설정: 업종 · 업체별 공개 사이트 재료, 지역 사진 현황 합치기 */
   const sets = await db.select().from(t.settings).where(inArray(t.settings.key, ['region_stats', 'region_order']));
   const rs = { ...(sets.find((s) => s.key === 'region_stats')?.value as object), ...regionStats };
