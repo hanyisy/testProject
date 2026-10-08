@@ -3,7 +3,7 @@
 가입 문의 랜딩 · 본사 어드민 · 파트너 관리자를 한 Next.js 앱(`web/`)으로 돌립니다.
 확정 시안은 로컬 `design/` 폴더에만 두고 저장소에는 올리지 않습니다(.gitignore).
 
-설계: [docs/architecture.md](docs/architecture.md) · [docs/db.md](docs/db.md) · [docs/screens.md](docs/screens.md) · 데모 계정: [docs/demo-accounts.md](docs/demo-accounts.md)
+설계: [docs/architecture.md](docs/architecture.md) · [docs/db.md](docs/db.md) · [docs/screens.md](docs/screens.md) · 데모 계정: [docs/demo-accounts.md](docs/demo-accounts.md) · 컨펌용 링크: [docs/confirm-links.md](docs/confirm-links.md)
 
 ## 실행
 ```
