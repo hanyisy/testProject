@@ -4,6 +4,8 @@ import PartnerTop from '@/components/PartnerTop';
 import ListState from '@/components/ListState';
 import { requirePartner } from '@/lib/auth';
 import { partnerMaking } from '@/lib/partner-app';
+import { getSetting } from '@/lib/admin';
+import { termsOf, workLabel, type IndustryContent } from '@/lib/site';
 import { getDb, schema as t } from '@/db/client';
 import PhotoActions from '../PhotoActions';
 import Making from './Making';
@@ -16,6 +18,14 @@ export default async function MakingPage() {
   const mk = await partnerMaking(user.partnerId);
   const db = await getDb();
   const sites = await db.select().from(t.sites).where(and(eq(t.sites.partnerId, user.partnerId), eq(t.sites.status, '발행됨'))).orderBy(desc(t.sites.workedAt)).limit(3);
+  /* 스케치 미리보기 말투는 업종 따라 (현장 → 사례 · 견적 → 상담) */
+  const [[ind], contents] = await Promise.all([
+    db.select({ code: t.industries.code, name: t.industries.name }).from(t.partners).innerJoin(t.industries, eq(t.industries.id, t.partners.industryId)).where(eq(t.partners.id, user.partnerId)).limit(1),
+    getSetting<Record<string, IndustryContent>>('industry_content', {})
+  ]);
+  const ic = ind ? contents[ind.code] : undefined;
+  const tm = termsOf(ic?.terms);
+  const work = mk ? workLabel(mk.run.pageType.split('×').pop() ?? '', ind?.name ?? '') : '';
   return (
     <>
       <PartnerTop title="만들고 있는 페이지" actions={<PhotoActions newPhotos={mk?.newPhotos ?? 0} />} />
@@ -25,7 +35,7 @@ export default async function MakingPage() {
           <ListState kind="empty" title="지금 만들고 있는 페이지가 없어요" desc="본사가 새 페이지를 만들기 시작하면 여기서 진행 상황을 볼 수 있어요" />
         ) : (
           <>
-            <div className="mkhead"><h2>{mk.run.pageType} {mk.total}장</h2><span>{mk.cities}</span></div>
+            <div className="mkhead"><h2>{mk.run.pageType.split('×')[0]} × {work} {mk.total}장</h2><span>{mk.cities}</span></div>
             <div className="pcard mksteps">
               {[[mk.steps.drafted ? '시안 준비됨' : '시안 준비 중', mk.steps.drafted], ['확인 요청 도착', mk.steps.requested], ['검수 중', mk.steps.inReview], [`배포 ${mk.deployed}/${mk.total}`, mk.total > 0 && mk.deployed >= mk.total]].map(([label, done], i) => (
                 <div key={String(label)} className="mksteps__i">
@@ -41,7 +51,8 @@ export default async function MakingPage() {
               runId={mk.run.id}
               drafts={mk.drafts.map((d) => ({ label: d.label, style: d.style, n: d.n, like: d.partnerLike, note: d.partnerNote, href: d.href }))}
               preview={mk.preview}
-              work={mk.run.pageType.split('×').pop() ?? ''}
+              work={work}
+              words={{ case: tm.case, quote: tm.quote, hint: tm.quoteSub, shots: tm.shots, head: ic?.cost.table.head.slice(0, 3) ?? ['평수', '작업 범위', '기간'] }}
               partnerName={mk.partnerName}
               timeline={sites.map((s) => ({ title: s.title, date: s.workedAt ?? '' }))}
               usage={mk.usage}

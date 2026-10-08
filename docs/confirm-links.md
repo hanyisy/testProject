@@ -21,16 +21,16 @@
 |---|---|
 | 대시보드 | [/admin/](https://hanyisy.github.io/testProject/preview/admin/) |
 | 가입 문의 | [/admin/leads/](https://hanyisy.github.io/testProject/preview/admin/leads/) |
-| 가입 문의 상세 | [/admin/leads/02014f10-b68e-46ea-bc7b-359b2832f29f/](https://hanyisy.github.io/testProject/preview/admin/leads/02014f10-b68e-46ea-bc7b-359b2832f29f/) |
+| 가입 문의 상세 | [/admin/leads/21f726ea-e122-4b58-9a9a-55254087ef2c/](https://hanyisy.github.io/testProject/preview/admin/leads/21f726ea-e122-4b58-9a9a-55254087ef2c/) |
 | 파트너 목록 | [/admin/partners/](https://hanyisy.github.io/testProject/preview/admin/partners/) |
-| 파트너 상세 | [/admin/partners/2c01bb9e-f8c6-4abc-9066-044706fb58ce/](https://hanyisy.github.io/testProject/preview/admin/partners/2c01bb9e-f8c6-4abc-9066-044706fb58ce/) · 결제 · 도메인 · 기능 · 양산 범위 탭 |
+| 파트너 상세 | [/admin/partners/44789cd5-eec4-47af-b22e-569f701992ee/](https://hanyisy.github.io/testProject/preview/admin/partners/44789cd5-eec4-47af-b22e-569f701992ee/) · 결제 · 도메인 · 기능 · 양산 범위 탭 |
 | 파트너 추가 | [/admin/partners/new/](https://hanyisy.github.io/testProject/preview/admin/partners/new/) |
 | 페이지 생성 | [/admin/generate/](https://hanyisy.github.io/testProject/preview/admin/generate/) · 위 "생성 기록"에서 지난 생성 열기 |
 | 업종 템플릿 | [/admin/templates/](https://hanyisy.github.io/testProject/preview/admin/templates/) |
 | 요금제 | [/admin/plans/](https://hanyisy.github.io/testProject/preview/admin/plans/) |
 | 발행 · 색인 | [/admin/indexing/](https://hanyisy.github.io/testProject/preview/admin/indexing/) |
 | 검수 | [/admin/review/](https://hanyisy.github.io/testProject/preview/admin/review/) |
-| 검수 묶음 상세 | [/admin/review/36b82840-4f2d-455f-8c84-385a3e72a00e/](https://hanyisy.github.io/testProject/preview/admin/review/36b82840-4f2d-455f-8c84-385a3e72a00e/) |
+| 검수 묶음 상세 | [/admin/review/373d3e0d-c034-4173-98aa-9b1e9f5bd565/](https://hanyisy.github.io/testProject/preview/admin/review/373d3e0d-c034-4173-98aa-9b1e9f5bd565/) |
 | 작업 로그 | [/admin/jobs/](https://hanyisy.github.io/testProject/preview/admin/jobs/) |
 | 문의 · 정산 | [/admin/billing/](https://hanyisy.github.io/testProject/preview/admin/billing/) |
 | 대행 작업 | [/admin/agency/](https://hanyisy.github.io/testProject/preview/admin/agency/) |
@@ -50,10 +50,25 @@
 | 만들고 있는 페이지 | [/partner/making/](https://hanyisy.github.io/testProject/preview/partner/making/) |
 | 문의 | [/partner/inquiries/](https://hanyisy.github.io/testProject/preview/partner/inquiries/) |
 | 문의 · 결과 입력 필요 | [/partner/inquiries/q-c230e58364/](https://hanyisy.github.io/testProject/preview/partner/inquiries/q-c230e58364/) |
-| 문의 자세히 | [/partner/inquiries/5bf176f1-5829-4e8a-a9aa-496c1a466198/](https://hanyisy.github.io/testProject/preview/partner/inquiries/5bf176f1-5829-4e8a-a9aa-496c1a466198/) |
+| 문의 자세히 | [/partner/inquiries/dfd3e3d9-3229-4c68-a1a7-61744de28f81/](https://hanyisy.github.io/testProject/preview/partner/inquiries/dfd3e3d9-3229-4c68-a1a7-61744de28f81/) |
 | 블로그 | [/partner/blog/](https://hanyisy.github.io/testProject/preview/partner/blog/) |
 | 결제 내역 | [/partner/billing/](https://hanyisy.github.io/testProject/preview/partner/billing/) |
 | 설정 (최근 알림) | [/partner/settings/](https://hanyisy.github.io/testProject/preview/partner/settings/) |
+
+## 3-2. 파트너 관리자 (새봄법무사사무소 · 개인회생으로 본 화면)
+| 화면 | 주소 |
+|---|---|
+| 홈 | [/새봄/partner/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/) |
+| 현장 발행 | [/새봄/partner/sites/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/sites/) |
+| 사진 추가 | [/새봄/partner/photos/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/photos/) |
+| 검색 노출 | [/새봄/partner/search/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/search/) |
+| 만들고 있는 페이지 (시안 A·B·C) | [/새봄/partner/making/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/making/) |
+| 문의 | [/새봄/partner/inquiries/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/inquiries/) |
+| 문의 · 결과 입력 필요 | [/새봄/partner/inquiries/q-c230e58364/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/inquiries/q-c230e58364/) |
+| 문의 자세히 | [/새봄/partner/inquiries/79d7da45-9db1-4245-b721-78367ac76f19/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/inquiries/79d7da45-9db1-4245-b721-78367ac76f19/) |
+| 블로그 | [/새봄/partner/blog/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/blog/) |
+| 결제 내역 | [/새봄/partner/billing/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/billing/) |
+| 설정 | [/새봄/partner/settings/](https://hanyisy.github.io/testProject/preview/%EC%83%88%EB%B4%84/partner/settings/) |
 
 ## 4. 업체 공개 사이트 (검수 중 페이지는 위에 "미리보기 · 시안 X" 띠)
 | 화면 | 주소 |
@@ -61,7 +76,22 @@
 | 한결철거 홈 (철거) | [/p/hangyeol/](https://hanyisy.github.io/testProject/preview/p/hangyeol/) |
 | 맑은집클린 홈 (입주청소) | [/p/malgeunjip/](https://hanyisy.github.io/testProject/preview/p/malgeunjip/) |
 | 단정인테리어 홈 (인테리어) | [/p/danjeong/](https://hanyisy.github.io/testProject/preview/p/danjeong/) |
+| 새봄법무사사무소 홈 (개인회생) | [/p/saebom/](https://hanyisy.github.io/testProject/preview/p/saebom/) |
 | 온마루 홈 (준비 중 · 미리보기) | [/p/onmaru/](https://hanyisy.github.io/testProject/preview/p/onmaru/) |
+
+### 개인회생 업체 (새봄법무사사무소) — 현장 대신 "사례", 견적 대신 "무료 상담"
+| 화면 | 주소 |
+|---|---|
+| 지역 허브 | [/p/saebom/관악/](https://hanyisy.github.io/testProject/preview/p/saebom/%EA%B4%80%EC%95%85/) |
+| 시 단위 지역 페이지 | [/p/saebom/관악/직장인개인회생/](https://hanyisy.github.io/testProject/preview/p/saebom/%EA%B4%80%EC%95%85/%EC%A7%81%EC%9E%A5%EC%9D%B8%EA%B0%9C%EC%9D%B8%ED%9A%8C%EC%83%9D/) |
+| 시안 A 미리보기 (검수 중) | [/p/saebom/관악/신림동-직장인개인회생/](https://hanyisy.github.io/testProject/preview/p/saebom/%EA%B4%80%EC%95%85/%EC%8B%A0%EB%A6%BC%EB%8F%99-%EC%A7%81%EC%9E%A5%EC%9D%B8%EA%B0%9C%EC%9D%B8%ED%9A%8C%EC%83%9D/) |
+| 시안 B 미리보기 (검수 중) | [/p/saebom/동작/사당동-직장인개인회생/](https://hanyisy.github.io/testProject/preview/p/saebom/%EB%8F%99%EC%9E%91/%EC%82%AC%EB%8B%B9%EB%8F%99-%EC%A7%81%EC%9E%A5%EC%9D%B8%EA%B0%9C%EC%9D%B8%ED%9A%8C%EC%83%9D/) |
+| 시안 C 미리보기 (검수 중) | [/p/saebom/영등포/당산동-직장인개인회생/](https://hanyisy.github.io/testProject/preview/p/saebom/%EC%98%81%EB%93%B1%ED%8F%AC/%EB%8B%B9%EC%82%B0%EB%8F%99-%EC%A7%81%EC%9E%A5%EC%9D%B8%EA%B0%9C%EC%9D%B8%ED%9A%8C%EC%83%9D/) |
+| 역 주변 | [/p/saebom/역/신림역/](https://hanyisy.github.io/testProject/preview/p/saebom/%EC%97%AD/%EC%8B%A0%EB%A6%BC%EC%97%AD/) |
+| 가이드 (변제금 계산) | [/p/saebom/가이드/개인회생-변제금-계산하는-법/](https://hanyisy.github.io/testProject/preview/p/saebom/%EA%B0%80%EC%9D%B4%EB%93%9C/%EA%B0%9C%EC%9D%B8%ED%9A%8C%EC%83%9D-%EB%B3%80%EC%A0%9C%EA%B8%88-%EA%B3%84%EC%82%B0%ED%95%98%EB%8A%94-%EB%B2%95/) |
+| 가이드 (신청 서류) | [/p/saebom/가이드/개인회생-신청-서류/](https://hanyisy.github.io/testProject/preview/p/saebom/%EA%B0%80%EC%9D%B4%EB%93%9C/%EA%B0%9C%EC%9D%B8%ED%9A%8C%EC%83%9D-%EC%8B%A0%EC%B2%AD-%EC%84%9C%EB%A5%98/) |
+| 질문 | [/p/saebom/질문/개인회생-기간/](https://hanyisy.github.io/testProject/preview/p/saebom/%EC%A7%88%EB%AC%B8/%EA%B0%9C%EC%9D%B8%ED%9A%8C%EC%83%9D-%EA%B8%B0%EA%B0%84/) |
+| 문의 | [/p/saebom/문의/](https://hanyisy.github.io/testProject/preview/p/saebom/%EB%AC%B8%EC%9D%98/) |
 
 ### 지역 × 작업 페이지 — 시안 A~F
 | 화면 | 주소 |

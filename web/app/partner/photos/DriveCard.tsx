@@ -25,7 +25,7 @@ export default function DriveCard({ connected, url, folderName, synced }: Props)
         <>
           <div className="box-surf box-surf--pad" style={{ gap: 3, minWidth: 0 }}>
             <b style={{ fontSize: 16 }}>{folderName}</b>
-            {url && <a href={url} target="_blank" rel="noopener" className="hint ell" style={{ fontSize: 13 }}>{url}</a>}
+            {url && <a href={url} target="_blank" rel="noopener" className="hint ell" style={{ fontSize: 13, display: 'block', maxWidth: '100%' }}>{url}</a>}
             <span className="hint" style={{ fontSize: 14 }}>마지막 동기화 {synced}</span>
           </div>
           <span className="muted">이 폴더에 사진을 넣으면 자동으로 올라와요</span>

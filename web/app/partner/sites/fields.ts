@@ -4,7 +4,7 @@ export type FieldKind = 'area' | 'days' | 'note' | 'choice' | 'extra';
 
 export function fieldKind(label: string): FieldKind {
   if (/^(평수|시공 면적|면적)$/.test(label)) return 'area';
-  if (/^(작업 기간|기간|공사 기간)$/.test(label)) return 'days';
+  if (/^(작업 기간|기간|공사 기간|진행 기간)$/.test(label)) return 'days';
   if (/^특이사항/.test(label)) return 'note';
   if (/^(작업 종류|건물 유형|대상 유형)$/.test(label)) return 'choice';
   return 'extra';

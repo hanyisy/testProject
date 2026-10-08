@@ -7,6 +7,8 @@ type Draft = { label: string; style: string; n: number; like: boolean; note: str
 type Props = {
   runId: string; drafts: Draft[]; partnerName: string;
   preview: { region: string; name: string; info: string | null; photos: number; sites: number }; work: string;
+  /** 업종 말투: 현장(사례) · 문의 버튼 · 비용 안내 한 줄 · 전/후 사진 이름(없으면 진행 사진) · 비용 표 머리 */
+  words: { case: string; quote: string; hint: string; shots: string[]; head: string[] };
   timeline: { title: string; date: string }[];
   usage: { site: string; date: string; n: number; pages: { name: string; k: string; st: string }[] }[];
 };
@@ -55,7 +57,7 @@ function Thumb({ kind }: { kind: string }) {
   );
 }
 
-export default function Making({ runId, drafts, partnerName, preview, work, timeline, usage }: Props) {
+export default function Making({ runId, drafts, partnerName, preview, work, words, timeline, usage }: Props) {
   const [sel, setSel] = useState(drafts[0]?.label ?? 'A');
   const [noteOpen, setNoteOpen] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -100,33 +102,33 @@ export default function Making({ runId, drafts, partnerName, preview, work, time
           <div className="pvwrap">
             <div className="pv">
               <span className="pv__brand">{partnerName} · {work}</span>
-              <span className="pv__title">{preview.region} {work}</span>
+              <span className="pv__title">{`${preview.region} ${work}`}</span>
               {preview.info && <span className="pv__info">{preview.info}</span>}
               {kind === 'X' && <span className="pv__text">이 시안은 스케치 대신 실제 페이지로 확인해 주세요 · 위의 “실제 페이지로 보기”</span>}
               {kind === 'A' && (
                 <>
-                  <Ph h={220} label="대표 현장 사진" />
-                  <div className="mthumb__g3" style={{ gap: 8 }}>{[1, 2, 3, 4, 5, 6].map((i) => <Ph key={i} h={90} label={`현장 ${i}`} />)}</div>
-                  <span className="pv__text">{preview.name}에서 진행한 현장 {preview.sites}곳의 사진 {preview.photos}장을 그대로 보여드려요.</span>
+                  <Ph h={220} label={`대표 ${words.case} 사진`} />
+                  <div className="mthumb__g3" style={{ gap: 8 }}>{[1, 2, 3, 4, 5, 6].map((i) => <Ph key={i} h={90} label={`${words.case} ${i}`} />)}</div>
+                  <span className="pv__text">{preview.name}에서 진행한 {words.case} {preview.sites}곳의 사진 {preview.photos}장을 그대로 보여드려요.</span>
                 </>
               )}
               {kind === 'B' && timeline.map((s) => (
                 <div key={s.title} className="pv__tl">
                   <span>{md(s.date)} · {s.title}</span>
-                  <div className="mthumb__g2" style={{ gap: 8 }}><Ph h={90} label="작업 전" /><Ph h={90} label="작업 후" /></div>
+                  <div className="mthumb__g2" style={{ gap: 8 }}><Ph h={90} label={words.shots[0] ?? `${words.case} 사진`} /><Ph h={90} label={words.shots[1] ?? `${words.case} 사진`} /></div>
                 </div>
               ))}
               {kind === 'D' && (
                 <>
                   <div className="pv__tbl">
-                    <div className="is-head"><span>평수</span><span>작업 범위</span><span>기간</span></div>
+                    <div className="is-head">{words.head.map((h) => <span key={h}>{h}</span>)}</div>
                     {[0, 1, 2].map((i) => <div key={i}><Line w="60%" /><Line w="80%" /><Line w="40%" /></div>)}
                   </div>
-                  <span className="hint">비용은 현장 사진을 보고 안내해 드려요</span>
-                  <div className="mthumb__g3" style={{ gap: 8 }}>{[1, 2, 3].map((i) => <Ph key={i} h={90} label={`현장 ${i}`} />)}</div>
+                  <span className="hint">{words.hint}</span>
+                  <div className="mthumb__g3" style={{ gap: 8 }}>{[1, 2, 3].map((i) => <Ph key={i} h={90} label={`${words.case} ${i}`} />)}</div>
                 </>
               )}
-              <div className="pv__cta">전화로 견적 받기</div>
+              <div className="pv__cta">{words.quote}</div>
             </div>
           </div>
         </section>

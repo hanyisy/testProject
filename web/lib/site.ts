@@ -14,12 +14,15 @@ export type IndustryContent = {
   faq: { q: string; a: string }[]; permit: string; cityPermit: string;
   guides: { slug: string; title: string; lead: string; short: string; updated: string; minutes: number; sections: { h: string; p?: string; cost?: boolean; checklist?: string[]; cases?: number }[] }[];
   questions: { slug: string; q: string; tag: string; short: string; a: string; basis: string }[];
+  /** 업종마다 다른 말 (현장 → 사례 등) — 없으면 시공 업종 기본 */
+  terms?: Partial<Terms>;
 };
 export type SiteContent = { home: { title: string; lead: string }; placeholder: string; cityInfo: Record<string, string>; stations: { name: string; city: string; radius: string; sites: string[] }[] };
 export type Photo = { id: string; caption: string; shot: string | null; src: string | null };
 export type SiteRow = typeof t.sites.$inferSelect & { photos: Photo[]; path: string; dong: string; city: string };
 
-export { josa, fill, copula } from './text';
+export { josa, fill, copula, daysText, termsOf, type Terms } from './text';
+import { termsOf, type Terms } from './text';
 
 /** 작업 이름 띄우기: 상가철거 → 상가 철거 (업종 이름 앞) */
 export const workLabel = (work: string, industry: string) => { const ind = industry.replace(/\s/g, ''); return work.endsWith(ind) && work !== ind ? `${work.slice(0, -ind.length)} ${industry}` : work; };
@@ -48,7 +51,9 @@ export async function siteBySlug(slug: string) {
   return {
     partner: row.p, industry: row.industry, ic, content: content[slug], cities, cityName: (c: string) => cityNames[c] ?? c, canPreview,
     area: cities.join(' · '),
-    vars: (extra: Record<string, string> = {}) => ({ 업체: row.p.name, 업종: row.industry.name, 동사: ic?.verb ?? '작업한', ...extra })
+    /** 업종마다 다른 말 */
+    t: termsOf(ic?.terms),
+    vars: (extra: Record<string, string> = {}) => ({ 업체: row.p.name, 업종: row.industry.name, 동사: ic?.verb ?? '작업한', 현장: termsOf(ic?.terms).case, ...extra })
   };
 }
 export type Site = NonNullable<Awaited<ReturnType<typeof siteBySlug>>>;

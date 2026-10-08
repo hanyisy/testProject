@@ -26,9 +26,9 @@ export default async function SiteHome({ params, searchParams }: { params: Promi
   return (
     <>
       <Hero s={s} eyebrow={s.area} title={fill(s.content?.home.title ?? '{업체}', v)} lead={s.content?.home.lead} photo={cover} caption={cover ? `${cover.caption} · 대표 사진` : '대표 사진'} />
-      <Sec title="최근 현장" sub="날짜, 평수, 작업 기간을 그대로 적었어요" id="cases">
-        <SiteCards slug={slug} sites={sites.slice(0, 4)} cols={4} />
-        {s.cities[0] && <Link href={href(slug, s.cities[0])} className="s-more">현장 기록 전체 보기 ›</Link>}
+      <Sec title={`최근 ${s.t.case}`} sub={s.t.recentSub} id="cases">
+        <SiteCards slug={slug} sites={sites.slice(0, 4)} cols={4} t={s.t} />
+        {s.cities[0] && <Link href={href(slug, s.cities[0])} className="s-more">{s.t.case} 기록 전체 보기 ›</Link>}
       </Sec>
       <Sec title="서비스 지역" sub={s.area} card>
         <MapPins label={`지도 · ${s.cities.join('·')}`} pins={Array.from(new Set(sites.map((x) => x.dong).filter(Boolean))).slice(0, 6)} />

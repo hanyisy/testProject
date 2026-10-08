@@ -63,11 +63,13 @@ function pagePath(u) {
   return (dec === '/' ? '' : dec) + (q ? '/' + qid(q) : '');
 }
 const enc = (p) => p.split('/').map((s) => encodeURIComponent(s)).join('/');
-function linkTo(href) {
+function linkTo(href, scope = '') {
   if (!href.startsWith('/') || href.startsWith('//') || href.startsWith(BASE + '/')) return href;
   const [pathq, hash] = href.split('#');
   const key = normalize(pathq);
   const tail = hash ? '#' + hash : '';
+  if (scope && pages.has(scope + key)) return BASE + enc(pages.get(scope + key)) + '/' + tail;
+  if (scope && pages.has(scope + key.split('?')[0])) return BASE + enc(pages.get(scope + key.split('?')[0])) + '/' + tail;
   if (pages.has(key)) return BASE + enc(pages.get(key)) + '/' + tail;
   const base = key.split('?')[0];
   if (pages.has(base)) return BASE + enc(pages.get(base)) + '/' + tail;
@@ -97,20 +99,25 @@ async function asset(u, j) {
   return BASE + rel;
 }
 const BANNER = `<div style="position:sticky;top:0;z-index:9999;background:#111827;color:#fff;font:600 13px/1.4 system-ui,sans-serif;padding:8px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>정적 미리보기</b><span style="opacity:.8">더미 데이터 화면이에요 · 링크 이동은 되지만 버튼 · 저장 · 폼은 동작하지 않아요</span><a href="${BASE}/" style="color:#93c5fd;margin-left:auto">미리보기 목차</a></div>`;
-async function rewrite(html, j) {
+async function rewrite(html, j, scope = '') {
   html = html.replace(/<script\b[\s\S]*?<\/script>/g, '').replace(/<link[^>]+rel="(?:preload|modulepreload)"[^>]*as="script"[^>]*>/g, '').replace(/<link[^>]+as="script"[^>]*>/g, '');
   html = html.replace(/<next-route-announcer[\s\S]*?<\/next-route-announcer>/g, '');
   for (const m of [...html.matchAll(/(?:href|src)="(\/(?:_next\/static|files|media|landing)\/[^"]+)"/g)]) {
     if (/\.(css|jpe?g|png|webp|gif|svg|woff2?|ico)(\?|$)/i.test(m[1]) || m[1].startsWith('/files/') || m[1].startsWith('/media/')) html = html.split(`"${m[1]}"`).join(`"${await asset(m[1].replace(/&amp;/g, '&'), j)}"`);
   }
   for (const m of [...html.matchAll(/url\((?:&quot;|")?(\/(?:files|media)\/[^)&"]+)(?:&quot;|")?\)/g)]) html = html.split(m[1]).join(await asset(m[1], j));
-  html = html.replace(/href="(\/[^"]*)"/g, (_, h) => `href="${linkTo(h.replace(/&amp;/g, '&'))}"`);
+  html = html.replace(/href="(\/[^"]*)"/g, (_, h) => `href="${linkTo(h.replace(/&amp;/g, '&'), scope)}"`);
   html = html.replace(/<form\b([^>]*)>/g, (_, a) => `<form${a.replace(/\saction="[^"]*"/, '').replace(/\smethod="[^"]*"/, '')} action="${BASE}/missing.html" method="get">`);
   html = html.replace(/<body([^>]*)>/, `<body$1>${BANNER}`);
   return html;
 }
 
 /* ---------- 모을 주소 ---------- */
+/* 새봄법무사사무소(개인회생): 파트너 화면은 /새봄/partner/… 로 따로 저장 · 시안 미리보기는 생성 기록 배분(사진 많은 동부터 A → B → C) */
+const S2 = '/새봄';
+const SAEBOM_DRAFTS = ['/p/saebom/관악/신림동-직장인개인회생', '/p/saebom/동작/사당동-직장인개인회생', '/p/saebom/영등포/당산동-직장인개인회생'];
+const SAEBOM_ROWS = [['지역 허브', '/p/saebom/관악'], ['시 단위 지역 페이지', '/p/saebom/관악/직장인개인회생'], ['시안 A 미리보기 (검수 중)', SAEBOM_DRAFTS[0]], ['시안 B 미리보기 (검수 중)', SAEBOM_DRAFTS[1]], ['시안 C 미리보기 (검수 중)', SAEBOM_DRAFTS[2]],
+  ['역 주변', '/p/saebom/역/신림역'], ['가이드 (변제금 계산)', '/p/saebom/가이드/개인회생-변제금-계산하는-법'], ['가이드 (신청 서류)', '/p/saebom/가이드/개인회생-신청-서류'], ['질문', '/p/saebom/질문/개인회생-기간'], ['문의', '/p/saebom/문의']];
 const uuids = (html, prefix) => [...new Set([...html.matchAll(new RegExp(`${prefix}/([0-9a-f-]{36})`, 'g'))].map((m) => m[1]))];
 async function html(u, j) { const r = await get(u, j); return r.ok ? r.text() : ''; }
 
@@ -119,8 +126,9 @@ async function main() {
   fs.mkdirSync(OUT, { recursive: true });
   const admin = await login('seojun.park');
   const partner = await login('hangyeol');
-  const list = []; // [주소, 쿠키]
-  const add = (u, j) => { const k = normalize(u); if (!list.some(([x]) => x === k)) list.push([k, j]); };
+  const partner2 = await login('saebom');
+  const list = []; // [저장 키, 쿠키, 묶음]
+  const add = (u, j, scope = '') => { const k = scope + normalize(u); if (!list.some(([x]) => x === k)) list.push([k, j, scope]); };
 
   /* 본사 어드민 */
   for (const u of ['/admin', '/admin/agency', '/admin/billing', '/admin/generate', '/admin/indexing', '/admin/jobs', '/admin/leads', '/admin/me', '/admin/partners', '/admin/partners/new', '/admin/plans', '/admin/review', '/admin/review?page=2', '/admin/review?page=3', '/admin/settings', '/admin/settings/landing', '/admin/staff', '/admin/staff/new', '/admin/templates']) add(u, admin);
@@ -140,13 +148,18 @@ async function main() {
   for (const id of uuids(await html('/partner/inquiries?period=all', partner), '/partner/inquiries')) add(`/partner/inquiries/${id}`, partner);
   for (const m of (await html('/partner/blog', partner)).matchAll(/\/partner\/blog\?d=([0-9a-f-]{36})/g)) add(`/partner/blog?d=${m[1]}`, partner);
 
+  /* 파트너 관리자 (새봄법무사사무소 · 개인회생) — /새봄/partner/… 로 따로 저장 */
+  for (const u of ['/partner', '/partner/sites', '/partner/photos', '/partner/search', '/partner/search?type=현장', '/partner/making', '/partner/inquiries', '/partner/inquiries?period=all', '/partner/inquiries?tab=신규', '/partner/inquiries?tab=결과 입력 필요&period=all', '/partner/blog', '/partner/billing', '/partner/settings']) add(u, partner2, S2);
+  for (const id of uuids(await html('/partner/inquiries?period=all', partner2), '/partner/inquiries')) add(`/partner/inquiries/${id}`, partner2, S2);
+  for (const m of (await html('/partner/blog', partner2)).matchAll(/\/partner\/blog\?d=([0-9a-f-]{36})/g)) add(`/partner/blog?d=${m[1]}`, partner2, S2);
+
   /* 업체 공개 사이트 (본사 계정으로 — 검수 중 페이지도 미리보기) */
-  const seeds = ['/p/hangyeol', '/p/malgeunjip', '/p/danjeong', '/p/onmaru',
+  const seeds = ['/p/hangyeol', '/p/malgeunjip', '/p/danjeong', '/p/saebom', '/p/onmaru', '/p/saebom/역/신림역', '/p/saebom/가이드/개인회생-신청-서류', '/p/saebom/질문/개인회생-기간', ...SAEBOM_DRAFTS,
     '/p/danjeong/성남/수내동-아파트인테리어', '/p/danjeong/성남/서현동-아파트인테리어', '/p/hangyeol/원주/단계동-학원철거', '/p/hangyeol/춘천/석사동-학원철거',
     '/p/malgeunjip/강남/역삼동-오피스텔입주청소', '/p/malgeunjip/서초/서초동-오피스텔입주청소', '/p/malgeunjip/강남/개포동-오피스텔입주청소', '/p/hangyeol/contact/done'];
   const seen = new Set();
   const queue = seeds.map((u) => [u, 0]);
-  while (queue.length && seen.size < 160) {
+  while (queue.length && seen.size < 220) {
     const [u, d] = queue.shift();
     const k = normalize(u);
     if (seen.has(k)) continue;
@@ -163,10 +176,10 @@ async function main() {
   /* 저장 경로 먼저 정해 두고(링크 바꾸기에 씀) 저장 */
   for (const [u] of list) pages.set(u, pagePath(u));
   let n = 0;
-  for (const [u, j] of list) {
-    const res = await get(encodeURI(u), j);
+  for (const [u, j, scope] of list) {
+    const res = await get(encodeURI(u.slice(scope.length)), j);
     if (!res.ok) { console.log('건너뜀', res.status, u); pages.delete(u); continue; }
-    const out = await rewrite(await res.text(), j);
+    const out = await rewrite(await res.text(), j, scope);
     const dir = path.join(OUT, ...pages.get(u).split('/').filter(Boolean));
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, 'index.html'), out);
@@ -194,7 +207,7 @@ async function main() {
   fs.writeFileSync(path.join(OUT, 'missing.html'), `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>서버가 필요한 화면</title><body style="font:16px/1.6 system-ui,sans-serif;max-width:560px;margin:60px auto;padding:0 16px">${BANNER}<h1 style="font-size:22px">이 동작은 서버가 있어야 돼요</h1><p>정적 미리보기라서 저장 · 로그인 · 폼 보내기, 저장해 두지 않은 화면은 열리지 않아요. 실제로 눌러 보려면 개발 서버(<code>cd web && npm run dev</code>)에서 확인해 주세요.</p><p><a href="javascript:history.back()">← 돌아가기</a> · <a href="${BASE}/">미리보기 목차</a></p></body>`);
   /* 미리보기 목차 — 저장한 화면만 링크 */
   const L = (label, u) => { const k = normalize(u); return pages.has(k) ? `<li><a href="${BASE}${enc(pages.get(k))}/">${label}</a> <small>${k}</small></li>` : ''; };
-  const firstOf = (prefix) => [...pages.keys()].find((k) => new RegExp(`^${prefix}/[0-9a-f-]{36}$`).test(k));
+  const firstOf = (prefix) => [...pages.keys()].find((k) => k.startsWith(prefix + '/') && /^[0-9a-f-]{36}$/.test(k.slice(prefix.length + 1)));
   const sec = (h, items) => `<h2>${h}</h2><ul>${items.join('')}</ul>`;
   const toc = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>현장로그 미리보기</title>
 <style>body{font:15px/1.6 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;max-width:860px;margin:0 auto;padding:0 16px 60px;color:#111827;background:#fff}h1{font-size:26px;margin:28px 0 4px}h2{font-size:18px;margin:28px 0 8px;padding-top:12px;border-top:1px solid #e5e7eb}ul{padding-left:18px;margin:0}li{margin:4px 0}small{color:#6b7280;font-size:12px;word-break:break-all}a{color:#2563eb}p{color:#4b5563}@media(prefers-color-scheme:dark){body{background:#0b0f17;color:#e5e7eb}h2{border-color:#1f2937}a{color:#93c5fd}p,small{color:#9ca3af}}</style></head><body>${BANNER}
@@ -202,7 +215,9 @@ async function main() {
 ${sec('1. 랜딩 (가입 문의)', [`<li><a href="${BASE}/landing/">랜딩</a></li>`, `<li><a href="${BASE}/landing/done.html">접수 완료</a> · <a href="${BASE}/landing/privacy.html">개인정보처리방침</a> · <a href="${BASE}/landing/terms.html">이용약관</a></li>`, L('로그인 화면', '/login')])}
 ${sec('2. 본사 어드민 (최고 관리자 박서준)', [L('대시보드', '/admin'), L('가입 문의', '/admin/leads'), firstOf('/admin/leads') ? L('가입 문의 상세', firstOf('/admin/leads')) : '', L('파트너', '/admin/partners'), firstOf('/admin/partners') ? L('파트너 상세', firstOf('/admin/partners')) : '', L('파트너 추가', '/admin/partners/new'), L('페이지 생성', '/admin/generate'), L('업종 템플릿', '/admin/templates'), L('요금제', '/admin/plans'), L('발행 · 색인', '/admin/indexing'), L('검수', '/admin/review'), firstOf('/admin/review') ? L('검수 묶음 상세', firstOf('/admin/review')) : '', L('작업 로그', '/admin/jobs'), L('문의 · 정산', '/admin/billing'), L('대행 작업', '/admin/agency'), L('설정', '/admin/settings'), L('랜딩 관리', '/admin/settings/landing'), L('직원 계정', '/admin/staff'), L('내 계정', '/admin/me')])}
 ${sec('3. 파트너 관리자 (한결철거)', [L('홈', '/partner'), L('현장 발행', '/partner/sites'), L('사진 추가', '/partner/photos'), L('검색 노출', '/partner/search'), L('만들고 있는 페이지', '/partner/making'), L('문의', '/partner/inquiries'), firstOf('/partner/inquiries') ? L('문의 자세히', firstOf('/partner/inquiries')) : '', L('블로그', '/partner/blog'), L('결제 내역', '/partner/billing'), L('설정', '/partner/settings')])}
-${sec('4. 업체 공개 사이트', [L('한결철거 홈 (철거)', '/p/hangyeol'), L('맑은집클린 홈 (입주청소)', '/p/malgeunjip'), L('단정인테리어 홈 (인테리어)', '/p/danjeong'), L('온마루 홈 (준비 중 · 미리보기)', '/p/onmaru')])}
+${sec('3-2. 파트너 관리자 (새봄법무사사무소 · 개인회생)', [L('홈', S2 + '/partner'), L('현장 발행', S2 + '/partner/sites'), L('검색 노출', S2 + '/partner/search'), L('만들고 있는 페이지 (시안 A·B·C)', S2 + '/partner/making'), L('문의', S2 + '/partner/inquiries'), firstOf(S2 + '/partner/inquiries') ? L('문의 자세히', firstOf(S2 + '/partner/inquiries')) : '', L('블로그', S2 + '/partner/blog'), L('결제 내역', S2 + '/partner/billing'), L('설정', S2 + '/partner/settings')])}
+${sec('4. 업체 공개 사이트', [L('한결철거 홈 (철거)', '/p/hangyeol'), L('맑은집클린 홈 (입주청소)', '/p/malgeunjip'), L('단정인테리어 홈 (인테리어)', '/p/danjeong'), L('새봄법무사사무소 홈 (개인회생)', '/p/saebom'), L('온마루 홈 (준비 중 · 미리보기)', '/p/onmaru')])}
+${sec('4-2. 개인회생 업체 (새봄법무사사무소) 페이지 종류', SAEBOM_ROWS.map(([l, u]) => L(l, u)))}
 ${sec('5. 지역 × 작업 페이지 — 시안 A~F', [L('A 사진 중심형', '/p/danjeong/성남/수내동-아파트인테리어'), L('B 현장 기록형', '/p/danjeong/성남/서현동-아파트인테리어'), L('C 질문 답변형', '/p/hangyeol/원주/단계동-학원철거'), L('D 비용 안내형', '/p/hangyeol/춘천/석사동-학원철거'), L('E 지도 중심형', '/p/malgeunjip/강남/역삼동-오피스텔입주청소'), L('F 후기 인용형', '/p/malgeunjip/서초/서초동-오피스텔입주청소'), L('발행된 지역 페이지', '/p/hangyeol/춘천/퇴계동-상가철거')])}
 ${sec('6. 그 밖의 페이지 종류', [L('지역 허브', '/p/hangyeol/춘천'), L('역 주변', '/p/hangyeol/역/남춘천역'), L('업종 가이드', '/p/hangyeol/가이드/철거-비용-계산하는-법'), L('질문', '/p/hangyeol/질문/학원-철거-기간'), L('문의', '/p/hangyeol/문의'), L('문의 접수 완료', '/p/hangyeol/contact/done'), L('개인정보처리방침', '/p/hangyeol/개인정보처리방침')])}
 <p style="margin-top:28px">만든 때: ${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} · 화면 ${pages.size}개</p></body></html>`;
@@ -240,8 +255,16 @@ ${table([row('홈', '/partner'), row('현장 발행', '/partner/sites'), row('�
     row('문의', '/partner/inquiries'), row('문의 · 결과 입력 필요', '/partner/inquiries?tab=결과 입력 필요&period=all'), firstOf('/partner/inquiries') && row('문의 자세히', firstOf('/partner/inquiries')),
     row('블로그', '/partner/blog'), row('결제 내역', '/partner/billing'), row('설정 (최근 알림)', '/partner/settings')])}
 
+## 3-2. 파트너 관리자 (새봄법무사사무소 · 개인회생으로 본 화면)
+${table([row('홈', S2 + '/partner'), row('현장 발행', S2 + '/partner/sites'), row('사진 추가', S2 + '/partner/photos'), row('검색 노출', S2 + '/partner/search'), row('만들고 있는 페이지 (시안 A·B·C)', S2 + '/partner/making'),
+    row('문의', S2 + '/partner/inquiries'), row('문의 · 결과 입력 필요', S2 + '/partner/inquiries?tab=결과 입력 필요&period=all'), firstOf(S2 + '/partner/inquiries') && row('문의 자세히', firstOf(S2 + '/partner/inquiries')),
+    row('블로그', S2 + '/partner/blog'), row('결제 내역', S2 + '/partner/billing'), row('설정', S2 + '/partner/settings')])}
+
 ## 4. 업체 공개 사이트 (검수 중 페이지는 위에 "미리보기 · 시안 X" 띠)
-${table([row('한결철거 홈 (철거)', '/p/hangyeol'), row('맑은집클린 홈 (입주청소)', '/p/malgeunjip'), row('단정인테리어 홈 (인테리어)', '/p/danjeong'), row('온마루 홈 (준비 중 · 미리보기)', '/p/onmaru')])}
+${table([row('한결철거 홈 (철거)', '/p/hangyeol'), row('맑은집클린 홈 (입주청소)', '/p/malgeunjip'), row('단정인테리어 홈 (인테리어)', '/p/danjeong'), row('새봄법무사사무소 홈 (개인회생)', '/p/saebom'), row('온마루 홈 (준비 중 · 미리보기)', '/p/onmaru')])}
+
+### 개인회생 업체 (새봄법무사사무소) — 현장 대신 "사례", 견적 대신 "무료 상담"
+${table(SAEBOM_ROWS.map(([l, u]) => row(l, u)))}
 
 ### 지역 × 작업 페이지 — 시안 A~F
 ${table([row('A 사진 중심형', '/p/danjeong/성남/수내동-아파트인테리어'), row('B 현장 기록형', '/p/danjeong/성남/서현동-아파트인테리어'), row('C 질문 답변형', '/p/hangyeol/원주/단계동-학원철거'),

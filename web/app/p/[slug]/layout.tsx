@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import '@/styles/site.css';
-import { href, josa, livePages, siteBySlug } from '@/lib/site';
+import { copula, href, josa, livePages, siteBySlug } from '@/lib/site';
 
 /* 업체 공개 사이트 틀 (시안: 머리 · 바닥 · 모바일 하단 버튼) — 업체마다 대표 색 --brand 하나만 바뀜 */
 export default async function SiteLayout({ children, params }: { children: React.ReactNode; params: Promise<{ slug: string }> }) {
@@ -13,7 +13,7 @@ export default async function SiteLayout({ children, params }: { children: React
   const pages = await livePages(s.partner.id);
   const guide = pages.find((p) => p.type === '가이드');
   const p = s.partner;
-  const nav: [string, string][] = [['시공 사례', '#cases'], ['지역', s.cities[0] ?? ''], ...(guide?.path ? [['가이드', guide.path] as [string, string]] : []), ['문의', '문의']];
+  const nav: [string, string][] = [[s.t.cases, '#cases'], ['지역', s.cities[0] ?? ''], ...(guide?.path ? [['가이드', guide.path] as [string, string]] : []), ['문의', '문의']];
   const link = (to: string) => (to.startsWith('#') ? href(slug) + to : href(slug, to));
   /* 검색엔진용 업체 정보 (LocalBusiness) — DB에 있는 값만, 없는 값은 넣지 않음 */
   const ld = { '@context': 'https://schema.org', '@type': 'LocalBusiness', name: p.name, ...(p.tel ? { telephone: p.tel } : {}), ...(p.address ? { address: p.address } : {}), areaServed: s.cities.map((c) => s.cityName(c)), url: href(slug) };
@@ -38,7 +38,7 @@ export default async function SiteLayout({ children, params }: { children: React
           <div className="s-foot__info">
             <span>상호 {p.name}</span>{p.ceo && <span>대표자 {p.ceo}</span>}{p.bizRegNo && <span>사업자등록번호 {p.bizRegNo}</span>}{p.address && <span>주소 {p.address}</span>}{p.tel && <span>전화 {p.tel}</span>}
           </div>
-          <div className="s-foot__links"><Link href={href(slug, '개인정보처리방침')}>개인정보처리방침</Link><span>이 사이트의 현장 기록은 {josa(p.name, '이')} 직접 작업한 현장이에요</span></div>
+          <div className="s-foot__links"><Link href={href(slug, '개인정보처리방침')}>개인정보처리방침</Link><span>이 사이트의 {s.t.case} 기록은 {josa(p.name, '이')} 직접 {s.ic?.verb ?? '작업한'} {copula(s.t.case)}</span></div>
         </div>
       </footer>
       <div className="s-bar"><a href={`tel:${p.tel ?? ''}`}>전화하기</a><a href="#contact">문의 남기기</a></div>

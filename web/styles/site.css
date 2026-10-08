@@ -101,6 +101,7 @@
 .s-table > div > span:nth-child(2) { font-weight: 800; display: flex; align-items: center; gap: 6px; }
 .s-table > div > span:nth-child(3) { color: var(--text2); }
 .s-table > div:first-child > span { font-weight: 800 !important; color: var(--text2) !important; }
+.s-table--long > div > span:nth-child(2) { font-weight: 500; line-height: 1.5; }
 .s-inc { display: grid; grid-template-columns: 1fr; gap: 10px; }
 .s-inc > div { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
 .s-inc b { font-size: 15px; font-weight: 800; color: var(--brand); }

@@ -2,19 +2,19 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { After, Contact, Cost, Crumb, Hero, MapPins, Ph, Photos, QnA, Records, RegionInfo, Related, Sec, SiteCards, Steps, Summary } from '@/components/site/Blocks';
 import {
-  LIVE, dotDate, fill, generatedBody, href, josa, livePages, pageByPath, regionStat, siteBySlug, sitesOf, workLabel, type Site, type SiteRow
+  LIVE, daysText, dotDate, fill, generatedBody, href, josa, livePages, pageByPath, regionStat, siteBySlug, sitesOf, workLabel, type Site, type SiteRow
 } from '@/lib/site';
 
 type Props = { params: Promise<{ slug: string; path: string[] }>; searchParams: Promise<{ err?: string }> };
 
 /* 생성 본문이 없을 때의 시안별 한 줄 (시안 04-A~D 머리 문구 · E 지도 · F 후기) */
 const DRAFT_LEAD: Record<string, string> = {
-  A: '{동}에서 직접 {동사} {대상} 현장 사진을 먼저 보여드려요.',
-  B: '{동} {작업} 현장을 작업 전과 후, 날짜순으로 정리했어요.',
-  C: '{동} {작업|을} 맡기기 전에 많이 묻는 질문 네 가지에 현장 기록으로 답해요.',
-  D: '{동} {작업|은} 평수와 작업 범위로 비용이 정해져요. 예시 비용과 실제 현장을 함께 보세요.',
-  E: '{동} 가까이에서 {동사} 현장을 지도에 모았어요.',
-  F: '{동} {작업} 현장을 작업을 마친 순서대로 보여드려요.'
+  A: '{동}에서 직접 {동사} {대상} {현장} 사진을 먼저 보여드려요.',
+  B: '{동} {작업} {현장|을} 날짜순으로 정리했어요.',
+  C: '{동} {작업|을} 맡기기 전에 많이 묻는 질문 네 가지에 {현장} 기록으로 답해요.',
+  D: '{동} {작업|은} 상황과 범위에 따라 비용 · 기간이 달라져요. 진행 순서와 실제 {현장|을} 함께 보세요.',
+  E: '{동} 가까이에서 {동사} {현장|을} 지도에 모았어요.',
+  F: '{동} {작업} {현장|을} 마친 순서대로 보여드려요.'
 };
 
 export async function generateMetadata({ params }: Props) {
@@ -33,18 +33,18 @@ export async function generateMetadata({ params }: Props) {
 async function describe(s: Site, p: string, pg: { id: string; type: string; title: string } | null) {
   const cut = (x: string) => (x.length > 150 ? x.slice(0, 149) + '…' : x);
   const [head, second] = p.split('/');
-  if (head === '가이드') { const g = s.ic.guides.find((x) => x.slug === second); return g ? cut(`${g.lead} ${s.partner.name} 현장 사례와 함께 정리했어요.`) : undefined; }
+  if (head === '가이드') { const g = s.ic.guides.find((x) => x.slug === second); return g ? cut(`${g.lead} ${s.partner.name} ${s.t.case}와 함께 정리했어요.`) : undefined; }
   if (head === '질문') { const q = s.ic.questions.find((x) => x.slug === second); return q ? cut(`${q.short} ${q.a}`) : undefined; }
-  if (head === '역' && second) return cut(`${second} 주변에서 ${josa(s.partner.name, '이')} 직접 ${s.ic.verb} 현장을 지도와 사진으로 모았어요.`);
+  if (head === '역' && second) return cut(`${second} 주변에서 ${josa(s.partner.name, '이')} 직접 ${s.ic.verb} ${s.t.case}를 지도와 사진으로 모았어요.`);
   if (head === '현장' && second) {
     const site = (await sitesOf(s.partner.id, s.partner.slug)).find((x) => x.id.startsWith(second));
-    return site ? cut(`${site.title} · ${dotDate(site.workedAt)}${site.areaPyeong ? ` · ${site.areaPyeong}평` : ''}${site.days ? ` · ${site.days}일` : ''}. ${site.summary ?? '작업 전·후 사진과 현장 정보를 그대로 올렸어요.'}`) : undefined;
+    return site ? cut(`${site.title} · ${dotDate(site.workedAt)}${site.areaPyeong ? ` · ${site.areaPyeong}평` : ''}${site.days ? ` · ${daysText(s.t, site.days)}` : ''}. ${site.summary ?? '작업 전·후 사진과 현장 정보를 그대로 올렸어요.'}`) : undefined;
   }
   if (!second && s.cities.includes(head)) return cut(fill(s.ic.hubLead, s.vars({ 시: head, 시이름: s.cityName(head) })));
   if (pg?.type === '지역') {
     const gen = await generatedBody(pg.id);
     const first = gen?.b.commonBody[0] ? fill(gen.b.commonBody[0], { 지역명: gen.i.name, '현장 수': String(gen.i.sites), '사진 수': String(gen.i.photos), '지역 정보': gen.i.info }) : '';
-    return cut(first || `${pg.title} · ${s.partner.name} 현장 사진과 기록`);
+    return cut(first || `${pg.title} · ${s.partner.name} ${s.t.case} 사진과 기록`);
   }
   return undefined;
 }
@@ -102,9 +102,9 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
   /* 현장 수는 이 페이지에 실제로 보여 주는 현장 수로 (본문 숫자와 아래 목록이 어긋나지 않게) */
   const body = gen ? gen.b.commonBody.map((p) => fill(p, { 지역명: gen.i.name, '지역 정보': gen.i.info, '현장 수': String(nearOnly ? gen.i.sites : sites.length || gen.i.sites), '사진 수': String(gen.i.photos) })).filter((p) => p.trim() && p !== gen.i.info) : [];
   const lead = body[0] ?? fill(DRAFT_LEAD[label], v);
-  const infoCards: [string, string][] = [[`${place} · 신고 절차`, fill(s.ic.permit, v)], [`${place} · 이 지역 건물 특성`, info]];
-  const siteTitle = nearOnly ? `${s.cityName(city)} 가까운 현장` : `${place} 현장`;
-  const siteSec = <Sec title={siteTitle} card={label !== 'B'}><SiteCards slug={slug} sites={sites} /></Sec>;
+  const infoCards: [string, string][] = [[`${place} · ${s.t.permit}`, fill(s.ic.permit, v)], [`${place} · ${s.t.areaInfo}`, info]];
+  const siteTitle = nearOnly ? `${s.cityName(city)} 가까운 ${s.t.case}` : `${place} ${s.t.case}`;
+  const siteSec = <Sec title={siteTitle} card={label !== 'B'}><SiteCards slug={slug} sites={sites} t={s.t} /></Sec>;
   const guideSec = body.length > 1 ? <Sec title={`${place} ${work} 안내`} narrow><div className="s-sechead">{body.slice(1).map((p, i) => <p key={i} className="s-p">{p}</p>)}</div></Sec> : null;
   return (
     <>
@@ -112,7 +112,7 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
       <Hero s={s} eyebrow={`${s.cityName(city).replace(/[시군구]$/, '')} ${place} · ${work}`.replace(`${city} ${city}`, city)} title={`${city} ${dong ? dong + ' ' : ''}${work}`} lead={lead} photo={cover} caption={cover ? `${cover.caption} · ${dotDate(latest?.workedAt ?? null)}` : undefined} />
       {label === 'A' && (
         <>
-          <Sec title="현장 사진" sub={`${place} ${work} · 사진 ${Math.max(stat?.photos ?? 0, sites.flatMap((x) => x.photos).length)}장 중 ${Math.min(5, sites.flatMap((x) => x.photos).length)}장`}><Photos photos={sites.flatMap((x) => x.photos).slice(0, 5)} /></Sec>
+          <Sec title={`${s.t.case} 사진`} sub={`${place} ${work} · 사진 ${Math.max(stat?.photos ?? 0, sites.flatMap((x) => x.photos).length)}장 중 ${Math.min(5, sites.flatMap((x) => x.photos).length)}장`}><Photos photos={sites.flatMap((x) => x.photos).slice(0, 5)} /></Sec>
           {siteSec}
           <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
           {guideSec}
@@ -120,7 +120,7 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
       )}
       {label === 'B' && (
         <>
-          <Sec title={nearOnly ? siteTitle : '현장 기록'} sub="최근 순"><Records sites={sites} /></Sec>
+          <Sec title={nearOnly ? siteTitle : `${s.t.case} 기록`} sub="최근 순"><Records sites={sites} t={s.t} /></Sec>
           <Sec title="진행 순서" card><Steps ic={s.ic} /></Sec>
           <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
           {guideSec}
@@ -128,11 +128,11 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
       )}
       {label === 'C' && (
         <>
-          <Sec title="많이 묻는 질문"><QnA items={s.ic.faq.slice(0, 4).map((f, i) => {
+          <Sec title="많이 묻는 질문"><QnA caseWord={s.t.case} items={s.ic.faq.slice(0, 4).map((f, i) => {
             const site = qaSites[i % Math.max(1, qaSites.length)];
             /* 작업 기간 질문({작업}이 들어간 질문)은 근거 현장의 실제 기록으로 먼저 답함 — 지어낸 수치 대신 */
-            const record = f.q.includes('{작업') && site?.days ? `${josa(site.title, '은')} ${site.areaPyeong ? `${site.areaPyeong}평, ` : ''}${site.days}일 걸렸어요. ` : '';
-            return { q: fill(f.q, v), a: record + fill(f.a, v), photo: site?.photos[(i + 1) % Math.max(1, site.photos.length)], basis: site ? `${site.title}${site.areaPyeong ? ` · ${site.areaPyeong}평` : ''}${site.days ? ` · ${site.days}일` : ''}` : s.partner.name };
+            const record = f.q.includes('{작업') && site?.days ? `${josa(site.title, '은')} ${site.areaPyeong ? `${site.areaPyeong}평, ` : ''}${daysText(s.t, site.days)} 걸렸어요. ` : '';
+            return { q: fill(f.q, v), a: record + fill(f.a, v), photo: site?.photos[(i + 1) % Math.max(1, site.photos.length)], basis: site ? `${site.title}${site.areaPyeong ? ` · ${site.areaPyeong}평` : ''}${site.days ? ` · ${daysText(s.t, site.days)}` : ''}` : s.partner.name };
           })} /></Sec>
           {siteSec}
           <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
@@ -142,7 +142,7 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
       {label === 'D' && (
         <>
           <Sec><Summary ic={s.ic} /></Sec>
-          <Sec title={s.ic.cost.table.priced ? '평수별 비용' : `${s.ic.cost.table.head[0]}별 작업 범위`}><Cost ic={s.ic} /></Sec>
+          <Sec title={s.t.costTitle || (s.ic.cost.table.priced ? '평수별 비용' : `${s.ic.cost.table.head[0]}별 작업 범위`)}><Cost ic={s.ic} /></Sec>
           {siteSec}
           <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
           {guideSec}
@@ -151,7 +151,7 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
       {/* E 지도 중심형: 이 동 현장을 지도에 · 현장 카드 · 지역 정보 */}
       {label === 'E' && (
         <>
-          <Sec title={`${place} 주변 현장 지도`}><MapPins label={`지도 · ${place} 주변`} pins={(regionSites.length ? regionSites : citySites).slice(0, 8).map((x) => `${x.dong} ${x.buildingType ?? ''}${x.areaPyeong ? ` · ${x.areaPyeong}평` : ''}`.replace(/\s+·/, ' ·'))} /></Sec>
+          <Sec title={`${place} 주변 ${s.t.case} 지도`}><MapPins label={`지도 · ${place} 주변`} pins={(regionSites.length ? regionSites : citySites).slice(0, 8).map((x) => `${x.dong} ${x.buildingType ?? ''}${x.areaPyeong ? ` · ${x.areaPyeong}평` : ''}`.replace(/\s+·/, ' ·'))} /></Sec>
           {siteSec}
           <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
           {guideSec}
@@ -160,7 +160,7 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
       {/* F 후기 인용형: 후기 자료(고객 동의)가 연결되기 전에는 현장 기록으로 — 없는 후기를 지어내지 않음 */}
       {label === 'F' && (
         <>
-          <Sec title={nearOnly ? siteTitle : '현장 기록'} sub="작업을 마친 순서"><Records sites={sites} /></Sec>
+          <Sec title={nearOnly ? siteTitle : `${s.t.case} 기록`} sub="마친 순서"><Records sites={sites} t={s.t} /></Sec>
           <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
           {guideSec}
         </>
@@ -168,7 +168,7 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
       {(sameWork.length > 0 || sameDong.length > 0) && (
         <Sec card><Related slug={slug} groups={[
           { h: `${s.cityName(city)} 다른 동 ${work}`, links: sameWork.map((p) => ({ label: `${p.regionKey!.split(' ')[1] ?? p.regionKey} ${work}`, path: p.path! })) },
-          { h: `${place} 다른 작업`, links: sameDong.map((p) => ({ label: `${place} ${workLabel(p.work ?? '', s.industry.name)}`, path: p.path! })) }
+          { h: `${place} 다른 ${s.t.kind}`, links: sameDong.map((p) => ({ label: `${place} ${workLabel(p.work ?? '', s.industry.name)}`, path: p.path! })) }
         ]} /></Sec>
       )}
       <Sec><Contact s={s} from={pg.path ?? ''} error={err} /></Sec>
@@ -188,13 +188,13 @@ async function HubPage({ s, city, err }: { s: Site; city: string; err: boolean }
   return (
     <>
       <Crumb slug={slug} items={[[s.cityName(city)]]} />
-      <Hero s={s} eyebrow={s.cityName(city)} title={`${s.cityName(city)} ${s.industry.name}`} lead={fill(s.ic.hubLead, v)} photo={cover} caption={cover ? `${cover.caption} · 현장 주변 모습` : undefined} />
-      <Sec title={`${city} 지역 정보`}><RegionInfo items={[[`${s.cityName(city)} · 신고 절차`, fill(s.ic.cityPermit, v)], [`${s.cityName(city)} · 이 지역 건물 특성`, s.content?.cityInfo[city] ?? '']]} /></Sec>
-      <Sec title={`${city} 현장`} sub={`${sites.length}곳 · 최근 순`} card><SiteCards slug={slug} sites={sites.slice(0, 8)} cols={4} /></Sec>
+      <Hero s={s} eyebrow={s.cityName(city)} title={`${s.cityName(city)} ${s.industry.name}`} lead={fill(s.ic.hubLead, v)} photo={cover} caption={cover ? `${cover.caption} · ${s.t.case} 사진` : undefined} />
+      <Sec title={`${city} 지역 정보`}><RegionInfo items={[[`${s.cityName(city)} · ${s.t.permit}`, fill(s.ic.cityPermit, v)], [`${s.cityName(city)} · ${s.t.areaInfo}`, s.content?.cityInfo[city] ?? '']]} /></Sec>
+      <Sec title={`${city} ${s.t.case}`} sub={`${sites.length}곳 · 최근 순`} card><SiteCards slug={slug} sites={sites.slice(0, 8)} cols={4} t={s.t} /></Sec>
       <Sec title={`${city} 안에서 찾기`}>
         <Related slug={slug} groups={[
           { h: '동별', links: byDong.map((p) => ({ label: `${p.regionKey!.split(' ')[1]} ${s.industry.name}`, path: p.path! })) },
-          { h: '작업별', links: byWork.map((p) => ({ label: `${city} ${workLabel(p.work!, s.industry.name)}`, path: p.path! })) }
+          { h: `${s.t.kind}별`, links: byWork.map((p) => ({ label: `${city} ${workLabel(p.work!, s.industry.name)}`, path: p.path! })) }
         ]} />
         {!inCity.length && <span className="s-h2sub">이 지역 페이지는 아직 만들고 있어요</span>}
       </Sec>
@@ -213,9 +213,9 @@ async function StationPage({ s, name, err }: { s: Site; name: string; err: boole
   return (
     <>
       <Crumb slug={slug} items={[[s.cityName(st.city), st.city], [`${name} 인근`]]} />
-      <Hero s={s} text eyebrow={`${name} 반경 ${st.radius}`} title={`${name} 인근 ${s.industry.name}`} lead={`${name} 주변에서 직접 작업한 현장 ${sites.length}곳이에요. 지도의 점을 누르면 현장 기록으로 가요.`} />
-      <section className="s-sec" style={{ paddingTop: 28, paddingBottom: 0 }}><div className="s-sec__in"><MapPins tall label={`지도 · ${name} 주변`} station={name} pins={sites.map((x) => `${x.dong} ${x.buildingType ?? ''} · ${x.areaPyeong}평`)} /></div></section>
-      <Sec title="지도에 표시된 현장"><SiteCards slug={slug} sites={sites} /></Sec>
+      <Hero s={s} text eyebrow={`${name} 반경 ${st.radius}`} title={`${name} 인근 ${s.industry.name}`} lead={`${name} 주변에서 직접 ${s.ic.verb} ${s.t.case} ${sites.length}곳이에요. 지도의 점을 누르면 ${s.t.case} 기록으로 가요.`} />
+      <section className="s-sec" style={{ paddingTop: 28, paddingBottom: 0 }}><div className="s-sec__in"><MapPins tall label={`지도 · ${name} 주변`} station={name} pins={sites.map((x) => `${x.dong} ${x.buildingType ?? ''}${x.areaPyeong ? ` · ${x.areaPyeong}평` : ''}`.replace(/\s+·/, ' ·'))} /></div></section>
+      <Sec title={`지도에 표시된 ${s.t.case}`}><SiteCards slug={slug} sites={sites} t={s.t} /></Sec>
       {others.length > 0 && <Sec card><Related slug={slug} groups={[{ h: '다른 역 주변', links: others.map((p) => ({ label: p.title, path: p.path! })) }]} /></Sec>}
       <Sec><Contact s={s} from={`역/${name}`} error={err} /></Sec>
     </>
@@ -233,22 +233,22 @@ async function SitePage({ s, id, err }: { s: Site; id: string; err: boolean }) {
   const dongPages = live.filter((p) => p.type === '지역' && p.regionKey === site.region).slice(0, 6);
   /* 현장 정보: 있는 값만 (업종마다 입력 항목이 달라 — 방 개수 · 자재 같은 값은 details) */
   const kv: [string, string][] = ([
-    ['유형', site.buildingType ?? ''], ['평수', site.areaPyeong ? `${site.areaPyeong}평` : ''], ['기간', site.days ? `${site.days}일` : ''], ['층', site.floorNote ?? ''],
+    ['유형', site.buildingType ?? ''], ['평수', site.areaPyeong ? `${site.areaPyeong}평` : ''], ['기간', site.days ? daysText(s.t, site.days) : ''], ['층', site.floorNote ?? ''],
     ...Object.entries(site.details ?? {})
   ] as [string, string][]).filter(([, v]) => v);
   return (
     <>
-      <Crumb slug={slug} items={[[s.cityName(site.city), site.city], [site.dong], ['현장 기록']]} />
-      <Hero s={s} text eyebrow={`현장 기록 · ${dotDate(site.workedAt)}`} title={site.title} />
+      <Crumb slug={slug} items={[[s.cityName(site.city), site.city], [site.dong], [`${s.t.case} 기록`]]} />
+      <Hero s={s} text eyebrow={`${s.t.case} 기록 · ${dotDate(site.workedAt)}`} title={site.title} />
       <Sec><Photos photos={site.photos} /></Sec>
-      <Sec title="현장 정보"><div className="s-kv">{kv.map(([k, v]) => <div key={k}><span>{k}</span><b>{v}</b></div>)}</div></Sec>
-      {site.issues.length > 0 && <Sec title="있었던 문제와 처리">{site.issues.map((x) => <div key={x.title} className="s-issue"><b>{x.title}</b><p className="s-p">{x.body}</p></div>)}</Sec>}
-      <Sec title="작업 전 · 후" card>
-        <div className="s-ba"><div><Ph photo={site.photos.find((p) => p.shot === '전') ?? site.photos[0]} shot="전" /></div><div><Ph photo={site.photos.find((p) => p.shot === '후') ?? site.photos[site.photos.length - 1]} shot="후" /></div></div>
+      <Sec title={`${s.t.case} 정보`}><div className="s-kv">{kv.map(([k, v]) => <div key={k}><span>{k}</span><b>{v}</b></div>)}</div></Sec>
+      {site.issues.length > 0 && <Sec title={s.t.issues}>{site.issues.map((x) => <div key={x.title} className="s-issue"><b>{x.title}</b><p className="s-p">{x.body}</p></div>)}</Sec>}
+      <Sec title={s.t.ba} card>
+        <div className="s-ba"><div><Ph photo={site.photos.find((p) => p.shot === '전') ?? site.photos[0]} shot="전" shotLabel={s.t.shots[0] ?? ''} /></div><div><Ph photo={site.photos.find((p) => p.shot === '후') ?? site.photos[site.photos.length - 1]} shot="후" shotLabel={s.t.shots[1] ?? ''} /></div></div>
         {site.summary && <span className="s-p" style={{ fontSize: 15 }}>{site.summary}</span>}
       </Sec>
-      {near.length > 0 && <Sec title={`${site.dong} 다른 현장`}><SiteCards slug={slug} sites={near} /></Sec>}
-      {dongPages.length > 0 && <Sec card><Related slug={slug} groups={[{ h: `${site.dong} 작업별 안내`, links: dongPages.map((p) => ({ label: `${site.dong} ${workLabel(p.work ?? '', s.industry.name)}`, path: p.path! })) }]} /></Sec>}
+      {near.length > 0 && <Sec title={`${site.dong} 다른 ${s.t.case}`}><SiteCards slug={slug} sites={near} t={s.t} /></Sec>}
+      {dongPages.length > 0 && <Sec card><Related slug={slug} groups={[{ h: `${site.dong} ${s.t.kind}별 안내`, links: dongPages.map((p) => ({ label: `${site.dong} ${workLabel(p.work ?? '', s.industry.name)}`, path: p.path! })) }]} /></Sec>}
       <Sec><Contact s={s} from={site.path} error={err} /></Sec>
     </>
   );
@@ -276,7 +276,7 @@ async function GuidePage({ s, guideSlug, err }: { s: Site; guideSlug: string; er
                   {x.p && <p className="s-p">{x.p}</p>}
                   {x.cost && <Cost ic={s.ic} />}
                   {x.checklist && <div className="s-check">{x.checklist.map((c) => <label key={c}><input type="checkbox" />{c}</label>)}</div>}
-                  {x.cases && <SiteCards slug={slug} sites={cases} cols={2} />}
+                  {x.cases && <SiteCards slug={slug} sites={cases} cols={2} t={s.t} />}
                 </div>
               ))}
             </article>
@@ -306,7 +306,7 @@ async function QuestionPage({ s, qSlug, err }: { s: Site; qSlug: string; err: bo
         <h1 className="s-h1" style={{ fontSize: 'clamp(28px, 4vw, 40px)', lineHeight: 1.3 }}>{q.q}</h1>
         <div className="s-answer"><b>{q.short}</b><p>{q.a}</p></div>
       </div></section>
-      <Sec title="근거가 된 현장" narrow><SiteCards slug={slug} sites={basis} cols={2} /></Sec>
+      <Sec title={`근거가 된 ${s.t.case}`} narrow><SiteCards slug={slug} sites={basis} cols={2} t={s.t} /></Sec>
       <Sec title={guide ? '관련 가이드' : undefined} narrow>
         {guide && guidePage?.path && <Link href={href(slug, guidePage.path)} className="s-guidelink"><div><b>{guide.title}</b><span>{guide.short}</span></div><i>›</i></Link>}
         <Related slug={slug} groups={[{ h: '다른 질문', links: others.map((p) => ({ label: p.title.endsWith('?') ? p.title : p.title + '?', path: p.path! })) }]} />
@@ -321,9 +321,9 @@ function ContactPage({ s, err }: { s: Site; err: boolean }) {
   return (
     <>
       <Crumb slug={s.partner.slug} items={[['문의']]} />
-      <Hero s={s} text title="문의" lead="전화가 가장 빨라요. 작업 중이라 못 받으면 문자로 다시 연락드려요." />
+      <Hero s={s} text title="문의" lead={s.t.contactLead} />
       <Sec><Contact s={s} from="문의" regions error={err} /></Sec>
-      <Sec title="접수 후 안내"><After /></Sec>
+      <Sec title="접수 후 안내"><After items={s.t.after} /></Sec>
     </>
   );
 }
@@ -336,7 +336,7 @@ function Done({ s }: { s: Site }) {
         <div className="s-done"><span className="s-done__i" aria-hidden="true">✓</span><b>문의가 접수됐어요</b><span>{josa(s.partner.name, '이')} 하루 안에 연락드려요. 급하시면 전화로 물어봐 주세요.</span></div>
       </Sec>
       <Sec title="접수 후 안내">
-        <After />
+        <After items={s.t.after} />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><a href={`tel:${s.partner.tel ?? ''}`} className="s-btn">전화하기</a><Link href={href(s.partner.slug)} className="s-btn s-btn--line">홈으로</Link></div>
       </Sec>
     </>

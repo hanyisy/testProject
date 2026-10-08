@@ -1,7 +1,7 @@
 /* 페이지 생성 계산 · 흐름 — 서버 전용 모듈(server-only) 없이: 어드민 화면과 데모 시드(db:reset)가 같이 씀 */
 import { and, asc, eq } from 'drizzle-orm';
 import { schema as t, type DB } from '@/db/client';
-import { copula, fill } from './text';
+import { copula, fill, termsOf } from './text';
 import type { IndustryContent } from './site';
 
 export type DraftStyle = { label: string; style: string; desc: string; body: string[] };
@@ -98,7 +98,7 @@ export async function buildReview(db: DB, runId: string, opts: { createdOn: stri
   const ic = contents[p.code];
   const period = ic?.cost.summary.find((x) => x.k === '기간');
   const vals: Record<string, string> = {
-    업체: p.name, 작업: work, '작업 방식': ic?.method ?? '',
+    업체: p.name, 작업: work, '작업 방식': ic?.method ?? '', 현장: termsOf(ic?.terms).case, '문의 방법': termsOf(ic?.terms).ask,
     '기간 안내': period ? `작업 기간은 보통 ${copula(period.v)}${period.note ? `(${period.note})` : ''}. 아래 표에서 ${ic!.cost.table.head[0]}별로 확인해 보세요.` : ''
   };
   for (const d of picked) {
