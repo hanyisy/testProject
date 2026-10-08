@@ -239,6 +239,7 @@ CREATE TABLE "partners" (
 	"ceo" text,
 	"biz_reg_no" text,
 	"tel" text,
+	"address" text,
 	"manager" text,
 	"mobile" text,
 	"email" text,

@@ -2,9 +2,11 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 export function proxy(req: NextRequest) {
+  /* 랜딩은 상대 주소(css/ · js/)를 쓰므로 /landing → /landing/ */
+  if (req.nextUrl.pathname === '/landing') return NextResponse.redirect(new URL('/landing/', req.url), 308);
   const headers = new Headers(req.headers);
   headers.set('x-pathname', req.nextUrl.pathname + req.nextUrl.search);
   return NextResponse.next({ request: { headers } });
 }
 
-export const config = { matcher: ['/admin/:path*', '/partner/:path*', '/login/:path*', '/forbidden'] };
+export const config = { matcher: ['/admin/:path*', '/partner/:path*', '/login/:path*', '/forbidden', '/landing'] };

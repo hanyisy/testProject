@@ -1,5 +1,5 @@
 {
-  "id": "89d85f77-26cb-4bfb-8d43-e73520fd979e",
+  "id": "1f33a2e0-ede5-4a3f-b587-09e24a4b5d58",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1770,6 +1770,12 @@
         },
         "tel": {
           "name": "tel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address": {
+          "name": "address",
           "type": "text",
           "primaryKey": false,
           "notNull": false

@@ -385,3 +385,9 @@
 .sumrow { display: flex; justify-content: space-between; font-size: 15px; }
 .sumrow span { color: var(--sub); }
 @media (max-width: 1100px) { .gensum { position: static; } }
+
+/* 랜딩 관리 */
+.capadd { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; }
+.capcanvas { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line3); cursor: crosshair; touch-action: none; background: var(--surf); }
+.capthumb { width: 96px; height: 60px; border-radius: 8px; background: var(--surf) center / cover no-repeat; border: 1px solid var(--line2); }
+@media (max-width: 900px) { .capadd { grid-template-columns: minmax(0, 1fr); } }

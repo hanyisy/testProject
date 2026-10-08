@@ -17,7 +17,8 @@
 
   /* 업종·지역 확인용 (지역 목록과 이미 운영 중인 조합) */
   var REGS = ['강원 춘천', '강원 원주', '강원 홍천', '서울 서초', '서울 강남', '서울 송파', '경기 수원', '경기 용인', '인천 부평'];
-  var TAKEN = { '철거': ['강원 춘천', '강원 원주', '강원 홍천'], '입주청소': ['서울 서초', '서울 강남'], '바닥 시공': ['경기 수원', '경기 용인'] };
+  /* 이미 운영 중인 업종×지역 — config.js data.occupancy 에서 읽어 채움 (못 읽으면 비어 있음 = 모두 신청 가능) */
+  var TAKEN = {};
 
   var state = { ind: '철거', reg: '강원 춘천', waitlist: false };
   var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -229,5 +230,9 @@
     bindConsent();
     initCaptures();
     initMarquee();
+    /* 업종×지역 운영 현황을 읽어 확인 결과를 다시 그림 */
+    if (HL.getJSON && CONFIG.data && CONFIG.data.occupancy) {
+      HL.getJSON(CONFIG.data.occupancy).then(function (res) { TAKEN = (res.data && res.data.taken) || {}; render(); }).catch(function () { /* 못 읽으면 모두 신청 가능 */ });
+    }
   });
 })();

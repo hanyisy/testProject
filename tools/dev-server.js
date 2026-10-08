@@ -1,6 +1,6 @@
 /* 현장로그 로컬 개발 서버 (의존성 없음) — node tools/dev-server.js [포트]
  *
- * site/ 정적 파일을 띄우고, 실제 서버가 생기기 전까지 필요한 동작만 흉내 냅니다.
+ * web/public 정적 파일(랜딩)만 띄우고, 실제 서버가 생기기 전까지 필요한 동작만 흉내 냅니다.
  * 실제 서버를 만들 때 같은 동작을 옮기면 됩니다. (README "서버가 할 일" 참고)
  *
  * - 모든 응답에 X-Robots-Tag: noindex   임시 주소(도메인 연결 전)는 색인 제외
@@ -14,7 +14,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..', 'site');
+const ROOT = path.resolve(__dirname, '..', 'web', 'public');
 const DEV = path.resolve(__dirname, '..', '.devdata');   // 로컬에서 받은 문의 (git 제외)
 const DESIGN = path.resolve(__dirname, '..', 'design');  // 확정 시안 (개발 서버에서만 /design/ 으로 보기)
 const PORT = Number(process.argv[2] || process.env.PORT || 8000);

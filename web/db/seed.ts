@@ -5,6 +5,7 @@ import { and, count, eq, like } from 'drizzle-orm';
 import type { DB } from './client';
 import * as t from './schema';
 import data from './seed-data.json';
+import sites from './partner-sites.json';
 import { hashPassword } from '../lib/password';
 
 type Seed = typeof data;
@@ -50,6 +51,8 @@ async function seed(db: DB, d: Seed) {
       slug: p.slug, name: p.name, industryId: industryId[p.industry], planId: planId[p.plan], status: p.status as '운영 중',
       ceo: p.ceo ?? null, bizRegNo: p.bizRegNo ?? null, tel: p.tel ?? null, manager: p.manager ?? null, mobile: p.mobile ?? null, email: p.email ?? null,
       /* 사업자 정보: 등록번호가 있는 업체는 저장된 상태로 (세금계산서 바로 요청), 없으면 요청 때 입력 창 */
+      /* 공개 사이트 시안의 사업장 주소 */
+      address: sites.items.find((x) => x.slug === p.slug)?.business.address ?? null,
       bizName: p.bizRegNo ? p.name : null, taxEmail: p.bizRegNo ? p.email ?? null : null,
       brandColor: p.brandColor ?? null, mark: p.mark ?? null, payMode: p.payMode as '계좌 입금', startedAt: p.startedAt ?? null,
       driveConnected: p.status === '운영 중', driveSyncedAt: p.status === '운영 중' ? at(d.today, '09:50') : null,

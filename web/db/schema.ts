@@ -88,6 +88,8 @@ export const partners = pgTable('partners', {
   ceo: text('ceo'),
   bizRegNo: text('biz_reg_no'),
   tel: text('tel'),
+  /** 사업장 주소 (공개 사이트 바닥 사업자 정보) */
+  address: text('address'),
   manager: text('manager'),
   mobile: text('mobile'),
   email: text('email'),
