@@ -111,7 +111,8 @@ CREATE TABLE "inquiries" (
 	"body" text,
 	"status" text DEFAULT '신규' NOT NULL,
 	"verify" text DEFAULT '확인 중' NOT NULL,
-	"amount" integer
+	"amount" integer,
+	"needs_result" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "jobs" (
@@ -249,6 +250,8 @@ CREATE TABLE "photos" (
 	"site_id" uuid,
 	"file_key" text NOT NULL,
 	"taken_at" timestamp with time zone,
+	"place" text,
+	"label" text,
 	"source" text NOT NULL,
 	"has_person" boolean DEFAULT false NOT NULL,
 	"partner_public" boolean DEFAULT false NOT NULL,

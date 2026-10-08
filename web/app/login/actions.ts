@@ -1,10 +1,11 @@
 'use server';
 /* 로그인 · 첫 로그인 비밀번호 변경 · 로그아웃 */
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { eq } from 'drizzle-orm';
 import { getDb, schema as t } from '@/db/client';
 import {
-  MAX_FAILS, attemptState, clearFailures, createSession, destroySession, readSession, recordFailure, safeNext
+  MAX_FAILS, PW_LATER_COOKIE, attemptState, clearFailures, createSession, destroySession, readSession, recordFailure, safeNext
 } from '@/lib/auth';
 import { hashPassword, passwordRules, verifyPassword } from '@/lib/password';
 
@@ -37,6 +38,7 @@ export async function login(_: LoginState, fd: FormData): Promise<LoginState> {
   if (user.status === '사용 중지') return { id, error: 'disabled' };
 
   await clearFailures(id);
+  (await cookies()).delete(PW_LATER_COOKIE);
   await db.update(t.users).set({ lastLoginAt: new Date() }).where(eq(t.users.id, user.id));
   await createSession(user.id, keep);
   const to = landing(user.kind, next);
@@ -70,6 +72,15 @@ export async function demoLogin(fd: FormData) {
   await createSession(user.id, false);
   const to = landing(user.kind, safeNext(fd.get('next')));
   redirect(user.mustChangePassword ? `/login/password?next=${encodeURIComponent(to)}` : to);
+}
+
+/** 컨펌용: 새 비밀번호는 나중에 — 이번 로그인만 건너뜀 (다음 로그인 때 다시 물어봄) */
+export async function skipPassword(fd: FormData) {
+  const { DEMO_LOGIN } = await import('@/lib/config');
+  const { user } = await readSession();
+  if (!user) redirect('/login?reason=expired');
+  if (DEMO_LOGIN) (await cookies()).set(PW_LATER_COOKIE, '1', { httpOnly: true, sameSite: 'lax', path: '/' });
+  redirect(landing(user.kind, safeNext(fd.get('next'))));
 }
 
 export async function logout() {

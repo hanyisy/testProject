@@ -1,5 +1,5 @@
 {
-  "id": "16f2cde1-ad46-4fed-9501-c7a20b89de82",
+  "id": "14209140-4739-45a5-bbde-5b5e8a50662b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -786,6 +786,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "needs_result": {
+          "name": "needs_result",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {
@@ -1844,6 +1851,18 @@
         "taken_at": {
           "name": "taken_at",
           "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "place": {
+          "name": "place",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

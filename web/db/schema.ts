@@ -166,6 +166,9 @@ export const photos = pgTable('photos', {
   siteId: uuid('site_id').references(() => sites.id),
   fileKey: text('file_key').notNull(),
   takenAt: timestamp('taken_at', { withTimezone: true }),
+  /** 촬영 위치로 정한 지역 이름 (예: 춘천 퇴계동) — 새 사진을 날짜 · 지역으로 묶을 때 씀 */
+  place: text('place'),
+  label: text('label'),
   source: text('source').$type<'직접 올림' | '드라이브'>().notNull(),
   hasPerson: boolean('has_person').notNull().default(false),
   partnerPublic: boolean('partner_public').notNull().default(false),
@@ -328,7 +331,9 @@ export const inquiries = pgTable('inquiries', {
   body: text('body'),
   status: text('status').$type<InquiryStatus>().notNull().default('신규'),
   verify: text('verify').$type<'확인 중' | '확인됨' | '본인 아님'>().notNull().default('확인 중'),
-  amount: integer('amount')
+  amount: integer('amount'),
+  /** 견적을 보낸 뒤 결과(계약 · 무산)를 아직 입력하지 않음 */
+  needsResult: boolean('needs_result').notNull().default(false)
 }, (t) => [index('inquiries_partner_idx').on(t.partnerId)]);
 
 export const charges = pgTable('charges', {

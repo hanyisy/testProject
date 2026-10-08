@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { readSession, safeNext } from '@/lib/auth';
 import PasswordForm from './PasswordForm';
+import { DEMO_LOGIN } from '@/lib/config';
 
 export const metadata = { title: '새 비밀번호' };
 
@@ -11,7 +12,7 @@ export default async function PasswordPage({ searchParams }: { searchParams: Pro
   if (!user) redirect('/login?reason=expired');
   return (
     <main className="auth">
-      <PasswordForm next={safeNext(sp.next)} homeLabel={user.kind === 'partner' ? '홈으로' : '대시보드로'} />
+      <PasswordForm next={safeNext(sp.next)} homeLabel={user.kind === 'partner' ? '홈으로' : '대시보드로'} allowSkip={DEMO_LOGIN} />
     </main>
   );
 }

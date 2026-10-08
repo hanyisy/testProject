@@ -7,6 +7,12 @@ import { and, eq, gt } from 'drizzle-orm';
 import { getDb, schema as t } from '@/db/client';
 
 export const SESSION_COOKIE = 'hl_session';
+/** 컨펌용: 첫 로그인 비밀번호 변경을 이번 로그인만 건너뜀 (DEMO_LOGIN=off 면 무시) */
+export const PW_LATER_COOKIE = 'hl_pw_later';
+async function pwLater() {
+  if (process.env.DEMO_LOGIN === 'off') return false;
+  return (await cookies()).get(PW_LATER_COOKIE)?.value === '1';
+}
 const HOURS = 3600 * 1000;
 const SESSION_TTL = 12 * HOURS;            // 로그인 상태 유지 안 함
 const KEEP_TTL = 30 * 24 * HOURS;          // 로그인 상태 유지
@@ -41,6 +47,7 @@ export async function destroySession() {
     await db.delete(t.sessions).where(eq(t.sessions.tokenHash, sha(token)));
   }
   jar.delete(SESSION_COOKIE);
+  jar.delete(PW_LATER_COOKIE);
 }
 
 /** 지금 로그인한 사용자. 쿠키가 있었는데 끝났으면 { expired: true } */
@@ -82,7 +89,7 @@ export async function requireStaff(roles?: Role[]): Promise<SessionUser> {
   const { user, expired } = await readSession();
   const here = await currentPath();
   if (!user) redirect(`/login?next=${encodeURIComponent(here)}${expired ? '&reason=expired' : ''}`);
-  if (user.mustChangePassword) redirect(`/login/password?next=${encodeURIComponent(here)}`);
+  if (user.mustChangePassword && !(await pwLater())) redirect(`/login/password?next=${encodeURIComponent(here)}`);
   if (user.kind !== 'staff' || (roles && !roles.includes(user.role as Role))) redirect(`/forbidden?from=${encodeURIComponent(here)}`);
   return user;
 }
@@ -98,7 +105,7 @@ export async function requirePartner(): Promise<SessionUser & { partnerId: strin
   const { user, expired } = await readSession();
   const here = await currentPath();
   if (!user) redirect(`/login?next=${encodeURIComponent(here)}${expired ? '&reason=expired' : ''}`);
-  if (user.mustChangePassword) redirect(`/login/password?next=${encodeURIComponent(here)}`);
+  if (user.mustChangePassword && !(await pwLater())) redirect(`/login/password?next=${encodeURIComponent(here)}`);
   if (user.kind !== 'partner' || !user.partnerId) redirect(`/forbidden?from=${encodeURIComponent(here)}`);
   return user as SessionUser & { partnerId: string };
 }

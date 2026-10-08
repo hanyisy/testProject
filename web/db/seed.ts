@@ -161,7 +161,19 @@ async function seed(db: DB, d: Seed) {
   }
   for (const [query, clicks] of d.hangyeol.queries as [string, number][]) await db.insert(t.pageQueries).values({ partnerId: hg, query, clicks, period: '2026-10' });
   for (const q of d.hangyeol.inquiries as Array<Record<string, any>>) {
-    await db.insert(t.inquiries).values({ partnerId: hg, receivedAt: relTime(q.time), title: q.title, pageTitle: q.page, pageType: q.ptype, status: q.status, verify: q.ver, amount: q.amount ?? null });
+    await db.insert(t.inquiries).values({ partnerId: hg, receivedAt: relTime(q.time), title: q.title, pageTitle: q.page, pageType: q.ptype, status: q.status, verify: q.ver, amount: q.amount ?? null, needsResult: !!q.needs });
+  }
+
+  /* 한결철거 새 사진 (사진 검토 대기) — 시안 2b: 9월 22일 춘천 퇴계동 18장 · 9월 25일 원주 단계동 6장, 사람 사진은 기본 비공개 */
+  const groups: [string, string, number, number[]][] = [['2026-09-22', '춘천 퇴계동', 18, [2, 6, 11]], ['2026-09-25', '원주 단계동', 6, []]];
+  let img = 2201;
+  for (const [day, place, n, persons] of groups) {
+    await db.insert(t.photos).values(Array.from({ length: n }, (_, i) => ({
+      partnerId: hg, fileKey: `demo/hangyeol/IMG_${img + i}.jpg`, label: `IMG_${img + i}`, place,
+      takenAt: at(day, `${String(9 + Math.floor(i / 6)).padStart(2, '0')}:${String((i * 7) % 60).padStart(2, '0')}`),
+      source: '드라이브' as const, hasPerson: persons.includes(i), partnerPublic: !persons.includes(i)
+    })));
+    img += n;
   }
 
   /* 설정값 */

@@ -1,6 +1,6 @@
 'use client';
 import { useActionState, useState } from 'react';
-import { changePassword, type PasswordState } from '../actions';
+import { changePassword, skipPassword, type PasswordState } from '../actions';
 
 /* 규칙은 lib/password.ts 의 passwordRules 와 같음 (서버에서 다시 검사) */
 const rules = (pw: string, again: string) => [
@@ -9,7 +9,7 @@ const rules = (pw: string, again: string) => [
   { label: '두 칸이 같아요', ok: !!again && pw === again }
 ];
 
-export default function PasswordForm({ next, homeLabel }: { next: string; homeLabel: string }) {
+export default function PasswordForm({ next, homeLabel, allowSkip }: { next: string; homeLabel: string; allowSkip?: boolean }) {
   const [state, action, pending] = useActionState<PasswordState, FormData>(changePassword, {});
   const [pw, setPw] = useState('');
   const [again, setAgain] = useState('');
@@ -49,6 +49,11 @@ export default function PasswordForm({ next, homeLabel }: { next: string; homeLa
         ))}
       </div>
       <button type="submit" className="auth__submit" disabled={!ok || pending}>저장하고 시작하기</button>
+      {allowSkip && (
+        <button type="submit" formAction={skipPassword} formNoValidate className="btn-line" style={{ width: '100%', height: 52 }}>
+          우선 로그인하기 <span style={{ fontWeight: 600, color: 'var(--sub)', marginLeft: 6 }}>· 비밀번호는 나중에</span>
+        </button>
+      )}
     </form>
   );
 }
