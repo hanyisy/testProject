@@ -1,5 +1,5 @@
 /* 랜딩 데이터 읽기 — config.js 다음, landing.js 앞에 불러옵니다.
- * JSON 파일이든 서버 응답이든 같은 모양이면 그대로 씁니다. (항목 설명: site/data/README.md)
+ * JSON 파일이든 서버 응답이든 같은 모양이면 그대로 씁니다. (항목 설명: public/data/README.md)
  * 랜딩 값이 있는 자리만 채우고, 없으면 빈칸 + "실제 값 입력" 표시를 그대로 둡니다. */
 (function () {
   'use strict';

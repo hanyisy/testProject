@@ -56,7 +56,7 @@
 | `/partner/billing` | 결제 내역 | `2g` | `1g` |
 | `/partner/settings` | 설정 | `2h` | `1h` |
 
-## 공개 (지금 `site/`)
+## 공개 (`web/public` · 같은 Next 서버)
 
 | 주소 | 화면 |
 |---|---|

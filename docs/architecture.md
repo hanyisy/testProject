@@ -79,7 +79,7 @@ DB는 **PostgreSQL**(Drizzle ORM)입니다. 컨펌 단계에서는 설치 없이
 ```
 design/            확정 시안 (로컬 · 공개 저장소 제외)
 docs/              기술 구성 · DB 설계 · 화면 목록
-site/              지금의 정적 랜딩 (Next 이전 전까지 그대로)
+web/public/        가입 문의 랜딩 · 업체 공개 사이트 조각 (같은 Next 서버)
 web/               Next.js 앱
   app/
     (auth)/login/          로그인 · 비밀번호 변경
@@ -95,7 +95,7 @@ web/               Next.js 앱
   styles/                  토큰 · 컴포넌트 CSS
 ```
 
-랜딩(`site/`)은 Next 앱이 자리를 잡으면 `web/public/`으로 옮겨 같은 서버에서 띄우고, 랜딩 폼 주소(`config.js`의 `leadEndpoint`)를 Next API로 받습니다. 그때 `tools/dev-server.js`는 정리합니다.
+랜딩은 `web/public/`에서 같은 서버로 뜨고, 폼은 `POST /api/lead`(가입 문의 저장), 데이터는 `/data/*.json`(DB에서 · 랜딩 관리에서 수정)으로 받습니다. `tools/dev-server.js`는 앱 없이 정적 파일과 시안만 볼 때 씁니다.
 
 ## 진행 순서
 

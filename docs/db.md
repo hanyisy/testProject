@@ -175,7 +175,7 @@ translations · landing_captures · settings · audit_logs
 
 ### landing_captures — 랜딩 "실제 검색 화면" (랜딩 관리)
 `id`, `image_key`, `query`, `industry`, `partner_id`, `captured_at`, `visible`, `sort`, `blur` jsonb(가린 영역), `created_by`
-랜딩은 지금처럼 같은 모양의 JSON을 받습니다(`site/data/README.md`).
+랜딩은 지금처럼 같은 모양의 JSON을 받습니다(`web/public/data/README.md` · 응답은 `web/app/data/*.json`).
 
 ### settings — 설정값 (key/value)
 `index_days`(23, 계약 안내용), `cap_per_partner`, `cap_total`(하루 발행 상한), `payment_key`, `alimtalk_codes`, `landing_values`(운영 업종 수 · 제작한 페이지 수 · 월 발행 수 · 수정 반영 기한 · 푸터 사업자 정보) …

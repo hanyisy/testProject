@@ -1,5 +1,5 @@
 /* 업체 공개 사이트 공통: 주소(/p/{slug}/...)로 업체를 찾아 이름·대표 색·연락처를 채움
- * 업체 정보: /data/partner-sites.json (항목 설명: site/data/README.md) */
+ * 업체 정보: /data/partner-sites.json (항목 설명: public/data/README.md) */
 (function () {
   'use strict';
   var SOURCE = '/data/partner-sites.json';
