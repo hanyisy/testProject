@@ -11,9 +11,11 @@ cd web
 npm install
 npm run dev          # 어드민 · 파트너: http://localhost:3000/login · 랜딩: http://localhost:3000/landing/
 npm run db:reset     # 시안 더미 데이터로 처음 상태 되돌리기 (개발 서버를 끄고)
+npm run demo:photos  # 업체 공개 사이트 데모 사진 받기 (Unsplash 무료 스톡 61장 · 약 11MB · web/.data, git 제외)
 ```
 - Postgres 설치 없이 돌아요(PGlite, `web/.data/`). `DATABASE_URL`을 넣으면 실제 PostgreSQL을 씁니다.
 - 올린 사진 · 랜딩 캡처는 `web/.data/uploads/`(git 제외). 운영에서는 저장소 어댑터를 S3 호환으로 바꿉니다.
+- **데모 사진은 확인용 스톡 사진이에요.** 업체 공개 사이트(`/p/{slug}`)가 실제 사진처럼 보이게 넣은 것이라, 운영 전에 업체의 실제 현장 사진으로 꼭 바꿔야 해요 (`web/db/demo-photos.json` · `web/db/demo-world.json`).
 - 데모 계정은 시안 그대로입니다(`web/db/seed-data.json`의 `logins`). 컨펌용 더미 값이에요.
 
 ## 구성

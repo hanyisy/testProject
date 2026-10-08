@@ -54,11 +54,11 @@ export function DropUpload({ partnerId }: { partnerId: string }) {
 type Group = { city: string; opts: { name: string; dong: string; photos: number }[] };
 
 /** 생성 설정 (3s) → 페이지 생성 */
-export function SetupForm({ partnerId, types, works, groups, minPhotos }: { partnerId: string; types: { label: string; sub: string }[]; works: string[]; industry: string; groups: Group[]; minPhotos: number }) {
+export function SetupForm({ partnerId, types, works, defaultWork, groups, minPhotos }: { partnerId: string; types: { label: string; sub: string }[]; works: string[]; defaultWork: string; industry: string; groups: Group[]; minPhotos: number }) {
   const router = useRouter();
   const all = groups.flatMap((g) => g.opts);
   const [type, setType] = useState(types[0].label);
-  const [work, setWork] = useState(works.find((w) => w.startsWith('상가')) ?? works[0]);
+  const [work, setWork] = useState(defaultWork);
   const [sel, setSel] = useState<string[]>(() => all.filter((o) => o.photos > 0).map((o) => o.name));
   const [n, setN] = useState(4);
   const [err, setErr] = useState('');

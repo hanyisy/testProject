@@ -155,7 +155,7 @@ export async function toReview(runId: string) {
     const [b] = await db.insert(t.reviewBundles).values({
       partnerId: st.run.partnerId, kind: `${st.run.pageType} · 시안 ${d.label}`, type: '지역', draftStyle: d.style, col1: '지역명', col2: '지역 정보 요약', commonBody: body, createdOn: md(day)
     }).returning();
-    await db.insert(t.reviewItems).values(regs.map((r, i) => {
+    const made = await db.insert(t.reviewItems).values(regs.map((r, i) => {
       const uniq = uniquePct(body, r);
       const reasons = [...(r.photos < minPhotos ? ['사진 부족'] : []), ...(uniq < minUnique ? ['고유 내용 부족'] : [])];
       return {
@@ -163,7 +163,16 @@ export async function toReview(runId: string) {
         state: (reasons.length ? '개별 검수' : '대기') as '대기', reasons,
         note: reasons.length ? [r.sites ? `현장 ${r.sites}곳` : '현장 없음', `사진 ${r.photos}장`, reasons.includes('사진 부족') ? '사진을 더 올리면 묶음으로 돌아가요' : '지역 정보를 더 채우면 묶음으로 돌아가요'].join(' · ') : null
       };
-    }));
+    })).returning();
+    /* 공개 페이지 행: 검수 중(미리보기만) → 검수 완료되면 발행 · 주소 /p/{slug}/{시}/{동}-{작업} */
+    for (const it of made) {
+      const [city, dong] = it.name.split(' ');
+      const [pg] = await db.insert(t.pages).values({
+        partnerId: st.run.partnerId, type: '지역', title: `${it.name} ${work}`, path: `${city}/${dong}-${st.run.work}`, runId, regionKey: it.name,
+        work: st.run.work, draftLabel: d.label, status: it.state === '개별 검수' ? '작성 중' : '검수 중'
+      }).returning();
+      await db.update(t.reviewItems).set({ pageId: pg.id }).where(eq(t.reviewItems.id, it.id));
+    }
   }
   await db.update(t.generationRuns).set({ status: '검수로 넘김' }).where(eq(t.generationRuns.id, runId));
   await db.insert(t.auditLogs).values({ userId: u.id, action: '페이지 생성 → 검수', targetType: 'generation', targetId: runId });

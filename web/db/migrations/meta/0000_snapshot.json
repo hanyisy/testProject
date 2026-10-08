@@ -1,5 +1,5 @@
 {
-  "id": "1f33a2e0-ede5-4a3f-b587-09e24a4b5d58",
+  "id": "0b585a37-ba72-4954-9f66-e252967edd26",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1422,6 +1422,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "region_key": {
+          "name": "region_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "work": {
+          "name": "work",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "draft_label": {
+          "name": "draft_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "lang": {
           "name": "lang",
           "type": "text",
@@ -1774,6 +1798,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "hours": {
+          "name": "hours",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "address": {
           "name": "address",
           "type": "text",
@@ -1996,6 +2026,25 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "caption": {
+          "name": "caption",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shot": {
+          "name": "shot",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sort": {
+          "name": "sort",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "source": {
           "name": "source",
@@ -2861,6 +2910,25 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "floor_note": {
+          "name": "floor_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "issues": {
+          "name": "issues",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
         },
         "worked_at": {
           "name": "worked_at",

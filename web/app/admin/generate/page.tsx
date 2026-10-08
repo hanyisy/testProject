@@ -115,7 +115,7 @@ export default async function GeneratePage({ searchParams }: { searchParams: Pro
         )}
 
         {step === 2 && !st && (
-          <SetupForm partnerId={src.partner.id} types={PAGE_TYPES.map(([l, s]) => ({ label: l, sub: s }))} works={src.works} industry={src.industry.name}
+          <SetupForm partnerId={src.partner.id} types={PAGE_TYPES.map(([l, s]) => ({ label: l, sub: s }))} works={src.works} defaultWork={src.defaultWork} industry={src.industry.name}
             groups={src.groups.map((g) => ({ city: g.city, opts: g.opts.map((o) => ({ name: o.name, dong: o.dong, photos: o.photos })) }))} minPhotos={minPhotos} />
         )}
         {step === 2 && st && (
@@ -200,6 +200,8 @@ export default async function GeneratePage({ searchParams }: { searchParams: Pro
           const sched: { day: string; n: number }[] = [];
           for (let left = total, d = 0; left > 0 && d < 5; d++) { const n = Math.min(cap, left); sched.push({ day: days[d], n }); left -= n; }
           const picked = st.drafts.filter((d) => d.picked);
+          const made = await db.select().from(t.pages).where(eq(t.pages.runId, st.run.id)).orderBy(t.pages.draftLabel, t.pages.title);
+          const PST: Record<string, string> = { '작성 중': 'gray', '검수 중': 'warn', '발행됨': 'ok', '색인 요청': 'ok', '색인 확인': 'ok', '비공개': 'gray' };
           return (
             <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,1fr)', alignItems: 'start' }}>
               <section className="panel" style={{ padding: 24, gap: 14 }}>
@@ -213,6 +215,17 @@ export default async function GeneratePage({ searchParams }: { searchParams: Pro
                   {short.length > 0 && <div className="genbundle"><span className="chip chip--warn">개별 검수</span><span style={{ flex: 1, fontSize: 15, fontWeight: 700 }}>{short.map((i) => i.name).join(', ')}</span><b>{short.length}장</b></div>}
                 </div>
                 <Link href="/admin/review" className="btn-acc btn-acc--lg" style={{ alignSelf: 'flex-start' }}>검수로 가기</Link>
+                {made.length > 0 && (
+                  <div className="stack" style={{ gap: 0, paddingTop: 10, borderTop: '1px solid var(--line2)' }}>
+                    <span className="fld__label" style={{ paddingBottom: 4 }}>만든 페이지 · 공개 사이트 미리보기</span>
+                    {made.map((p) => (
+                      <a key={p.id} href={`/p/${src.partner.slug}/${(p.path ?? '').split('/').map(encodeURIComponent).join('/')}`} target="_blank" rel="noreferrer" className="genbundle" style={{ minHeight: 44 }}>
+                        <span className="genbundle__k" style={{ width: 24, height: 24, fontSize: 13 }}>{p.draftLabel}</span><b style={{ flex: 1, fontSize: 14 }}>{p.title}</b>
+                        <span className={`chip chip--${PST[p.status]}`}>{p.status === '검수 중' || p.status === '작성 중' ? '미리보기' : p.status}</span><span className="link-accent" style={{ fontSize: 13 }}>보기 ↗</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </section>
               <div className="stack">
                 <section className="panel" style={{ padding: 22, gap: 12 }}>

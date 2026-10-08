@@ -88,6 +88,8 @@ export const partners = pgTable('partners', {
   ceo: text('ceo'),
   bizRegNo: text('biz_reg_no'),
   tel: text('tel'),
+  /** 전화 받는 시간 (공개 사이트 문의) */
+  hours: text('hours'),
   /** 사업장 주소 (공개 사이트 바닥 사업자 정보) */
   address: text('address'),
   manager: text('manager'),
@@ -162,6 +164,10 @@ export const sites = pgTable('sites', {
   areaPyeong: integer('area_pyeong'),
   days: integer('days'),
   note: text('note'),
+  /** 공개 현장 기록(06): 층 · 한 줄 요약 · 있었던 문제와 처리 */
+  floorNote: text('floor_note'),
+  summary: text('summary'),
+  issues: jsonb('issues').$type<{ title: string; body: string }[]>().notNull().default([]),
   workedAt: date('worked_at'),
   photoCount: integer('photo_count').notNull().default(0),
   status: text('status').$type<'작성 중' | '발행됨'>().notNull().default('작성 중'),
@@ -178,6 +184,10 @@ export const photos = pgTable('photos', {
   /** 촬영 위치로 정한 지역 이름 (예: 춘천 퇴계동) — 새 사진을 날짜 · 지역으로 묶을 때 씀 */
   place: text('place'),
   label: text('label'),
+  /** 공개 페이지에서 쓰는 사진 설명 · 작업 전/후 · 현장 안 순서 */
+  caption: text('caption'),
+  shot: text('shot').$type<'전' | '후'>(),
+  sort: integer('sort').notNull().default(0),
   source: text('source').$type<'직접 올림' | '드라이브'>().notNull(),
   hasPerson: boolean('has_person').notNull().default(false),
   partnerPublic: boolean('partner_public').notNull().default(false),
@@ -196,7 +206,12 @@ export const pages = pgTable('pages', {
   siteId: uuid('site_id').references(() => sites.id),
   type: text('type').$type<PageType>().notNull(),
   title: text('title').notNull(),
+  /** 공개 주소 (/p/{slug}/ 뒤) · 페이지 생성 기록 · 지역(예: 춘천 석사동) · 작업 · 시안 */
   path: text('path'),
+  runId: uuid('run_id'),
+  regionKey: text('region_key'),
+  work: text('work'),
+  draftLabel: text('draft_label'),
   lang: text('lang').notNull().default('ko'),
   status: text('status').$type<PageStatus>().notNull().default('작성 중'),
   visits30d: integer('visits_30d').notNull().default(0),

@@ -32,7 +32,7 @@ export async function approveItems(bundleId: string, ids: string[]) {
   await db.update(t.reviewItems).set({ state: '검수 완료', reviewedAt: new Date() }).where(inArray(t.reviewItems.id, items.map((i) => i.id)));
   /* 연결된 페이지가 있으면 발행 */
   const pageIds = items.map((i) => i.pageId).filter((x): x is string => !!x);
-  if (pageIds.length) await db.update(t.pages).set({ status: '발행됨' }).where(inArray(t.pages.id, pageIds));
+  if (pageIds.length) await db.update(t.pages).set({ status: '발행됨', publishedAt: new Date() }).where(inArray(t.pages.id, pageIds));
   const [h] = await db.insert(t.reviewHistory).values({
     bundleId, bundleLabel: `${b.partner} · ${b.b.kind}`, userId: u.id, who: who(u), what: `일괄 검수 완료 · ${items.length}장`, snapshot: snap, whenText: ''
   }).returning();
@@ -49,7 +49,7 @@ export async function decideItem(itemId: string, decision: 'done' | 'skip') {
   if (!i || i.state !== '개별 검수') return;
   if (decision === 'done' && !i.sites) return;
   await db.update(t.reviewItems).set({ state: decision === 'done' ? '검수 완료' : '반려', reviewedAt: new Date() }).where(eq(t.reviewItems.id, itemId));
-  if (decision === 'done' && i.pageId) await db.update(t.pages).set({ status: '발행됨' }).where(eq(t.pages.id, i.pageId));
+  if (i.pageId) await db.update(t.pages).set({ status: decision === 'done' ? '발행됨' : '비공개', ...(decision === 'done' ? { publishedAt: new Date() } : {}) }).where(eq(t.pages.id, i.pageId));
   refresh();
 }
 
@@ -85,6 +85,12 @@ export async function undoHistory(historyId: string) {
   if (!h || h.reverted) return;
   const snap = h.snapshot as Snap | null;
   if (snap) {
+    /* 일괄 검수 완료를 되돌리면 발행했던 페이지도 다시 검수 중 */
+    if (snap.type === 'approve') {
+      const its = await db.select({ pageId: t.reviewItems.pageId }).from(t.reviewItems).where(inArray(t.reviewItems.id, Object.keys(snap.states)));
+      const pids = its.map((x) => x.pageId).filter((x): x is string => !!x);
+      if (pids.length) await db.update(t.pages).set({ status: '검수 중', publishedAt: null }).where(inArray(t.pages.id, pids));
+    }
     for (const [id, state] of Object.entries(snap.states)) {
       await db.update(t.reviewItems).set({ state: state as '대기', ...(snap.type === 'approve' ? { reviewedAt: null } : {}) }).where(eq(t.reviewItems.id, id));
     }

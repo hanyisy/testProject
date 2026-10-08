@@ -71,7 +71,7 @@ export async function reviewList() {
 export async function reviewBundle(id: string) {
   if (!isUuid(id)) return null;
   const db = await getDb();
-  const [row] = await db.select({ b: t.reviewBundles, partner: t.partners.name }).from(t.reviewBundles).innerJoin(t.partners, eq(t.partners.id, t.reviewBundles.partnerId)).where(eq(t.reviewBundles.id, id)).limit(1);
+  const [row] = await db.select({ b: t.reviewBundles, partner: t.partners.name, slug: t.partners.slug }).from(t.reviewBundles).innerJoin(t.partners, eq(t.partners.id, t.reviewBundles.partnerId)).where(eq(t.reviewBundles.id, id)).limit(1);
   if (!row) return null;
   const [items, minUnique] = await Promise.all([
     db.select().from(t.reviewItems).where(eq(t.reviewItems.bundleId, id)).orderBy(asc(t.reviewItems.sort)),
@@ -79,7 +79,11 @@ export async function reviewBundle(id: string) {
   ]);
   const rows = items.filter((i) => !i.reasons.length);
   const ex = items.filter((i) => i.reasons.length);
-  return { ...row.b, partner: row.partner, rows, ex, minUnique, pend: rows.filter(isPending).length };
+  /* 공개 사이트 페이지 주소 (미리보기) */
+  const pids = items.map((i) => i.pageId).filter((x): x is string => !!x);
+  const pgs = pids.length ? await db.select({ id: t.pages.id, path: t.pages.path }).from(t.pages).where(inArray(t.pages.id, pids)) : [];
+  const pageHref = (pageId: string | null) => { const p = pgs.find((x) => x.id === pageId)?.path; return p ? `/p/${row.slug}/${p.split('/').map(encodeURIComponent).join('/')}` : null; };
+  return { ...row.b, partner: row.partner, rows, ex, minUnique, pend: rows.filter(isPending).length, pageHref };
 }
 
 export async function itemsById(ids: string[]) {

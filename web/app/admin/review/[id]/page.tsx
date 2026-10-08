@@ -50,7 +50,7 @@ export default async function BundlePage({ params, searchParams }: { params: Pro
               <Link href={`/admin/review/${b.id}/edit`} className="btn-ghost" style={{ height: 46, justifyContent: 'center', fontSize: 15, fontWeight: 800 }}>공통 본문 수정</Link>
             </section>
             <BundleTable key={b.rows.map((r) => r.state).join()} bundleId={b.id} c1={b.col1} c2={b.col2} minUnique={b.minUnique}
-              rows={b.rows.map((r) => ({ id: r.id, name: r.name, info: r.info, photos: r.photos, sites: r.sites, uniq: r.uniquePct, state: r.state, selected: r.selected }))} />
+              rows={b.rows.map((r) => ({ id: r.id, name: r.name, info: r.info, photos: r.photos, sites: r.sites, uniq: r.uniquePct, state: r.state, selected: r.selected, href: b.pageHref(r.pageId) }))} />
           </div>
         ) : (
           <section className="table">
@@ -73,7 +73,7 @@ export default async function BundlePage({ params, searchParams }: { params: Pro
                     <span className="cell-act">
                       {wait ? (
                         <>
-                          <Link href={`/admin/review/${b.id}/edit?preview=${e.id}`} className="btn-ghost btn-ghost--sm">열어서 보기</Link>
+                          <Link href={b.pageHref(e.pageId) ?? `/admin/review/${b.id}/edit?preview=${e.id}`} target={b.pageHref(e.pageId) ? '_blank' : undefined} className="btn-ghost btn-ghost--sm">열어서 보기</Link>
                           <form action={decideItem.bind(null, e.id, 'skip')}><button className="btn-ghost btn-ghost--sm">발행 안 함</button></form>
                           <form action={decideItem.bind(null, e.id, 'done')}><button className="btn-ink btn-ink--sm" disabled={!e.sites} title={!e.sites ? '현장이 없어 발행할 수 없어요' : undefined}>검수 완료</button></form>
                         </>

@@ -28,7 +28,7 @@ function Lock() {
   return <span className="lock" aria-label="요금제에 없는 기능"><span /><span /></span>;
 }
 
-export default function PartnerNav({ name, area, needs, blogLocked }: { name: string; area: string; needs: number; blogLocked: boolean }) {
+export default function PartnerNav({ name, area, needs, blogLocked, slug }: { name: string; area: string; needs: number; blogLocked: boolean; slug?: string }) {
   const path = usePathname();
   const on = (href: string) => (href === '/partner' ? path === '/partner' : path === href || path.startsWith(href + '/'));
   const mTitle = MOBILE_TITLES.find(([p]) => path === p || path.startsWith(p + '/'))?.[1];
@@ -55,7 +55,7 @@ export default function PartnerNav({ name, area, needs, blogLocked }: { name: st
       <nav className="pside" aria-label="파트너 메뉴">
         <div className="pside__brand"><span className="pside__logo">현장로그</span><span className="pside__name">{name}</span></div>
         {PARTNER_MENU.map((m) => item(m, 'pside__link'))}
-        <div className="pside__foot">{PARTNER_FOOT.map((m) => item(m, 'pside__link'))}</div>
+        <div className="pside__foot">{slug && <a href={`/p/${slug}`} target="_blank" rel="noreferrer" className="pside__link"><span className="pnav__label">내 사이트 보기 ↗</span></a>}{PARTNER_FOOT.map((m) => item(m, 'pside__link'))}</div>
       </nav>
 
       {/* 모바일 머리: 업체명 · 지역 · 더보기 */}

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { approveItems, undoHistory } from '../actions';
 
-type Row = { id: string; name: string; info: string; photos: number; sites: number; uniq: number; state: string; selected: boolean };
+type Row = { id: string; name: string; info: string; photos: number; sites: number; uniq: number; state: string; selected: boolean; href: string | null };
 const COLS = '28px minmax(0,0.8fr) minmax(0,1fr) 40px 40px 96px 140px';
 const pending = (r: Row) => r.state === '대기' || r.state === '발행 중 · 수정 대기';
 
@@ -42,7 +42,7 @@ export default function BundleTable({ bundleId, c1, c2, rows, minUnique }: { bun
           return (
             <div key={r.id} className="table__row" style={{ '--cols': COLS, '--min': '700px', minHeight: 60 } as React.CSSProperties}>
               <button type="button" className="cbox" role="checkbox" aria-checked={on} aria-label={`${r.name} 고르기`} disabled={done} onClick={() => toggle(r.id)}>{on ? '✓' : ''}</button>
-              <b className="ell" style={{ fontSize: 15, opacity: done ? 0.5 : 1 }}>{r.name}</b>
+              <span className="cell-name" style={{ opacity: done ? 0.5 : 1 }}><b className="ell">{r.name}</b>{r.href && <a href={r.href} target="_blank" rel="noreferrer" className="link-accent" style={{ fontSize: 12 }}>페이지 보기 ↗</a>}</span>
               <span style={{ fontSize: 13, lineHeight: 1.45, color: 'var(--text2)', opacity: done ? 0.5 : 1 }}>{r.info}</span>
               <span className="cell-num cell-num--n">{r.photos}</span>
               <span className="cell-num cell-num--n">{r.sites || '—'}</span>

@@ -25,6 +25,7 @@ export default async function PartnerLayout({ children, params }: { children: Re
             <span className="chip chip--plain">{d.industry.name}</span>
             <span className="chip chip--plain">{d.plan.name}</span>
             <span className="phead__meta">{regionText(d.regions)} · 발행 {d.pages} · 색인 {d.indexPct === null ? '—' : `${d.indexPct}%`}</span>
+            {p.status !== '종료' && <a href={`/p/${p.slug}`} target="_blank" rel="noreferrer" className="link-accent">공개 사이트 ↗</a>}
           </div>
           <PartnerTabs id={p.id} />
         </div>

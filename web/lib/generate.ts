@@ -13,7 +13,7 @@ export type PhotoStatus = { total: number; usable: number; unconfirmed: number; 
 export const PAGE_TYPES = [['지역×작업', '동 단위 지역 × 작업 종류'], ['역 주변', '역 반경 현장 모음'], ['질문', '자주 묻는 질문 답변']] as const;
 export const kindOf = (type: string, work: string) => (type === '지역×작업' ? `지역×${work}` : `${type}×${work}`);
 /** 지역×상가철거 → 상가 철거 (본문 {작업} 칸) */
-export const workPhrase = (work: string, industry: string) => (work.endsWith(industry) && work !== industry ? `${work.slice(0, -industry.length)} ${industry}` : work);
+export const workPhrase = (work: string, industry: string) => { const ind = industry.replace(/\s/g, ''); return work.endsWith(ind) && work !== ind ? `${work.slice(0, -ind.length)} ${industry}` : work; };
 
 export async function partnerOptions() {
   const db = await getDb();
@@ -49,8 +49,12 @@ export async function partnerSource(partnerId: string) {
     person: (base?.person ?? 0) + real.person,
     byCity: cities.map((c) => ({ city: c, n: (base?.byCity[c] ?? 0) + photos.filter((p) => p.partnerPublic && !p.hasPerson && p.place?.startsWith(c)).length }))
   };
-  const works = items.filter((i) => i.group === '대상 유형').map((i) => `${i.label}${row.industry.name}`);
-  return { partner: row.p, industry: row.industry, regions: regions.map((r) => r.region), groups, status, works: works.length ? works : [row.industry.name], items };
+  const works = items.filter((i) => i.group === '대상 유형').map((i) => `${i.label}${row.industry.name.replace(/\s/g, '')}`);
+  /* 기본 작업: 이 업체 현장 기록에 가장 많은 작업 */
+  const siteWorks = await db.select({ w: t.sites.workType }).from(t.sites).where(eq(t.sites.partnerId, partnerId));
+  const freq = (w: string) => siteWorks.filter((x) => x.w === w).length;
+  const defaultWork = [...works].sort((a, b) => freq(b) - freq(a))[0];
+  return { partner: row.p, industry: row.industry, regions: regions.map((r) => r.region), groups, status, works: works.length ? works : [row.industry.name], defaultWork: defaultWork ?? works[0] ?? row.industry.name, items };
 }
 
 export async function runState(runId: string) {

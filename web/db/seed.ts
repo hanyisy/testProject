@@ -7,6 +7,7 @@ import * as t from './schema';
 import data from './seed-data.json';
 import sites from './partner-sites.json';
 import { hashPassword } from '../lib/password';
+import { seedDemoWorld } from './seed-demo';
 
 type Seed = typeof data;
 const KST = '+09:00';
@@ -25,6 +26,7 @@ export async function seedIfEmpty(db: DB) {
   const [{ n }] = await db.select({ n: count() }).from(t.users);
   if (n > 0) return;
   await seed(db, data);
+  await seedDemoWorld(db);
 }
 
 async function seed(db: DB, d: Seed) {
@@ -198,7 +200,7 @@ async function seed(db: DB, d: Seed) {
   await db.insert(t.generationAssignments).values(gen.selected.map((g) => ({ runId: run.id, region: `${cityOf[g]} ${g}`, draftLabel: gen.assign[g] ?? 'A' })));
 
   /* 한결철거 현장 · 페이지 · 검색어 · 고객 문의 (파트너 시안) */
-  for (const s of d.hangyeol.sites) await db.insert(t.sites).values({ partnerId: hg, title: s.title, workedAt: md(s.date), photoCount: s.n, status: '발행됨', publishedAt: at(md(s.date)) });
+  /* 현장은 데모 세계(seed-demo.ts)에서 사진과 함께 넣음 */
   for (const [i, [type, title, status, visits]] of (d.hangyeol.pages as [string, string, string, number][]).entries()) {
     await db.insert(t.pages).values({ partnerId: hg, type: type as '현장', title, status: status as '발행됨', visits30d: visits, sort: i, publishedAt: at('2026-09-01') });
   }

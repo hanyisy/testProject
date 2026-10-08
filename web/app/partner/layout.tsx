@@ -9,7 +9,7 @@ export default async function PartnerLayout({ children }: { children: React.Reac
   const f = await partnerFrame(user.partnerId);
   return (
     <div className="pshell">
-      <PartnerNav name={f.partner.name} area={f.area} needs={f.needs} blogLocked={f.blogLocked} />
+      <PartnerNav name={f.partner.name} area={f.area} needs={f.needs} blogLocked={f.blogLocked} slug={f.partner.slug} />
       <div className="pmain">{children}</div>
     </div>
   );
