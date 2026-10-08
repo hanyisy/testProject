@@ -4,16 +4,13 @@ import 'server-only';
 import { asc, desc, eq } from 'drizzle-orm';
 import { getDb, schema as t } from '@/db/client';
 import { getSetting } from './admin';
+import { runStateWith, type DraftStyle, type RegionStat } from './generate-core';
+export { kindOf, workPhrase, autoAssign, uniquePct, type DraftStyle, type RegionStat } from './generate-core';
 
-export type DraftStyle = { label: string; style: string; desc: string; body: string[] };
 export type Preset = { faq: string[]; table: { head: string[]; rows: string[][]; note: string } };
-export type RegionStat = { photos: number; sites: number; info: string | null };
 export type PhotoStatus = { total: number; usable: number; unconfirmed: number; person: number; byCity: Record<string, number> };
 
 export const PAGE_TYPES = [['지역×작업', '동 단위 지역 × 작업 종류'], ['역 주변', '역 반경 현장 모음'], ['질문', '자주 묻는 질문 답변']] as const;
-export const kindOf = (type: string, work: string) => (type === '지역×작업' ? `지역×${work}` : `${type}×${work}`);
-/** 지역×상가철거 → 상가 철거 (본문 {작업} 칸) */
-export const workPhrase = (work: string, industry: string) => { const ind = industry.replace(/\s/g, ''); return work.endsWith(ind) && work !== ind ? `${work.slice(0, -ind.length)} ${industry}` : work; };
 
 export async function partnerOptions() {
   const db = await getDb();
@@ -58,21 +55,7 @@ export async function partnerSource(partnerId: string) {
 }
 
 export async function runState(runId: string) {
-  const db = await getDb();
-  const [run] = await db.select().from(t.generationRuns).where(eq(t.generationRuns.id, runId)).limit(1);
-  if (!run) return null;
-  const [drafts, assigns, styles, stats] = await Promise.all([
-    db.select().from(t.generationDrafts).where(eq(t.generationDrafts.runId, runId)).orderBy(asc(t.generationDrafts.label)),
-    db.select().from(t.generationAssignments).where(eq(t.generationAssignments.runId, runId)),
-    getSetting<DraftStyle[]>('draft_styles', []),
-    getSetting<Record<string, RegionStat>>('region_stats', {})
-  ]);
-  const regions = run.regions.map((name) => {
-    const key = name.split(' ').slice(-2).join(' ');
-    const s = stats[key] ?? stats[name] ?? { photos: 0, sites: 0, info: null };
-    return { name: key, ...s };
-  });
-  return { run, drafts, assigns, styles, regions };
+  return runStateWith(await getDb(), runId);
 }
 
 export async function latestRuns(partnerId: string) {
@@ -80,11 +63,6 @@ export async function latestRuns(partnerId: string) {
   return db.select().from(t.generationRuns).where(eq(t.generationRuns.partnerId, partnerId)).orderBy(desc(t.generationRuns.createdAt)).limit(5);
 }
 
-/** 기본 배분: 사진 많은 지역부터 고른 시안을 돌아가며 — 시안마다 사진 많은/적은 지역이 고르게 섞임 */
-export function autoAssign(regions: { name: string; photos: number }[], picked: string[]) {
-  const order = [...regions].sort((a, b) => b.photos - a.photos);
-  return Object.fromEntries(order.map((r, i) => [r.name, picked[i % picked.length]]));
-}
 
 /** 공통 본문을 이 지역 값으로 채운 글 */
 export function fill(body: string[], v: { name: string; info: string | null; sites: number; photos: number }) {
@@ -92,21 +70,3 @@ export function fill(body: string[], v: { name: string; info: string | null; sit
   return body.map((p) => p.replace(/\{([^}]+)\}/g, (_, k) => map[k] ?? `{${k}}`)).filter((p) => p.trim());
 }
 
-/** 고유 내용 비율: 페이지 글자 중 이 페이지에만 있는 부분의 비율
- * = 본문 칸(지역명 · 지역 정보 · 숫자) + 현장마다 붙는 현장 기록 한 줄 + 사진마다 붙는 설명 */
-const SITE_TEXT = 40, PHOTO_TEXT = 4;
-export function uniquePct(body: string[], v: { name: string; info: string | null; sites: number; photos: number }) {
-  const strip = (s: string) => s.replace(/\s/g, '').length;
-  const map: Record<string, string> = { '지역명': v.name, '지역 정보': v.info ?? '', '현장 수': String(v.sites), '사진 수': String(v.photos) };
-  let uniq = 0, total = 0;
-  for (const p of body) {
-    for (const part of p.split(/(\{[^}]+\})/)) {
-      const m = part.match(/^\{(.+)\}$/);
-      const n = strip(m ? map[m[1]] ?? '' : part);
-      total += n;
-      if (m) uniq += n;
-    }
-  }
-  const extra = v.sites * SITE_TEXT + v.photos * PHOTO_TEXT;
-  return total + extra ? Math.round(((uniq + extra) / (total + extra)) * 100) : 0;
-}
