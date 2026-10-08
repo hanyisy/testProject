@@ -52,8 +52,8 @@ export default async function GeneratePage({ searchParams }: { searchParams: Pro
           <PartnerPick value={src.partner.id} options={partners.map((p) => ({ id: p.id, name: p.name + (p.status !== '운영 중' ? ` · ${p.status}` : '') }))} />
           <span className="hint" style={{ fontSize: 14 }}>{areaText}</span>
           {runs.length > 0 && (
-            <div className="row" style={{ marginLeft: 'auto', gap: 6, alignItems: 'center' }}>
-              <span className="muted">생성 기록</span>
+            <div className="row" style={{ marginLeft: 'auto', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span className="muted" style={{ whiteSpace: 'nowrap' }}>생성 기록</span>
               {runs.slice(0, 3).map((r) => <Link key={r.id} href={`/admin/generate?run=${r.id}`} className="chip chip--plain" aria-current={r.id === sp.run ? 'true' : undefined} style={r.id === sp.run ? { outline: '2px solid var(--ink)' } : undefined}>{r.pageType} · {rel(r.createdAt, day)}</Link>)}
               {st && <Link href={`/admin/generate?p=${src.partner.id}`} className="link-accent">+ 새로 만들기</Link>}
             </div>

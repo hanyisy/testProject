@@ -108,8 +108,8 @@ h1, h2, h3, p { margin: 0; }
 }
 .todo__n.is-zero { color: var(--sub3); }
 .todo__n.is-alert { background: var(--s6b); color: var(--red); }
-.todo__label { flex: 1; font-size: 16px; font-weight: 700; }
-.todo__sub { font-size: 13px; color: var(--sub); }
+.todo__label { flex: 1 0 auto; font-size: 16px; font-weight: 700; white-space: nowrap; }
+.todo__sub { flex: 0 1 auto; min-width: 0; font-size: 13px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chev { font-size: 20px; color: var(--sub3); }
 
 /* 주의가 필요한 파트너 */

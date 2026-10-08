@@ -145,7 +145,8 @@
 
 /* 파트너 추가 (3y) */
 .stepper { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px 18px; display: flex; align-items: center; gap: 8px; overflow-x: auto; }
-.stepper__item { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; background: none; border: 0; padding: 0; color: var(--ink); }
+.stepper__item { flex: 1 0 auto; display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; color: var(--ink); }
+@media (max-width: 767px) { .stepper__item:not([aria-current='step']) .stepper__label { display: none; } .stepper__line { min-width: 12px; } }
 .stepper__item:disabled { cursor: default; }
 .stepper__n { width: 28px; height: 28px; flex-shrink: 0; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; background: var(--line3); color: var(--sub2); }
 .stepper__n.is-on { background: var(--ink); color: var(--on-ink); }
@@ -215,7 +216,7 @@
 .rvgrid { display: grid; grid-template-columns: 372px minmax(0, 1fr); gap: 16px; align-items: start; }
 .rvbody { position: sticky; top: 16px; gap: 14px; padding: 22px; }
 .rvp { font-size: 15px; line-height: 1.8; color: var(--text2); text-wrap: pretty; }
-.tok { background: var(--s1b); color: var(--s1f); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+.tok { background: var(--s1b); color: var(--s1f); padding: 1px 6px; border-radius: 6px; font-weight: 700; white-space: nowrap; }
 .rvbar { padding: 14px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .cbox { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; background: var(--card); color: var(--on-ink); border: 2px solid var(--line4); padding: 0; cursor: pointer; }
 .cbox[aria-checked="true"] { background: var(--ink); border-color: var(--ink); }
@@ -243,11 +244,12 @@
 .hbars b { font-size: 13px; font-weight: 800; }
 .hbars > div > span { width: 100%; border-radius: 6px 6px 0 0; }
 .hbars__x { display: flex; gap: 10px; }
-.hbars__x span { flex: 1; text-align: center; font-size: 12px; color: var(--sub); font-weight: 600; }
+.hbars__x span { flex: 1; min-width: 0; text-align: center; font-size: 12px; color: var(--sub); font-weight: 600; white-space: nowrap; letter-spacing: -0.03em; }
+@media (max-width: 520px) { .hbars, .hbars__x { gap: 6px; } .hbars__x span { font-size: 11px; } }
 .legend { display: flex; gap: 14px; font-size: 13px; font-weight: 600; flex-wrap: wrap; }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend i { width: 10px; height: 10px; border-radius: 3px; }
-@media (max-width: 900px) { .idxmeasure { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 1180px) { .idxmeasure { grid-template-columns: minmax(0, 1fr); } }
 
 /* 요금제 (3i) */
 .plancard { padding: 22px; gap: 12px; }
@@ -324,7 +326,8 @@
 .ppick select { appearance: none; border: 0; background: transparent; height: 36px; padding: 0 28px 0 12px; font: inherit; font-size: 15px; font-weight: 800; color: var(--ink); cursor: pointer; outline: none; }
 .ppick span { position: absolute; right: 10px; font-size: 11px; color: var(--sub); pointer-events: none; }
 .genstep { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px 18px; display: flex; align-items: center; gap: 8px; overflow-x: auto; }
-.genstep__i { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; color: inherit; }
+.genstep__i { flex: 1 0 auto; display: flex; align-items: center; gap: 8px; color: inherit; }
+@media (max-width: 767px) { .genstep__t:not(.is-on) { display: none; } .genstep__line { min-width: 12px; } }
 .genstep__n { width: 28px; height: 28px; flex-shrink: 0; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; background: var(--line3); color: var(--sub2); }
 .genstep__n.is-on { background: var(--ink); color: var(--on-ink); }
 .genstep__n.is-ok { background: var(--s4f); color: #fff; }
@@ -391,3 +394,7 @@
 .capcanvas { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line3); cursor: crosshair; touch-action: none; background: var(--surf); }
 .capthumb { width: 96px; height: 60px; border-radius: 8px; background: var(--surf) center / cover no-repeat; border: 1px solid var(--line2); }
 @media (max-width: 900px) { .capadd { grid-template-columns: minmax(0, 1fr); } }
+/* 양산 범위 카드: 1180 이하는 한 줄에 하나 (좁은 3열에서 라벨·경고 칩이 눌리지 않게) */
+@media (max-width: 1180px) { .scopegrid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .permgrid { grid-template-columns: minmax(0, 1fr) repeat(3, 64px); padding: 6px 16px 14px; } .permgrid__h { font-size: 13px; } }
+.permgrid__l { text-wrap: balance; }

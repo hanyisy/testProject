@@ -51,7 +51,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
             <Link href={href({ f: '', page: '' })} className="seg__opt" aria-pressed={sp.f !== 'fail'}>전체<span className="seg__n">{inPeriod.length}</span></Link>
             <Link href={href({ f: 'fail', page: '' })} className="seg__opt" aria-pressed={sp.f === 'fail'}>실패<span className="seg__n">{failed.length}</span></Link>
           </nav>
-          <span className="hint" style={{ marginLeft: 'auto', fontSize: 14 }}>오늘 {md(day)}</span>
+          <span className="hint" style={{ marginLeft: 'auto', fontSize: 14, whiteSpace: 'nowrap' }}>오늘 {md(day)}</span>
         </div>
         <div className="filters">
           <span className="filters__label">필터</span>

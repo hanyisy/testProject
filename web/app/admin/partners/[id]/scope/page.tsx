@@ -35,7 +35,7 @@ export default async function ScopePage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
 
-        <div className="grid grid--3">
+        <div className="grid grid--3 scopegrid">
           {TIERS.map((t) => {
             const fill = Math.min(t.pages, canFill);
             const full = fill >= t.pages;

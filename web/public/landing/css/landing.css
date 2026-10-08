@@ -369,7 +369,7 @@
 .promises { display: grid; grid-template-columns: 1fr; gap: 10px; }
 .promise { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 10px; }
 .promise__label { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; color: var(--accent); }
-.promise__val { font-size: 21px; font-weight: 800; line-height: 1.4; letter-spacing: -0.02em; }
+.promise__val { font-size: 21px; font-weight: 800; line-height: 1.4; letter-spacing: -0.02em; text-wrap: balance; }
 .promise__note { font-size: 15px; color: var(--sub); line-height: 1.5; }
 @media (min-width: 1024px) {
   .promises { grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -388,6 +388,7 @@
   display: flex; align-items: center; justify-content: center; font-weight: 900;
 }
 .result__txt { flex: 1; font-size: 18px; font-weight: 800; line-height: 1.4; }
+.result__txt [data-chk-text] { white-space: nowrap; }
 .result--ok { background: var(--okb); color: var(--ok); }
 .result--ok .result__icon { background: var(--ok); }
 .result--etc { background: color-mix(in oklch, var(--accent) 10%, white); color: var(--ink); }

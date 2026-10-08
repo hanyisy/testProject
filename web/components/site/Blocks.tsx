@@ -145,9 +145,20 @@ export function RegionInfo({ items }: { items: [string, string][] }) {
 
 /* 9 지도와 핀 — 지도 연동 전: 핀 위치는 이름으로 고르게 흩뿌림 */
 export function MapPins({ label, pins, tall, station }: { label: string; pins: string[]; tall?: boolean; station?: string }) {
+  /* 지도 자리(실제 지도 연동 전): 핀을 칸에 나눠 놓아 이름표가 겹치지 않게 · 역 지도는 가운데(역 표시)를 비움 */
+  const cols = pins.length > 8 ? 3 : pins.length > 1 ? 2 : 1;
+  const rows = Math.max(1, Math.ceil(pins.length / cols));
+  const bands: [number, number][] = station ? [[26, 38], [64, 86]] : [[28, 82]];
+  const total = bands.reduce((a, [s, e]) => a + e - s, 0);
+  const rowTop = (r: number) => {
+    let at = rows === 1 ? total / 2 : (r / (rows - 1)) * total;
+    for (const [s, e] of bands) { if (at <= e - s) return s + at; at -= e - s; }
+    return bands[bands.length - 1][1];
+  };
   const pos = (s: string, i: number) => {
     const h = [...s].reduce((a, c) => a + c.charCodeAt(0), 0);
-    return { left: `${18 + ((h * 37 + i * 23) % 64)}%`, top: `${20 + ((h * 13 + i * 31) % 55)}%` };
+    const c = i % cols, r = Math.floor(i / cols);
+    return { left: `${6 + c * (88 / cols) + (h % 7)}%`, top: `${rowTop(r)}%` };
   };
   return (
     <div className={'s-map' + (tall ? ' s-map--tall' : '')}>

@@ -12,7 +12,7 @@ export const metadata = { title: '가입 문의' };
 
 const BIZ = ['전체', '철거', '입주청소', '인테리어', '바닥 시공', '기타'];
 const PERIODS = [{ value: '30', label: '최근 30일' }, { value: '7', label: '최근 7일' }, { value: 'all', label: '전체' }];
-const COLS = '84px minmax(0,1fr) 96px minmax(0,1.1fr) 128px 112px 84px 76px 20px';
+const COLS = '84px minmax(0,1fr) 120px minmax(0,1.1fr) 128px 112px 84px 76px 20px';
 
 type SP = { tab?: string; biz?: string; period?: string; owner?: string; page?: string };
 
@@ -76,14 +76,14 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
         <div className="table">
           <div className="table__scroll">
-            <div className="table__head" style={{ '--cols': COLS, '--min': '1060px' } as React.CSSProperties}>
+            <div className="table__head" style={{ '--cols': COLS, '--min': '1090px' } as React.CSSProperties}>
               <span>접수일</span><span>상호</span><span>업종</span><span>지역</span><span>담당자 연락처</span><span>신청 가능</span><span>상태</span><span>담당</span><span />
             </div>
             {items.map((l) => (
-              <Link key={l.id} href={`/admin/leads/${l.id}`} className="table__row" style={{ '--cols': COLS, '--min': '1060px' } as React.CSSProperties}>
+              <Link key={l.id} href={`/admin/leads/${l.id}`} className="table__row" style={{ '--cols': COLS, '--min': '1090px' } as React.CSSProperties}>
                 <span className="cell-sub">{md(l.receivedAt)}</span>
                 <span className="cell-name"><b>{l.company}</b><small>{l.manager}{l.requestType === 'waitlist' && ' · 대기 신청'}</small></span>
-                <span className="cell-strong">{l.industry}</span>
+                <span className="cell-strong ell" title={l.industry}>{l.industry}</span>
                 <span className="cell-ell">{l.regions.join(', ') || '—'}</span>
                 <span className="cell-mono">{l.phone}</span>
                 <span><span className={`chip chip--${l.av[1]}`}>{l.av[0]}</span></span>

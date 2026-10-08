@@ -124,7 +124,8 @@
 .spick__save { flex: 2; height: 44px; border-radius: 12px; background: var(--ink); color: var(--on-ink); border: 0; font-size: 15px; font-weight: 800; }
 
 /* ---------- 모바일 (시안 1a · 390) ---------- */
-@media (max-width: 767px) {
+/* 태블릿(768~1023)도 옆 메뉴 대신 위 머리 + 아래 탭 — 옆 메뉴(232px)가 본문을 눌러 깨지지 않게 */
+@media (max-width: 1023px) {
   .pshell { flex-direction: column; }
   .pside { display: none; }
   .pmhead { display: flex; height: 60px; align-items: center; justify-content: space-between; padding: 0 12px 0 20px; position: sticky; top: 0; background: var(--bg); z-index: 20; }
@@ -156,6 +157,8 @@
   .ptop--mhide, .ptop:not(:has(.ptop__actions)) { display: none; }
   .ptop__actions { margin-left: 0; width: 100%; }
   .ptop__actions > * { flex: 1; }
+}
+@media (max-width: 767px) {
   .ppage { padding: 4px 16px 24px; gap: 12px; }
   .pgrid--home, .pgrid--2, .leak { grid-template-columns: minmax(0, 1fr); }
   .pcard--lg { padding: 20px; }
@@ -331,10 +334,10 @@
 .ptile.is-on { opacity: 1; }
 .ptile:disabled { opacity: .55; cursor: default; }
 .ptile.is-warn { outline: 3px solid #B07400; outline-offset: -3px; }
-.ptile__label { font: 11px var(--mono); color: var(--sub); }
+.ptile__label { font: 11px var(--mono); color: var(--sub); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ptile__box { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; background: rgba(255,255,255,.85); border: 2px solid var(--sub3); color: var(--on-ink); }
 .ptile.is-on .ptile__box { background: var(--ink); border-color: var(--ink); }
-.ptile__person { position: absolute; top: 8px; left: 8px; background: #B07400; color: #fff; font-size: 12px; font-weight: 800; padding: 4px 7px; border-radius: 7px; }
+.ptile__person { position: absolute; top: 8px; left: 8px; background: #B07400; color: #fff; font-size: 12px; font-weight: 800; padding: 4px 7px; border-radius: 7px; white-space: nowrap; }
 .pubside { position: sticky; top: 92px; padding: 22px; gap: 18px; }
 .sel--opt { height: 44px; padding: 0 16px; border-radius: 12px; font-size: 16px; }
 .sel--opt[aria-pressed="true"]::before { content: none; }
@@ -356,7 +359,7 @@
 .newpage small { font-size: 13px; color: var(--sub); font-weight: 600; }
 .newpage b { font-size: 16px; font-weight: 800; }
 
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
   .pubgrid { grid-template-columns: minmax(0, 1fr); }
   .pubside { position: static; }
 }
@@ -477,9 +480,18 @@
 .billrow__m small { font-size: 13px; color: var(--sub2); }
 .billrow__amt { text-align: right; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .billrow__docs { display: flex; align-items: center; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
-@media (max-width: 1100px) {
-  .billrow { grid-template-columns: 76px minmax(0, 1.2fr) minmax(0, 1fr) 100px 84px 220px; gap: 12px; }
+/* 1280 미만은 6칸 표가 눌려 글자가 세로로 깨지므로 모바일과 같은 두 줄 행으로 */
+@media (max-width: 1279px) {
+  .billrow--head { display: none; }
+  .billrow { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 14px 20px; }
+  .billrow__date { grid-column: 1; grid-row: 1; font-size: 13px; }
+  .billrow__item { grid-column: 1; grid-row: 2; }
+  .billrow__m { grid-column: 1; grid-row: 3; flex-direction: row; gap: 6px; align-items: baseline; }
+  .billrow__amt { grid-column: 2; grid-row: 2; }
+  .billrow > span:nth-child(5) { grid-column: 2; grid-row: 1; justify-self: end; }
+  .billrow__docs { grid-column: 1 / -1; justify-content: flex-start; padding-top: 6px; }
 }
+@media (max-width: 1180px) { .billgrid > .stack:first-child { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 767px) {
   .billstats { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .billstats .pstat { padding: 16px 20px; }
@@ -591,3 +603,5 @@
   .itop__note--m { display: none; }
   .icard .spick__pop { left: auto; right: 0; }
 }
+/* 홈 성과 카드: 좁은 폭(1280 미만)은 2칸 + 금액은 아래 줄 (라벨이 두 줄로 깨지지 않게) */
+@media (max-width: 1279px) { .perf { grid-template-columns: 1fr 1fr; } .perf__i--amt { grid-column: 1 / -1; padding-top: 12px; border-top: 1px solid var(--line2); } }

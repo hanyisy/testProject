@@ -89,7 +89,10 @@ export async function pageByPath(partnerId: string, path: string) {
 
 export async function livePages(partnerId: string) {
   const db = await getDb();
-  return db.select().from(t.pages).where(and(eq(t.pages.partnerId, partnerId), inArray(t.pages.status, LIVE)));
+  const rows = await db.select().from(t.pages).where(and(eq(t.pages.partnerId, partnerId), inArray(t.pages.status, LIVE))).orderBy(desc(t.pages.createdAt));
+  /* 같은 주소를 다시 발행했으면 최근 것 하나만 (pageByPath와 같은 기준 · 링크가 두 번 나오지 않게) */
+  const seen = new Set<string>();
+  return rows.filter((p) => !p.path || (!seen.has(p.path) && !!seen.add(p.path)));
 }
 
 /** 생성된 지역 페이지의 공통 본문 (검수 묶음) */
