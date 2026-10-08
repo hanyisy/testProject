@@ -13,6 +13,12 @@ export const PARTNER_MENU = [
   { href: '/partner/inquiries', label: '문의', badge: 'needs' as const },
   { href: '/partner/blog', label: '블로그', lock: true }
 ];
+/** 모바일 머리 제목 (홈은 업체명 · 지역) — 시안 1b~1h */
+const MOBILE_TITLES: [string, string][] = [
+  ['/partner/sites', '현장 발행'], ['/partner/photos', '사진 추가'], ['/partner/search', '검색 노출'], ['/partner/making', '만들고 있는 페이지'],
+  ['/partner/inquiries', '문의'], ['/partner/blog', '블로그'], ['/partner/billing', '결제 내역'], ['/partner/settings', '설정']
+];
+
 export const PARTNER_FOOT = [
   { href: '/partner/billing', label: '결제 내역' },
   { href: '/partner/settings', label: '설정' }
@@ -25,6 +31,7 @@ function Lock() {
 export default function PartnerNav({ name, area, needs, blogLocked }: { name: string; area: string; needs: number; blogLocked: boolean }) {
   const path = usePathname();
   const on = (href: string) => (href === '/partner' ? path === '/partner' : path === href || path.startsWith(href + '/'));
+  const mTitle = MOBILE_TITLES.find(([p]) => path === p || path.startsWith(p + '/'))?.[1];
   const [more, setMore] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => setMore(false), [path]);
@@ -53,7 +60,9 @@ export default function PartnerNav({ name, area, needs, blogLocked }: { name: st
 
       {/* 모바일 머리: 업체명 · 지역 · 더보기 */}
       <header className="pmhead">
-        <div className="pmhead__txt"><span className="pmhead__name">{name}</span><span className="pmhead__area">{area}</span></div>
+        <div className="pmhead__txt">
+          {mTitle ? <span className="pmhead__name">{mTitle}</span> : <><span className="pmhead__name">{name}</span><span className="pmhead__area">{area}</span></>}
+        </div>
         <div className="pmhead__more" ref={ref}>
           <button type="button" className="dots" aria-label="더보기" aria-expanded={more} onClick={() => setMore(!more)}><span /><span /><span /></button>
           {more && (
