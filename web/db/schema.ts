@@ -2,7 +2,7 @@
  * 선택값은 화면 문구와 같은 한국어 문자열을 그대로 씁니다. */
 import { sql } from 'drizzle-orm';
 import {
-  pgTable, uuid, text, integer, boolean, timestamp, date, jsonb, primaryKey, index, real
+  pgTable, uuid, text, integer, boolean, timestamp, date, jsonb, primaryKey, index, uniqueIndex, real
 } from 'drizzle-orm/pg-core';
 
 const id = () => uuid('id').primaryKey().default(sql`gen_random_uuid()`);
@@ -74,6 +74,8 @@ export const plans = pgTable('plans', {
   setupFee: integer('setup_fee').notNull(),
   monthlyFee: integer('monthly_fee').notNull(),
   extraNote: text('extra_note').notNull().default(''),
+  /** 지원형: 우리 사이트 경유 계약 금액의 정산율(%) — 0이면 정산 없음 */
+  settleRatePct: integer('settle_rate_pct').notNull().default(0),
   defaultFeatures: jsonb('default_features').$type<Features>().notNull(),
   sort: integer('sort').notNull().default(0),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
@@ -372,8 +374,10 @@ export const settlements = pgTable('settlements', {
   contractCount: integer('contract_count').notNull(),
   contractAmount: integer('contract_amount').notNull(),
   ratePct: integer('rate_pct').notNull(),
-  fee: integer('fee').notNull()
-});
+  fee: integer('fee').notNull(),
+  /** 달이 끝나 청구한 정산 수수료 청구 건 — 없으면 아직 진행 중(다음 달 1일 청구 예정) */
+  chargeId: uuid('charge_id').references(() => charges.id)
+}, (t) => [uniqueIndex('settlements_partner_month').on(t.partnerId, t.month)]);
 
 export const blogPosts = pgTable('blog_posts', {
   id: id(),

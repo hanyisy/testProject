@@ -1,5 +1,5 @@
 {
-  "id": "41062743-9d01-4409-b643-3617e65575c2",
+  "id": "a9aada4a-3589-4a52-89ca-1f47c56579bf",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2084,6 +2084,13 @@
           "notNull": true,
           "default": "''"
         },
+        "settle_rate_pct": {
+          "name": "settle_rate_pct",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
         "default_features": {
           "name": "default_features",
           "type": "jsonb",
@@ -2685,9 +2692,37 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "charge_id": {
+          "name": "charge_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "settlements_partner_month": {
+          "name": "settlements_partner_month",
+          "columns": [
+            {
+              "expression": "partner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "month",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "settlements_partner_id_partners_id_fk": {
           "name": "settlements_partner_id_partners_id_fk",
@@ -2695,6 +2730,19 @@
           "tableTo": "partners",
           "columnsFrom": [
             "partner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "settlements_charge_id_charges_id_fk": {
+          "name": "settlements_charge_id_charges_id_fk",
+          "tableFrom": "settlements",
+          "tableTo": "charges",
+          "columnsFrom": [
+            "charge_id"
           ],
           "columnsTo": [
             "id"

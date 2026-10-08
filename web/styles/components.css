@@ -179,3 +179,22 @@
   .search-box { width: 100%; }
   .btn-add { margin-left: 0; }
 }
+
+/* 표 공용 보조 (어드민 3l 이후) */
+.tablehead { padding: 18px 20px 6px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.r { text-align: right; }
+.ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.cell-num { text-align: right; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cell-num--n { font-weight: 600; }
+.cell-act { display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
+.btn-ink--sm { height: 38px; padding: 0 16px; font-size: 14px; }
+
+/* 대행 작업 (3m) */
+.agjob { border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; background: var(--card); }
+.agjob.is-done { background: var(--field); }
+.agjob__meta { font-size: 13px; font-weight: 700; color: var(--sub); }
+.agjob__title { font-size: 17px; font-weight: 800; }
+.agjob__act { display: flex; gap: 8px; align-items: center; }
+.agjob__url { font: 14px var(--mono); color: var(--text2); overflow-wrap: anywhere; }
+.linkpanel { flex-direction: row; align-items: center; gap: 14px; }
+@media (max-width: 767px) { .agjob__act { flex-wrap: wrap; } .agjob__act input { flex-basis: 100% !important; order: -1; } }

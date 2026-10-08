@@ -5,7 +5,10 @@ import { can as can_ } from '@/lib/permissions';
 import { partnerDetail } from '@/lib/partners';
 import { rel } from '@/lib/format';
 import { today as getToday } from '@/lib/config';
-import { removeRegion, saveInfo } from '../../actions';
+import { and, desc, eq } from 'drizzle-orm';
+import { getDb, schema as t } from '@/db/client';
+import { md } from '@/lib/format';
+import { removeRegion, resolveRequest, saveInfo } from '../../actions';
 import RegionAdd from './RegionAdd';
 import Reissue from './Reissue';
 
@@ -15,7 +18,11 @@ export const metadata = { title: '파트너 · 기본 정보' };
 export default async function PartnerInfo({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePerm('파트너 관리');
   const { id } = await params;
+  const db = await getDb();
   const [d, today] = await Promise.all([partnerDetail(id), getToday()]);
+  if (!d) notFound();
+  /* 파트너가 보낸 요청 (기능 추가 · 지역 추가 문의) */
+  const requests = await db.select().from(t.partnerRequests).where(and(eq(t.partnerRequests.partnerId, d.partner.id), eq(t.partnerRequests.status, '접수'))).orderBy(desc(t.partnerRequests.createdAt));
   if (!d) notFound();
   const p = d.partner;
   const canEdit = can_(user.role, '파트너 관리');
@@ -32,6 +39,18 @@ export default async function PartnerInfo({ params }: { params: Promise<{ id: st
       </form>
 
       <div className="stack">
+        {requests.length > 0 && (
+          <section className="card card--pad" style={{ borderColor: 'var(--warnf)' }}>
+            <div className="panel__head"><h3 className="panel__title">파트너 요청</h3><span className="panel__sub">파트너 화면의 추가 문의</span></div>
+            {requests.map((r) => (
+              <form key={r.id} action={resolveRequest} className="row" style={{ alignItems: 'center', gap: 10, minHeight: 48 }}>
+                <input type="hidden" name="id" value={r.id} /><input type="hidden" name="partnerId" value={d.partner.id} />
+                <span className="chip chip--warn">{r.kind}</span><b style={{ flex: 1 }}>{r.subject}</b><span className="muted">{md(r.createdAt)}</span>
+                {canEdit && <button className="btn-ghost btn-ghost--sm">처리 완료</button>}
+              </form>
+            ))}
+          </section>
+        )}
         <section className="card card--pad">
           <div className="panel__head"><h3 className="panel__title">업종</h3></div>
           <div className="row" style={{ alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>

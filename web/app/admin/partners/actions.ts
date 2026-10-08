@@ -169,3 +169,14 @@ export async function reissuePassword(prev: ReissueState, fd: FormData): Promise
   await audit(u, '임시 비밀번호 재발급', id);
   return { pw };
 }
+
+/** 파트너 요청(기능 · 지역 추가 문의) 처리 완료 */
+export async function resolveRequest(fd: FormData) {
+  const u = await requirePerm('파트너 관리');
+  const id = String(fd.get('id')), partnerId = String(fd.get('partnerId'));
+  if (!isUuid(id) || !isUuid(partnerId)) return;
+  const db = await getDb();
+  await db.update(t.partnerRequests).set({ status: '처리 완료' }).where(and(eq(t.partnerRequests.id, id), eq(t.partnerRequests.partnerId, partnerId)));
+  await audit(u, '파트너 요청 처리', partnerId, { request: id });
+  revalidatePath('/admin', 'layout');
+}

@@ -2405,6 +2405,23 @@
    }
   ]
  },
+ "settles": [
+  {
+   "partner": "맑은집클린",
+   "month": "2026-09",
+   "count": 4,
+   "amount": 6800000,
+   "rate": 5,
+   "chargeItem": "정산 수수료 · 9월"
+  },
+  {
+   "partner": "맑은집클린",
+   "month": "2026-10",
+   "count": 2,
+   "amount": 2900000,
+   "rate": 5
+  }
+ ],
  "billing": {
   "bank": "농협",
   "account": "301-0123-4567-81",

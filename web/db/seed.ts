@@ -1,7 +1,7 @@
 /* 시안 더미 데이터 넣기 — 데이터 원본은 seed-data.json (tools/design-to-seed.mjs 로 시안에서 생성)
  * DB가 비어 있을 때만 실행됩니다. 처음 상태로 되돌리려면: npm run db:reset */
 import { randomBytes } from 'node:crypto';
-import { count } from 'drizzle-orm';
+import { and, count, eq, like } from 'drizzle-orm';
 import type { DB } from './client';
 import * as t from './schema';
 import data from './seed-data.json';
@@ -39,7 +39,7 @@ async function seed(db: DB, d: Seed) {
   /* 요금제 */
   const planId: Record<string, string> = {};
   for (const p of d.plans) {
-    const [row] = await db.insert(t.plans).values({ name: p.name, setupFee: p.setupFee, monthlyFee: p.monthlyFee, extraNote: p.extraNote, defaultFeatures: p.features as t.Features, sort: p.sort }).returning();
+    const [row] = await db.insert(t.plans).values({ name: p.name, setupFee: p.setupFee, monthlyFee: p.monthlyFee, extraNote: p.extraNote, settleRatePct: Number(p.extraNote.match(/(\d+)% 정산/)?.[1] ?? 0), defaultFeatures: p.features as t.Features, sort: p.sort }).returning();
     planId[p.name] = row.id;
   }
 
@@ -128,6 +128,12 @@ async function seed(db: DB, d: Seed) {
   }
   const onmaruDeposit = d.deposits.find((x) => x.partner === '온마루');
   if (onmaruDeposit) await db.insert(t.charges).values({ partnerId: partnerId['온마루'], billedOn: '2026-10-01', item: onmaruDeposit.item, method: '계좌 입금', amount: onmaruDeposit.amount, state: '입금 대기', payer: onmaruDeposit.payer });
+
+  /* 지원형 정산: 마감된 달은 정산 수수료 청구 건과 연결 */
+  for (const x of d.settles) {
+    const [c] = x.chargeItem ? await db.select({ id: t.charges.id }).from(t.charges).where(and(eq(t.charges.partnerId, partnerId[x.partner]), like(t.charges.item, x.chargeItem + '%'))).limit(1) : [];
+    await db.insert(t.settlements).values({ partnerId: partnerId[x.partner], month: x.month, contractCount: x.count, contractAmount: x.amount, ratePct: x.rate, fee: Math.round((x.amount * x.rate) / 100), chargeId: c?.id ?? null });
+  }
 
   /* 블로그: 맑은집클린 본사 대행(승인됨) · 한결철거 직접 올리기 */
   for (const [i, b] of d.agencyBlog.entries()) {

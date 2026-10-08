@@ -279,6 +279,7 @@ CREATE TABLE "plans" (
 	"setup_fee" integer NOT NULL,
 	"monthly_fee" integer NOT NULL,
 	"extra_note" text DEFAULT '' NOT NULL,
+	"settle_rate_pct" integer DEFAULT 0 NOT NULL,
 	"default_features" jsonb NOT NULL,
 	"sort" integer DEFAULT 0 NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -362,7 +363,8 @@ CREATE TABLE "settlements" (
 	"contract_count" integer NOT NULL,
 	"contract_amount" integer NOT NULL,
 	"rate_pct" integer NOT NULL,
-	"fee" integer NOT NULL
+	"fee" integer NOT NULL,
+	"charge_id" uuid
 );
 --> statement-breakpoint
 CREATE TABLE "sites" (
@@ -454,6 +456,7 @@ ALTER TABLE "scope_logs" ADD CONSTRAINT "scope_logs_partner_id_partners_id_fk" F
 ALTER TABLE "scope_logs" ADD CONSTRAINT "scope_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "settlements" ADD CONSTRAINT "settlements_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "settlements" ADD CONSTRAINT "settlements_charge_id_charges_id_fk" FOREIGN KEY ("charge_id") REFERENCES "public"."charges"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sites" ADD CONSTRAINT "sites_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tax_requests" ADD CONSTRAINT "tax_requests_charge_id_charges_id_fk" FOREIGN KEY ("charge_id") REFERENCES "public"."charges"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "translations" ADD CONSTRAINT "translations_partner_id_partners_id_fk" FOREIGN KEY ("partner_id") REFERENCES "public"."partners"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -461,4 +464,5 @@ ALTER TABLE "users" ADD CONSTRAINT "users_partner_id_partners_id_fk" FOREIGN KEY
 CREATE INDEX "inquiries_partner_idx" ON "inquiries" USING btree ("partner_id");--> statement-breakpoint
 CREATE INDEX "pages_partner_idx" ON "pages" USING btree ("partner_id");--> statement-breakpoint
 CREATE INDEX "photos_partner_idx" ON "photos" USING btree ("partner_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "settlements_partner_month" ON "settlements" USING btree ("partner_id","month");--> statement-breakpoint
 CREATE INDEX "sites_partner_idx" ON "sites" USING btree ("partner_id");

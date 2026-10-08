@@ -61,6 +61,8 @@ export async function dashboard() {
   const agencyPartners = await db.selectDistinct({ name: t.partners.name }).from(t.blogPosts)
     .innerJoin(t.partners, eq(t.partners.id, t.blogPosts.partnerId))
     .where(and(eq(t.blogPosts.mode, '본사 대행'), eq(t.blogPosts.status, '승인')));
+  const reqs = await db.select({ id: t.partners.id, name: t.partners.name }).from(t.partnerRequests).innerJoin(t.partners, eq(t.partners.id, t.partnerRequests.partnerId)).where(eq(t.partnerRequests.status, '접수'));
+  const reqNames = Array.from(new Set(reqs.map((r) => r.name)));
   const won = (v: number) => v.toLocaleString('ko-KR');
   const published = stats ? Object.values(stats.monthPublished).reduce((a, b) => a + b, 0) : 0;
   return {
@@ -75,6 +77,7 @@ export async function dashboard() {
       { perm: '입금 확인 · 세금계산서' as const, label: '입금 확인 대기', n: counts.deposits, sub: won(counts.depositSum) + '원', href: '/admin/billing' },
       { perm: '입금 확인 · 세금계산서' as const, label: '세금계산서 발행 요청', n: counts.taxes, sub: '계좌 입금 건', href: '/admin/billing' },
       { perm: '대행 작업' as const, label: '블로그 대행 대기', n: counts.agency, sub: agencyPartners.map((p) => p.name).join(' · '), href: '/admin/agency' },
+      { perm: '파트너 관리' as const, optional: true, label: '파트너 요청', n: reqs.length, sub: reqNames.join(' · ') || '기능 · 지역 추가 문의', href: reqNames.length === 1 ? `/admin/partners/${reqs[0].id}` : '/admin/partners' },
       { perm: '검수' as const, label: '페이지 검수 대기', n: counts.pagesPending, sub: `묶음 ${counts.bundles} · 개별 ${counts.individual}`, href: '/admin/review' },
       { perm: '검수' as const, label: '번역 검수 대기', n: counts.translations, sub: counts.translationSub, href: '/admin/review' },
       { perm: '작업 로그' as const, label: '실패한 작업', n: counts.fails, sub: '오늘', href: '/admin/jobs', alert: true }
