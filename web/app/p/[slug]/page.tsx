@@ -5,7 +5,11 @@ import { fill, href, livePages, siteBySlug, sitesOf } from '@/lib/site';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const s = await siteBySlug((await params).slug);
-  return { title: { absolute: s ? `${s.partner.name} · ${s.area} ${s.industry.name}` : '업체 사이트' } };
+  const lead = s?.content?.home.lead;
+  return {
+    title: { absolute: s ? `${s.partner.name} · ${s.area} ${s.industry.name}` : '업체 사이트' },
+    description: lead ? (lead.length > 150 ? lead.slice(0, 149) + '…' : lead) : undefined
+  };
 }
 
 /* 시안 01 홈 — 머리 · 최근 현장 · 서비스 지역 · 대표 가이드 · 문의 */

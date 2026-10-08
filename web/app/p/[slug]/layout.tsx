@@ -15,9 +15,11 @@ export default async function SiteLayout({ children, params }: { children: React
   const p = s.partner;
   const nav: [string, string][] = [['시공 사례', '#cases'], ['지역', s.cities[0] ?? ''], ...(guide?.path ? [['가이드', guide.path] as [string, string]] : []), ['문의', '문의']];
   const link = (to: string) => (to.startsWith('#') ? href(slug) + to : href(slug, to));
+  /* 검색엔진용 업체 정보 (LocalBusiness) — DB에 있는 값만, 없는 값은 넣지 않음 */
+  const ld = { '@context': 'https://schema.org', '@type': 'LocalBusiness', name: p.name, ...(p.tel ? { telephone: p.tel } : {}), ...(p.address ? { address: p.address } : {}), areaServed: s.cities.map((c) => s.cityName(c)), url: href(slug) };
   return (
     <div className="site" style={{ '--brand': p.brandColor ?? '#2F6B57' } as React.CSSProperties}>
-      {p.status !== '운영 중' && <div className="s-preview"><b>미리보기</b>{p.name}는 아직 {p.status}이라 손님에게는 안 보여요 · 본사와 업체만 볼 수 있어요</div>}
+      {p.status !== '운영 중' && <div className="s-preview"><b>미리보기</b>{josa(p.name, '은')} 아직 {p.status}이라 손님에게는 안 보여요 · 본사와 업체만 볼 수 있어요</div>}
       <header className="s-head">
         <div className="s-head__in">
           <Link href={href(slug)} style={{ display: 'contents' }}><span className="s-mark">{p.mark ?? p.name.slice(0, 1)}</span><span className="s-name">{p.name}</span></Link>
@@ -28,6 +30,7 @@ export default async function SiteLayout({ children, params }: { children: React
           <details className="s-menu s-mob"><summary aria-label="메뉴"><span /><span /><span /></summary><nav>{nav.map(([l, to]) => <Link key={l} href={link(to)}>{l}</Link>)}</nav></details>
         </div>
       </header>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, '\\u003c') }} />
       <main className="s-main">{children}</main>
       <footer className="s-foot">
         <div className="s-foot__in">

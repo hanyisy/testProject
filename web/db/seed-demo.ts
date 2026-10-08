@@ -144,4 +144,6 @@ export async function seedDemoWorld(db: DB) {
     { key: 'site_content', value: siteContent },
     { key: 'city_names', value: world.cityNames }
   ]);
+  /* 시안 A~F 공통 본문: 업종에 상관없이 쓰는 판(시안 원본은 철거 문장이 박혀 있어 다른 업종에 그대로 나갔음) */
+  await db.update(t.settings).set({ value: world.draftStyles }).where(eq(t.settings.key, 'draft_styles'));
 }

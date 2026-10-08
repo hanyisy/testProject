@@ -7,12 +7,14 @@ import {
 
 type Props = { params: Promise<{ slug: string; path: string[] }>; searchParams: Promise<{ err?: string }> };
 
-/* 생성 본문이 없을 때의 시안별 한 줄 (시안 04-A~D 머리 문구) */
+/* 생성 본문이 없을 때의 시안별 한 줄 (시안 04-A~D 머리 문구 · E 지도 · F 후기) */
 const DRAFT_LEAD: Record<string, string> = {
   A: '{동}에서 직접 {동사} {대상} 현장 사진을 먼저 보여드려요.',
   B: '{동} {작업} 현장을 작업 전과 후, 날짜순으로 정리했어요.',
   C: '{동} {작업|을} 맡기기 전에 많이 묻는 질문 네 가지에 현장 기록으로 답해요.',
-  D: '{동} {작업|은} 평수와 작업 범위로 비용이 정해져요. 예시 비용과 실제 현장을 함께 보세요.'
+  D: '{동} {작업|은} 평수와 작업 범위로 비용이 정해져요. 예시 비용과 실제 현장을 함께 보세요.',
+  E: '{동} 가까이에서 {동사} 현장을 지도에 모았어요.',
+  F: '{동} {작업} 현장을 작업을 마친 순서대로 보여드려요.'
 };
 
 export async function generateMetadata({ params }: Props) {
@@ -21,7 +23,30 @@ export async function generateMetadata({ params }: Props) {
   const p = path.map(decodeURIComponent).join('/');
   const pg = s ? await pageByPath(s.partner.id, p) : null;
   const special: Record<string, string> = { 'contact/done': '문의 접수 완료', '문의': '문의', '개인정보처리방침': '개인정보처리방침' };
-  return { title: { absolute: `${special[p] ?? pg?.title ?? decodeURIComponent(path[path.length - 1]).replaceAll('-', ' ')} · ${s?.partner.name ?? ''}` } };
+  return {
+    title: { absolute: `${special[p] ?? pg?.title ?? decodeURIComponent(path[path.length - 1]).replaceAll('-', ' ')} · ${s?.partner.name ?? ''}` },
+    description: s?.ic ? await describe(s, p, pg) : undefined
+  };
+}
+
+/* 검색 결과 요약 문구 — 페이지 내용(생성 본문 · 가이드 · 질문 · 현장 기록)에서 뽑음, 150자 안쪽 */
+async function describe(s: Site, p: string, pg: { id: string; type: string; title: string } | null) {
+  const cut = (x: string) => (x.length > 150 ? x.slice(0, 149) + '…' : x);
+  const [head, second] = p.split('/');
+  if (head === '가이드') { const g = s.ic.guides.find((x) => x.slug === second); return g ? cut(`${g.lead} ${s.partner.name} 현장 사례와 함께 정리했어요.`) : undefined; }
+  if (head === '질문') { const q = s.ic.questions.find((x) => x.slug === second); return q ? cut(`${q.short} ${q.a}`) : undefined; }
+  if (head === '역' && second) return cut(`${second} 주변에서 ${josa(s.partner.name, '이')} 직접 ${s.ic.verb} 현장을 지도와 사진으로 모았어요.`);
+  if (head === '현장' && second) {
+    const site = (await sitesOf(s.partner.id, s.partner.slug)).find((x) => x.id.startsWith(second));
+    return site ? cut(`${site.title} · ${dotDate(site.workedAt)}${site.areaPyeong ? ` · ${site.areaPyeong}평` : ''}${site.days ? ` · ${site.days}일` : ''}. ${site.summary ?? '작업 전·후 사진과 현장 정보를 그대로 올렸어요.'}`) : undefined;
+  }
+  if (!second && s.cities.includes(head)) return cut(fill(s.ic.hubLead, s.vars({ 시: head, 시이름: s.cityName(head) })));
+  if (pg?.type === '지역') {
+    const gen = await generatedBody(pg.id);
+    const first = gen?.b.commonBody[0] ? fill(gen.b.commonBody[0], { 지역명: gen.i.name, '현장 수': String(gen.i.sites), '사진 수': String(gen.i.photos), '지역 정보': gen.i.info }) : '';
+    return cut(first || `${pg.title} · ${s.partner.name} 현장 사진과 기록`);
+  }
+  return undefined;
 }
 
 export default async function SitePath({ params, searchParams }: Props) {
@@ -59,22 +84,31 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
   const [city, dong] = key.split(' ');
   const place = dong ?? s.cityName(city);
   const work = workLabel(pg.work ?? '', s.industry.name);
-  const label = ['A', 'B', 'C', 'D'].includes(pg.draftLabel ?? '') ? pg.draftLabel! : pg.draftLabel ? 'D' : 'A';
-  const [stat, gen, regionSites, citySites] = await Promise.all([regionStat(key), generatedBody(pg.id), sitesOf(s.partner.id, slug, { region: dong ? key : undefined, city: dong ? undefined : city }), sitesOf(s.partner.id, slug, { city })]);
+  const label = ['A', 'B', 'C', 'D', 'E', 'F'].includes(pg.draftLabel ?? '') ? pg.draftLabel! : 'A';
+  const [stat, gen, regionSites, citySites, live] = await Promise.all([regionStat(key), generatedBody(pg.id), sitesOf(s.partner.id, slug, { region: dong ? key : undefined, city: dong ? undefined : city }), sitesOf(s.partner.id, slug, { city }), livePages(s.partner.id)]);
+  /* 함께 볼 페이지: 같은 시 다른 동의 같은 작업 · 같은 동의 다른 작업 (공개된 것만) */
+  const sameWork = live.filter((p) => p.type === '지역' && p.id !== pg.id && p.work === pg.work && p.regionKey?.startsWith(city + ' ') && p.regionKey !== key).slice(0, 8);
+  const sameDong = live.filter((p) => p.type === '지역' && p.id !== pg.id && p.regionKey === key && p.work !== pg.work).slice(0, 6);
   const sites = (regionSites.length ? regionSites : citySites).slice(0, 3);
+  /* 이 동에 현장이 아직 없으면 같은 시의 가까운 현장으로 — 제목 · 숫자도 그렇게 (이 동 현장인 것처럼 보이지 않게) */
+  const nearOnly = !!dong && !regionSites.length;
   const latest = sites[0];
+  /* 질문 답변(C)의 근거 현장: 이 동 현장이 모자라면 같은 시 현장으로 채워 답마다 다른 현장을 붙임 */
+  const qaSites = [...regionSites, ...citySites].filter((x, i, a) => a.findIndex((y) => y.id === x.id) === i).slice(0, 4);
   const cover = latest?.photos.find((p) => p.shot === '후') ?? latest?.photos[0];
   const info = gen?.i.info || stat?.info || '';
   const v = s.vars({ 동: place, 시: city, 시이름: s.cityName(city), 시청: `${s.cityName(city)}청`, 작업: work, 대상: work.replace(s.industry.name, '').trim() || work });
   /* 생성 본문: 검수 묶음의 공통 본문을 이 지역 값으로 채움 — 첫 문단은 머리 한 줄, 나머지는 안내 */
-  const body = gen ? gen.b.commonBody.map((p) => fill(p, { 지역명: gen.i.name, '지역 정보': gen.i.info, '현장 수': String(gen.i.sites), '사진 수': String(gen.i.photos) })).filter((p) => p.trim() && p !== gen.i.info) : [];
+  /* 현장 수는 이 페이지에 실제로 보여 주는 현장 수로 (본문 숫자와 아래 목록이 어긋나지 않게) */
+  const body = gen ? gen.b.commonBody.map((p) => fill(p, { 지역명: gen.i.name, '지역 정보': gen.i.info, '현장 수': String(nearOnly ? gen.i.sites : sites.length || gen.i.sites), '사진 수': String(gen.i.photos) })).filter((p) => p.trim() && p !== gen.i.info) : [];
   const lead = body[0] ?? fill(DRAFT_LEAD[label], v);
   const infoCards: [string, string][] = [[`${place} · 신고 절차`, fill(s.ic.permit, v)], [`${place} · 이 지역 건물 특성`, info]];
-  const siteSec = <Sec title={`${place} 현장`} card={label !== 'B'}><SiteCards slug={slug} sites={sites} /></Sec>;
+  const siteTitle = nearOnly ? `${s.cityName(city)} 가까운 현장` : `${place} 현장`;
+  const siteSec = <Sec title={siteTitle} card={label !== 'B'}><SiteCards slug={slug} sites={sites} /></Sec>;
   const guideSec = body.length > 1 ? <Sec title={`${place} ${work} 안내`} narrow><div className="s-sechead">{body.slice(1).map((p, i) => <p key={i} className="s-p">{p}</p>)}</div></Sec> : null;
   return (
     <>
-      <Crumb slug={slug} items={[[s.cityName(city), city], [pg.work ?? work]]} />
+      <Crumb slug={slug} items={[[s.cityName(city), city], [work]]} />
       <Hero s={s} eyebrow={`${s.cityName(city).replace(/[시군구]$/, '')} ${place} · ${work}`.replace(`${city} ${city}`, city)} title={`${city} ${dong ? dong + ' ' : ''}${work}`} lead={lead} photo={cover} caption={cover ? `${cover.caption} · ${dotDate(latest?.workedAt ?? null)}` : undefined} />
       {label === 'A' && (
         <>
@@ -86,15 +120,22 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
       )}
       {label === 'B' && (
         <>
-          <Sec title="현장 기록" sub="최근 순"><Records sites={sites} /></Sec>
+          <Sec title={nearOnly ? siteTitle : '현장 기록'} sub="최근 순"><Records sites={sites} /></Sec>
           <Sec title="진행 순서" card><Steps ic={s.ic} /></Sec>
+          <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
           {guideSec}
         </>
       )}
       {label === 'C' && (
         <>
-          <Sec title="많이 묻는 질문"><QnA items={s.ic.faq.slice(0, 4).map((f, i) => { const site = sites[i % Math.max(1, sites.length)]; return { q: fill(f.q, v), a: fill(f.a, v), photo: site?.photos[(i + 1) % Math.max(1, site.photos.length)], basis: site ? `${site.title}${site.areaPyeong ? ` · ${site.areaPyeong}평` : ''}${site.days ? ` · ${site.days}일` : ''}` : s.partner.name }; })} /></Sec>
+          <Sec title="많이 묻는 질문"><QnA items={s.ic.faq.slice(0, 4).map((f, i) => {
+            const site = qaSites[i % Math.max(1, qaSites.length)];
+            /* 작업 기간 질문({작업}이 들어간 질문)은 근거 현장의 실제 기록으로 먼저 답함 — 지어낸 수치 대신 */
+            const record = f.q.includes('{작업') && site?.days ? `${josa(site.title, '은')} ${site.areaPyeong ? `${site.areaPyeong}평, ` : ''}${site.days}일 걸렸어요. ` : '';
+            return { q: fill(f.q, v), a: record + fill(f.a, v), photo: site?.photos[(i + 1) % Math.max(1, site.photos.length)], basis: site ? `${site.title}${site.areaPyeong ? ` · ${site.areaPyeong}평` : ''}${site.days ? ` · ${site.days}일` : ''}` : s.partner.name };
+          })} /></Sec>
           {siteSec}
+          <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
           {guideSec}
         </>
       )}
@@ -106,6 +147,29 @@ async function RegionPage({ s, pg, err }: { s: Site; pg: NonNullable<Awaited<Ret
           <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
           {guideSec}
         </>
+      )}
+      {/* E 지도 중심형: 이 동 현장을 지도에 · 현장 카드 · 지역 정보 */}
+      {label === 'E' && (
+        <>
+          <Sec title={`${place} 주변 현장 지도`}><MapPins label={`지도 · ${place} 주변`} pins={(regionSites.length ? regionSites : citySites).slice(0, 8).map((x) => `${x.dong} ${x.buildingType ?? ''}${x.areaPyeong ? ` · ${x.areaPyeong}평` : ''}`.replace(/\s+·/, ' ·'))} /></Sec>
+          {siteSec}
+          <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
+          {guideSec}
+        </>
+      )}
+      {/* F 후기 인용형: 후기 자료(고객 동의)가 연결되기 전에는 현장 기록으로 — 없는 후기를 지어내지 않음 */}
+      {label === 'F' && (
+        <>
+          <Sec title={nearOnly ? siteTitle : '현장 기록'} sub="작업을 마친 순서"><Records sites={sites} /></Sec>
+          <Sec title={`${place} 지역 정보`}><RegionInfo items={infoCards} /></Sec>
+          {guideSec}
+        </>
+      )}
+      {(sameWork.length > 0 || sameDong.length > 0) && (
+        <Sec card><Related slug={slug} groups={[
+          { h: `${s.cityName(city)} 다른 동 ${work}`, links: sameWork.map((p) => ({ label: `${p.regionKey!.split(' ')[1] ?? p.regionKey} ${work}`, path: p.path! })) },
+          { h: `${place} 다른 작업`, links: sameDong.map((p) => ({ label: `${place} ${workLabel(p.work ?? '', s.industry.name)}`, path: p.path! })) }
+        ]} /></Sec>
       )}
       <Sec><Contact s={s} from={pg.path ?? ''} error={err} /></Sec>
     </>
@@ -161,10 +225,12 @@ async function StationPage({ s, name, err }: { s: Site; name: string; err: boole
 /* ---------- 06 현장 기록 ---------- */
 async function SitePage({ s, id, err }: { s: Site; id: string; err: boolean }) {
   const slug = s.partner.slug;
-  const all = await sitesOf(s.partner.id, slug);
+  const [all, live] = await Promise.all([sitesOf(s.partner.id, slug), livePages(s.partner.id)]);
   const site = all.find((x) => x.id.startsWith(id));
   if (!site) notFound();
   const near = all.filter((x) => x.region === site.region && x.id !== site.id).slice(0, 3);
+  /* 이 현장이 있는 동의 지역 페이지 (현장 → 지역 페이지로 이어지게) */
+  const dongPages = live.filter((p) => p.type === '지역' && p.regionKey === site.region).slice(0, 6);
   const kv: [string, string][] = [['건물 유형', site.buildingType ?? '—'], ['평수', site.areaPyeong ? `${site.areaPyeong}평` : '—'], ['기간', site.days ? `${site.days}일` : '—'], ['층', site.floorNote ?? '—']];
   return (
     <>
@@ -178,6 +244,7 @@ async function SitePage({ s, id, err }: { s: Site; id: string; err: boolean }) {
         {site.summary && <span className="s-p" style={{ fontSize: 15 }}>{site.summary}</span>}
       </Sec>
       {near.length > 0 && <Sec title={`${site.dong} 다른 현장`}><SiteCards slug={slug} sites={near} /></Sec>}
+      {dongPages.length > 0 && <Sec card><Related slug={slug} groups={[{ h: `${site.dong} 작업별 안내`, links: dongPages.map((p) => ({ label: `${site.dong} ${workLabel(p.work ?? '', s.industry.name)}`, path: p.path! })) }]} /></Sec>}
       <Sec><Contact s={s} from={site.path} error={err} /></Sec>
     </>
   );

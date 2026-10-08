@@ -10,6 +10,7 @@ import { today } from '@/lib/config';
 import { isUuid } from '@/lib/partners';
 import { savePhoto } from '@/lib/photos';
 import { autoAssign, kindOf, runState, uniquePct, workPhrase, type DraftStyle } from '@/lib/generate';
+import { copula, fill, type IndustryContent } from '@/lib/site';
 
 const done = () => revalidatePath('/admin/generate');
 
@@ -140,16 +141,24 @@ export async function toReview(runId: string) {
   if (!st) return { ok: false as const, error: '생성 기록을 찾을 수 없어요' };
   if (st.run.status === '검수로 넘김') return { ok: true as const };
   const db = await getDb();
-  const [[p], minPhotos, minUnique, day] = await Promise.all([
-    db.select({ name: t.partners.name, industry: t.industries.name }).from(t.partners).innerJoin(t.industries, eq(t.industries.id, t.partners.industryId)).where(eq(t.partners.id, st.run.partnerId)).limit(1),
-    getSetting<number>('review_min_photos', 3), getSetting<number>('review_min_unique', 35), today()
+  const [[p], minPhotos, minUnique, day, contents] = await Promise.all([
+    db.select({ name: t.partners.name, industry: t.industries.name, code: t.industries.code }).from(t.partners).innerJoin(t.industries, eq(t.industries.id, t.partners.industryId)).where(eq(t.partners.id, st.run.partnerId)).limit(1),
+    getSetting<number>('review_min_photos', 3), getSetting<number>('review_min_unique', 35), today(),
+    getSetting<Record<string, IndustryContent>>('industry_content', {})
   ]);
   const picked = st.drafts.filter((d) => d.picked);
   const labelOf = (name: string) => st.assigns.find((a) => a.region.endsWith(name))?.draftLabel ?? picked[0]?.label;
   const work = workPhrase(st.run.work, p.industry);
+  /* 업종 문장은 업종 내용에서 — 시안 본문이 어느 업종에도 맞게 · 조사는 {업체|이}처럼 받침에 맞춰 */
+  const ic = contents[p.code];
+  const period = ic?.cost.summary.find((x) => x.k === '기간');
+  const vals: Record<string, string> = {
+    업체: p.name, 작업: work, '작업 방식': ic?.method ?? '',
+    '기간 안내': period ? `작업 기간은 보통 ${copula(period.v)}${period.note ? `(${period.note})` : ''}. 아래 표에서 ${ic!.cost.table.head[0]}별로 확인해 보세요.` : ''
+  };
   for (const d of picked) {
     const style = st.styles.find((s) => s.label === d.label);
-    const body = (style?.body ?? []).map((x) => x.replaceAll('{업체}', p.name).replaceAll('{작업}', work));
+    const body = (style?.body ?? []).map((x) => fill(x, vals)).filter((x) => x.trim());
     const regs = st.regions.filter((r) => labelOf(r.name) === d.label);
     if (!regs.length) continue;
     const [b] = await db.insert(t.reviewBundles).values({

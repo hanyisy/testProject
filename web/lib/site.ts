@@ -8,6 +8,8 @@ import { readSession } from './auth';
 
 export type IndustryContent = {
   verb: string; noun: string; hubLead: string; process: [string, string][];
+  /** 시안 본문 {작업 방식}에 들어가는 한 문장 */
+  method?: string;
   cost: { summary: { k: string; v: string; note: string; example?: boolean }[]; table: { head: string[]; priced: boolean; rows: string[][] }; include: string[]; exclude: string[]; note: string };
   faq: { q: string; a: string }[]; permit: string; cityPermit: string;
   guides: { slug: string; title: string; lead: string; short: string; updated: string; minutes: number; sections: { h: string; p?: string; cost?: boolean; checklist?: string[]; cases?: number }[] }[];
@@ -108,3 +110,9 @@ export async function regionStat(key: string) {
 }
 
 export const dotDate = (d: string | null) => (d ? d.replaceAll('-', '.') : '');
+
+/** "1~2일" → "1~2일이에요" · "하루" → "하루예요" (받침에 맞춘 -이에요/-예요) */
+export function copula(word: string) {
+  const code = word.trim().slice(-1).charCodeAt(0) - 0xac00;
+  return word + (code >= 0 && code <= 11171 && code % 28 === 0 ? '예요' : '이에요');
+}
