@@ -282,7 +282,6 @@
 .mthumb__tbl { border: 1px solid var(--line3); border-radius: 5px; overflow: hidden; }
 .mthumb__tbl > div { display: flex; gap: 6px; padding: 5px; border-top: 1px solid var(--line3); }
 .mthumb__tbl > div.is-head { background: var(--surf); border-top: 0; }
-.phb { border-radius: 10px; background: repeating-linear-gradient(135deg, var(--ph1) 0 6px, var(--ph2) 6px 12px); display: flex; align-items: center; justify-content: center; font: 12px var(--mono); color: var(--sub2); }
 .skl { display: block; border-radius: 4px; background: var(--line3); }
 .dot { width: 8px; height: 8px; border-radius: 4px; background: var(--ink); flex-shrink: 0; }
 .mkbtn { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--line4); background: var(--card); color: var(--ink); font-size: 15px; font-weight: 700; }

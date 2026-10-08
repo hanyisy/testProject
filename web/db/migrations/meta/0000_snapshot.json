@@ -1,5 +1,5 @@
 {
-  "id": "a9aada4a-3589-4a52-89ca-1f47c56579bf",
+  "id": "9199fd1a-3a02-4290-a099-75baf5767b89",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2397,6 +2397,12 @@
         "note": {
           "name": "note",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_at": {
+          "name": "reviewed_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },

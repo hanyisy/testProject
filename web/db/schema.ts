@@ -272,6 +272,8 @@ export const reviewItems = pgTable('review_items', {
   selected: boolean('selected').notNull().default(true),
   reasons: text('reasons').array().notNull().default(sql`'{}'::text[]`),
   note: text('note'),
+  /** 검수 완료 · 발행 안 함으로 정한 때 (오늘 검수 완료 수) */
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
   sort: integer('sort').notNull().default(0)
 });
 

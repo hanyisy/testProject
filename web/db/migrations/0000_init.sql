@@ -325,6 +325,7 @@ CREATE TABLE "review_items" (
 	"selected" boolean DEFAULT true NOT NULL,
 	"reasons" text[] DEFAULT '{}'::text[] NOT NULL,
 	"note" text,
+	"reviewed_at" timestamp with time zone,
 	"sort" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
