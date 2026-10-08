@@ -1,5 +1,6 @@
 'use client';
 /* 파트너 추가 4단계 (시안 3y-1 ~ 3y-4) */
+import { genPw } from '@/lib/pwgen';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import type { Features } from '@/db/schema';
@@ -23,11 +24,6 @@ const won = (n: number) => n.toLocaleString('ko-KR');
 const shown = (k: keyof Features, v: unknown) => (k === 'blog' ? String(v) : v ? '켜짐' : '꺼짐');
 
 /** 시안 형식 임시 비밀번호 Ab12-cd3Ef */
-function genPw() {
-  const lo = 'abcdefghjkmnpqrstuvwxyz', up = 'ABCDEFGHJKLMNPQRSTUVWXYZ', d = '23456789';
-  const r = (s: string) => s[crypto.getRandomValues(new Uint32Array(1))[0] % s.length];
-  return r(up) + r(lo) + r(d) + r(d) + '-' + r(lo) + r(lo) + r(d) + r(up) + r(lo);
-}
 
 export default function Wizard({ initial, industries, plans, occupancy, regionOptions, appHost }: Props) {
   const firstIndustry = initial?.industry || industries.find((i) => i.status === '사용 가능')?.name || '';

@@ -284,3 +284,37 @@
 .occ__v--none { color: var(--sub3); }
 @media (max-width: 1100px) { .tplgrid { grid-template-columns: minmax(0, 1fr); } }
 .okbox { display: flex; align-items: center; gap: 10px; background: var(--s4b); color: var(--s4f); border-radius: 14px; padding: 12px 16px; font-size: 15px; font-weight: 800; }
+
+/* 설정 (3n) */
+.setpanel { padding: 22px; gap: 14px; }
+.stepper3 { display: flex; align-items: center; gap: 10px; }
+.stepper3 button { width: 44px; height: 44px; border-radius: 11px; background: var(--surf); border: 0; font-size: 20px; font-weight: 700; color: var(--ink); cursor: pointer; }
+.stepper3 button:disabled { opacity: .45; cursor: default; }
+.stepper3 b { font-size: 28px; font-weight: 800; min-width: 76px; text-align: center; }
+.stepper3 b.is-big { font-size: 30px; min-width: 72px; }
+.stepper3 small { font-size: 16px; }
+.surfbox { background: var(--surf); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+.surfbox small { font-size: 12px; color: var(--sub); font-weight: 700; }
+.surfbox > span { font-size: 15px; font-weight: 600; }
+.introw { display: grid; grid-template-columns: 200px minmax(0, 1fr) 120px; gap: 14px; align-items: center; min-height: 66px; border-top: 1px solid var(--line2); padding: 8px 0; }
+@media (max-width: 767px) { .introw { grid-template-columns: minmax(0, 1fr); gap: 8px; } }
+.infobox--i { border-radius: 14px; padding: 12px 16px; }
+.infobox__i { width: 20px; height: 20px; flex-shrink: 0; border-radius: 10px; background: var(--s1f); color: var(--card); font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.okline { font-size: 14px; color: var(--s4f); font-weight: 700; }
+.seg--lg { gap: 6px; border-radius: 14px; padding: 4px; width: 420px; max-width: 100%; }
+.seg--lg .seg__opt { height: 42px; border-radius: 11px; font-size: 15px; gap: 4px; }
+.pwrules { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.pwrules > span { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--sub2); }
+.pwrules > span > span { width: 18px; height: 18px; border-radius: 9px; background: var(--line4); color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.pwrules > span.is-ok { color: var(--s4f); }
+.pwrules > span.is-ok > span { background: var(--s4f); }
+
+/* 직원 (3z · 3z-2) */
+.permgrid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); padding: 6px 20px 14px; }
+.permgrid__h { height: 44px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; }
+.permgrid__l { min-height: 46px; display: flex; align-items: center; font-size: 15px; font-weight: 700; border-top: 1px solid var(--line2); }
+.permgrid__c { min-height: 46px; display: flex; align-items: center; justify-content: center; border-top: 1px solid var(--line2); font-size: 16px; font-weight: 900; }
+.roleopt { text-align: left; border: 1px solid var(--line3); background: var(--card); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; color: var(--ink); }
+.roleopt b { font-size: 16px; font-weight: 800; }
+.roleopt small { font-size: 13px; color: var(--sub); line-height: 1.45; }
+.roleopt[aria-pressed="true"] { border: 2px solid var(--ink); padding: 13px 15px; }

@@ -76,12 +76,20 @@ async function seed(db: DB, d: Seed) {
   const known = Object.fromEntries(d.logins.map((l) => [l.id, l]));
   const unknownHash = await hashPassword(randomBytes(18).toString('base64'));
   const userId: Record<string, string> = {};
+  /* 시안의 마지막 로그인 표기(오늘 08:30 · 방금 · 8월 29일 · —) → 시각 */
+  const lastLogin = (v: string) => {
+    const hm = v.match(/(\d{1,2}):(\d{2})/);
+    if (v.startsWith('오늘') && hm) return at(d.today, `${hm[1].padStart(2, '0')}:${hm[2]}`);
+    if (v === '방금') return at(d.today, '10:40');
+    const m = v.match(/(\d+)월 (\d+)일/);
+    return m ? at(`${d.today.slice(0, 4)}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`) : null;
+  };
   for (const s of d.staff) {
     const k = known[s.id];
     const [row] = await db.insert(t.users).values({
       loginId: s.id, passwordHash: k ? await hashPassword(k.pw) : unknownHash, kind: 'staff', role: s.role as '관리팀', name: s.name,
       phone: s.phone, email: s.email, status: s.st as '사용 중', mustChangePassword: k ? k.first : s.st === '첫 로그인 전',
-      activityCount: Number(String(s.logs).replace(/[^0-9]/g, '')) || 0
+      activityCount: Number(String(s.logs).replace(/[^0-9]/g, '')) || 0, lastLoginAt: lastLogin(s.last)
     }).returning();
     userId[s.name] = row.id;
   }

@@ -19,3 +19,5 @@ export async function today(): Promise<string> {
   const real = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(new Date());
   return getSetting<string>('demo_today', real);
 }
+/** 본사 어드민 접속 주소 (직원 계정 안내문) */
+export const ADMIN_APP_HOST = process.env.ADMIN_APP_HOST || `admin.${SERVICE_DOMAIN}`;

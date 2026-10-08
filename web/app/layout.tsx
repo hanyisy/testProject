@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import '@/styles/app.css';
 import '@/styles/components.css';
 
@@ -14,10 +15,10 @@ const themeBoot = `try{var t=localStorage.getItem('hl-theme');if(t==='dark')docu
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBoot }} />
-      </head>
-      <body>{children}</body>
+      <body>
+        <Script id="theme-boot" strategy="beforeInteractive">{themeBoot}</Script>
+        {children}
+      </body>
     </html>
   );
 }

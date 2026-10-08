@@ -88,8 +88,6 @@
 
 /* ---------- 문의 (2d · 1d) ---------- */
 .only-mob { display: none !important; }
-.seg--lg { gap: 6px; border-radius: 14px; padding: 4px; width: 420px; max-width: 100%; }
-.seg--lg .seg__opt { height: 42px; border-radius: 11px; font-size: 15px; gap: 4px; }
 .itop { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .itop__note { margin-left: auto; font-size: 14px; color: var(--sub); }
 .itable { overflow: visible; border-radius: 22px; }
@@ -261,9 +259,6 @@
 .mksteps__n { width: 30px; height: 30px; flex-shrink: 0; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; background: var(--ink); color: var(--on-ink); }
 .mksteps__l { font-size: 15px; white-space: nowrap; }
 .mksteps__line { flex: 1; height: 2px; background: var(--line3); min-width: 12px; }
-.infobox { display: flex; align-items: center; gap: 10px; background: var(--s1b); color: var(--s1f); border-radius: 12px; padding: 12px 14px; font-size: 15px; font-weight: 700; }
-.infobox--i { border-radius: 14px; padding: 12px 16px; }
-.infobox__i { width: 20px; height: 20px; flex-shrink: 0; border-radius: 10px; background: var(--s1f); color: var(--card); font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
 .mkgrid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 16px; align-items: start; }
 .mklabel { font-size: 15px; font-weight: 700; color: var(--sub); padding: 0 4px; }
 .mkcard { background: var(--card); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); }
@@ -448,7 +443,6 @@
 .blogprev__ph .phb:last-child { border-radius: 0 12px 12px 0; }
 .blogprev__p { margin: 0; font-size: 16px; line-height: 1.7; color: var(--text2); text-wrap: pretty; }
 .blogprev__url { display: flex; flex-direction: column; gap: 8px; padding-top: 6px; border-top: 1px solid var(--line2); }
-.okline { font-size: 14px; color: var(--s4f); font-weight: 700; }
 .urlbox { height: 52px; border-radius: 12px; background: var(--surf); padding: 0 14px; display: flex; align-items: center; gap: 8px; color: var(--ink); }
 .urlbox span { flex: 1; min-width: 0; font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .urlbox b { font-size: 14px; font-weight: 800; color: var(--accent); }
@@ -521,11 +515,6 @@
 .setacct { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
 .setbtn { height: 48px; padding: 0 20px; border-radius: 12px; font-size: 16px; }
 .fld__input--mono { font-family: var(--mono); }
-.pwrules { display: flex; flex-wrap: wrap; gap: 6px 14px; }
-.pwrules > span { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--sub2); }
-.pwrules > span > span { width: 18px; height: 18px; border-radius: 9px; background: var(--line4); color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; }
-.pwrules > span.is-ok { color: var(--s4f); }
-.pwrules > span.is-ok > span { background: var(--s4f); }
 .regchip { height: 44px; padding: 0 16px; border-radius: 12px; display: flex; align-items: center; font-size: 16px; font-weight: 700; background: var(--surf); color: var(--ink); }
 .linkbtn { border: 0; background: none; padding: 0; font-size: 14px; font-weight: 800; color: var(--accent); cursor: pointer; white-space: nowrap; }
 .linkbtn--red { color: var(--red); }
